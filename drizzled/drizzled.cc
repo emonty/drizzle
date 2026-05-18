@@ -605,10 +605,6 @@ passwd *check_user(const char *user)
     }
     return NULL;
   }
-  if (not user)
-  {
-    drizzled_abort << _("drizzled cannot be run as root, use --user to start drizzled up as another user");
-  }
 
   if (strcmp(user, "root") == 0)
   {
