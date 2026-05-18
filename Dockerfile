@@ -21,6 +21,11 @@ COPY bindep.txt /src/bindep.txt
 RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b compile) \
     && rm -rf /var/lib/apt/lists/*
 
-COPY . /src
-RUN cd /src && \
-    autoreconf -i && ./configure && make
+# Build in a cache mount so artifacts persist across `podman build` runs.
+# Source is bind-mounted read-only; cp -au only copies changed files into the
+# cache, so make sees only the files that actually changed.
+RUN --mount=type=bind,source=.,target=/host-src,readonly \
+    --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
+    cp -au /host-src/. /build/ && \
+    cd /build && \
+    autoreconf -i && ./configure && make -j"$(nproc)"
