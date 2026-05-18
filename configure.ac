@@ -46,7 +46,6 @@ LT_LANG([C++])
 
 
 gl_VISIBILITY
-AX_ASSERT
 
 dnl Set the default datadir location to /usr/local/var/drizzle. If a
 dnl localstatedir is explicitly given, just use that.
