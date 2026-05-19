@@ -1,0 +1,80 @@
+---
+# Drizzle CI jobs. Pipelines: see projects.yaml.
+#
+# These jobs scaffold what the spec at docs/specs/revival.rst calls
+# for. Playbooks (playbooks/*/run.yaml) and the OpenDev tenant
+# registration come as follow-up work when CI is actually activated;
+# Zuul will not run any of this until that wiring lands.
+
+- job:
+    name: drizzle-lint
+    description: |
+      Fast-feedback pre-review checks: autoreconf syntax, configure
+      dry-run, Sphinx docs build. Bare nodeset, no container.
+    parent: opendev-tox-docs
+    nodeset:
+      nodes:
+        - name: ubuntu-jammy
+          label: ubuntu-jammy
+
+- job:
+    name: drizzle-build-image
+    description: |
+      Build the Drizzle test-stage container image and push it to the
+      buildset's intermediate registry. Run once per architecture.
+    parent: opendev-build-container-image
+    provides:
+      - drizzle-container-image
+    vars: &drizzle_image_vars
+      docker_images:
+        - context: .
+          target: test
+          repository: opendev.org/inaugust/drizzle
+          tags:
+            - latest
+
+- job:
+    name: drizzle-build-image-arm64
+    parent: drizzle-build-image
+    nodeset:
+      nodes:
+        - name: ubuntu-jammy-arm64
+          label: ubuntu-jammy-arm64
+
+- job:
+    name: drizzle-unit-tests
+    description: |
+      Pull the test image and run `make unit` (boost.test).
+    parent: opendev-buildset-registry-consumer
+    requires:
+      - drizzle-container-image
+
+- job:
+    name: drizzle-dtr-tests
+    description: |
+      Pull the test image and run `make test-drizzle` via the DTR
+      Perl harness. The image's CMD filters failures against
+      tests/skiplist.<phase>.txt.
+    parent: opendev-buildset-registry-consumer
+    requires:
+      - drizzle-container-image
+    timeout: 3600
+
+- job:
+    name: drizzle-distcheck
+    description: |
+      Run `make distcheck` against the built tree. amd64 only;
+      distcheck is arch-agnostic.
+    parent: opendev-buildset-registry-consumer
+    requires:
+      - drizzle-container-image
+    timeout: 3600
+
+- job:
+    name: drizzle-promote-image
+    description: |
+      Re-tag the buildset-registry image into the permanent registry
+      under the merge SHA, `latest`, and the current revival phase
+      name.
+    parent: opendev-promote-container-image
+    vars: *drizzle_image_vars
