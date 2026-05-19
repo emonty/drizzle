@@ -8,7 +8,7 @@
 
 set -uo pipefail
 
-BUILD_DIR="${BUILD_DIR:-/opt/drizzle}"
+BUILD_DIR="${BUILD_DIR:-.}"
 SKIPLIST="${DTR_SKIPLIST:-${BUILD_DIR}/tests/skiplist.precise.txt}"
 export DTR_BUILD_THREAD="${DTR_BUILD_THREAD:-$$}"
 

@@ -33,13 +33,7 @@ RUN --mount=type=bind,source=.,target=/host-src,readonly,Z \
     --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
     cp -au --no-preserve=context /host-src/. /build/ && \
     cd /build && \
-    autoreconf -i && ./configure && make -j"$(nproc)" && \
-    mkdir -p /opt/drizzle && \
-    cp -au --no-preserve=context /build/. /opt/drizzle/
-
-# Libtool bakes rpaths to the build dir into the wrappers and binaries;
-# the symlink makes those resolve to /opt/drizzle in the final image.
-RUN ln -s /opt/drizzle /build
+    if [ ! -f Makefile ] ; then autoreconf -i && ./configure ; fi && make -j"$(nproc)"
 
 FROM build AS test
 
@@ -47,5 +41,6 @@ FROM build AS test
 RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b test) \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt/drizzle
-CMD ["/opt/drizzle/support-files/docker/run-tests.sh"]
+WORKDIR /build
+RUN --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
+    support-files/docker/run-tests.sh
