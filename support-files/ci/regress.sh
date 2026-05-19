@@ -37,7 +37,7 @@ podman build --platform linux/amd64 --target=test -t drizzle:regress-test .
 
 if [ "${DO_DTR}" -eq 1 ]; then
     echo "=== run-tests (amd64) ==="
-    podman run --rm --net=host drizzle:regress-test
+    podman run --rm drizzle:regress-test
 else
     echo "=== run-tests skipped (--no-dtr) ==="
 fi

@@ -18,8 +18,8 @@ of it. Read it before opening a PR.
 
 - Branch model: `drizzle-7.2` is the stable / default branch. Active
   revival work happens on `main`.
-- Revival phase: **Phase 0** (tests in container, Zuul CI wiring,
-  baseline skiplist). See the spec's Phase Map for what's next.
+- Revival phase: **Phase 0** (tests in container, Zuul CI wiring)
+  See the spec's Phase Map for what's next.
 - Build target: Ubuntu 12.04 (Precise). We will ratchet LTS-by-LTS to
   26.04 as Phases 3–9 land.
 - Architectures: `linux/amd64` and `linux/arm64`. amd64 is gating now;
@@ -68,8 +68,7 @@ Containerfile). Use `[compile platform:dpkg]` for build-time deps and
 - `plugin/` — 82 plugins, each with a `plugin.ini`. Per-plugin
   `build_conditional` lines are being deleted in Phase 10; do not add
   new ones.
-- `tests/` — DTR (`test-run.pl`) harness and suites. `tests/skiplist.<phase>.txt`
-  is the load-bearing artifact tracking known-broken tests per phase.
+- `tests/` — DTR (`test-run.pl`) harness and suites.
 - `unittests/` — boost.test unit tests. `make unit` runs them.
 - `support-files/docker/run-tests.sh` — test stage entrypoint.
 - `support-files/ci/regress.sh` — local CI mirror.
@@ -94,8 +93,8 @@ for examples.
   tokyocabinet plugin is a separate commit.
 - **Every commit must be fully green.** `podman build --target=build`
   succeeds, `podman build --target=test` succeeds, `make unit` exits
-  0, `make test-drizzle` exits 0 (modulo the current phase's
-  skiplist). No commit may knowingly break tests, even transiently.
+  0, `make test-drizzle` exits 0. No commit may knowingly break tests,
+  even transiently.
 - Bisect-load-bearing: future debugging walks dozens of small commits
   with `git bisect`. A "broken in the middle" commit defeats bisect
   for the rest of the stack.
@@ -129,9 +128,7 @@ CI runs on OpenDev Zuul. Pipelines:
 - **promote** — pushes the merged image to the permanent registry,
   tagged with the merge SHA, `latest`, and the phase name.
 
-Everything must always pass. Flaky tests get fixed. Tests only get
-added to `tests/skiplist.<phase>.txt` with a recorded reason after
-explicit discussion as a last result.
+Everything must always pass. Flaky tests get fixed.
 
 ## Quick links
 

@@ -108,9 +108,8 @@ Aggressive commit splitting; every commit green
   two commits.
 * **Every commit is fully green.** ``podman build --target=build``
   succeeds, ``podman build --target=test`` succeeds, ``make unit``
-  exits 0, ``make test-drizzle`` exits 0 (modulo the current phase's
-  recorded skiplist). No commit may knowingly break tests — not even
-  transiently. If a change requires a sequence, structure the
+  exits 0, ``make test-drizzle`` exits 0. No commit may break tests
+   — not even transiently. If a change requires a sequence, structure the
   sequence so intermediate steps stay green (typical pattern:
   *add new code* → *migrate callers* → *delete old code*, three
   commits, each green).
@@ -270,14 +269,10 @@ parallel stacks.
   - runs ``make unit`` first (boost.test, no servers);
   - runs ``make test-drizzle`` with ``--force --fast`` against the
     ``NORMAL_TESTS`` suite list;
-  - exits non-zero on any failure that isn't in
-    ``tests/skiplist.precise.txt``.
+  - exits non-zero on any failure
 
 * Extend ``bindep.txt`` with a ``[test platform:dpkg]`` profile
   (``perl``, ``libdbi-perl``, ``libdbd-mysql-perl``, ``subunit``).
-* Record the baseline ``tests/skiplist.precise.txt``. Each entry has a
-  one-line rationale. This is the gate; no subsequent phase may grow
-  it without recorded reason.
 * Add ``zuul.d/projects.yaml`` mapping the project to the four
   pipelines: ``check``, ``vouched``, ``gate``, ``promote``.
 * Add ``zuul.d/jobs.yaml`` defining the jobs listed under
@@ -339,8 +334,7 @@ Done when
 * ``podman build --target=build`` succeeds on amd64 (regression check
   of current behavior).
 * ``podman build --target=test`` succeeds on amd64.
-* ``podman run --rm --net=host drizzle:test`` exits 0, with any
-  failures matching ``tests/skiplist.precise.txt``.
+* ``podman run --rm --net=host drizzle:test`` exits 0
 * ``podman build --platform linux/arm64 --target=build`` succeeds
   (configure + compile only; tests not gating until Phase 9).
 * Zuul ``check`` pipeline runs ``drizzle-lint`` green.
@@ -478,8 +472,7 @@ returns only the curated amd64/arm64 branches we intentionally kept.
 
 shows a ≥40% drop in total line count vs the Phase 0 baseline.
 
-* Phase 0 tests still pass on amd64 with unchanged
-  ``tests/skiplist.precise.txt``.
+* Phase 0 tests still pass on amd64
 * ``podman build --platform linux/arm64 --target=build`` still gets
   through ``./configure`` cleanly. Test failures on arm64 are recorded
   in :ref:`spec-revival-multiarch-hazards` but not gating until
@@ -578,8 +571,7 @@ Template tasks
       podman build --platform linux/amd64 --target=test .
       podman run --rm --net=host <image>
 
-   Fix test failures. If fixing is impossible, stop and discuss
-   whether skiplist is acceptible.
+   Fix test failures.
 
 5. Build on arm64:
 
@@ -732,7 +724,7 @@ Done when
 returns only ``plugin/js/plugin.ini``.
 
 * ``make`` builds every other plugin.
-* ``make test-drizzle`` skiplist no larger than Phase 9's.
+* ``make test-drizzle`` passes.
 
 Optional: split production and test-client images
 -------------------------------------------------
@@ -805,8 +797,7 @@ CI runs on OpenDev Zuul. Pipeline mapping:
   image to the permanent registry.
 
 Everything must always pass. There is no "soft" job; flaky tests get
-fixed or get added to ``tests/skiplist.<phase>.txt`` with a recorded
-reason only after explcit discussion as a last resort.
+fixed.
 
 Job design (buildset-registry pattern)
 --------------------------------------
