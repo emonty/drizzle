@@ -49,7 +49,7 @@ podman build --platform linux/arm64 --target=build -t drizzle:build-arm64 .
 Local mirror of CI:
 
 ```console
-./support-files/ci/regress.sh
+./tools/regress.sh
 ```
 
 Build deps live in `bindep.txt` (consumed by `bindep-rs` in the
@@ -70,8 +70,8 @@ Containerfile). Use `[compile platform:dpkg]` for build-time deps and
   new ones.
 - `tests/` — DTR (`test-run.pl`) harness and suites.
 - `unittests/` — boost.test unit tests. `make unit` runs them.
-- `support-files/docker/run-tests.sh` — test stage entrypoint.
-- `support-files/ci/regress.sh` — local CI mirror.
+- `tools/run-tests.sh` — test stage entrypoint.
+- `tools/regress.sh` — local CI mirror.
 - `zuul.d/` — Zuul pipeline + job definitions.
 - `docs/` — Sphinx documentation. `docs/specs/` for engineering
   specifications.

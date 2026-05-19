@@ -262,7 +262,7 @@ parallel stacks.
   - ``test`` — installs DTR runtime deps, sets working dir to the
     build artifacts cache, default ``CMD`` runs the test entrypoint.
 
-* Add ``support-files/docker/run-tests.sh`` invoked by the test
+* Add ``tools/run-tests.sh`` invoked by the test
   stage ``CMD``. Script:
 
   - exports ``DTR_BUILD_THREAD=$$``;
@@ -277,7 +277,7 @@ parallel stacks.
   pipelines: ``check``, ``vouched``, ``gate``, ``promote``.
 * Add ``zuul.d/jobs.yaml`` defining the jobs listed under
   :ref:`spec-revival-ci`.
-* Add ``support-files/ci/regress.sh`` — a local-developer mirror of
+* Add ``tools/regress.sh`` — a local-developer mirror of
   the Zuul invocations. One-command "run what CI runs."
 
 Local invocations (documented for contributors)
@@ -306,7 +306,7 @@ Mirror of CI:
 
 .. code-block:: console
 
-   ./support-files/ci/regress.sh
+   ./tools/regress.sh
 
 Test target choice
 ------------------

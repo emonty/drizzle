@@ -43,4 +43,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b tes
 
 WORKDIR /build
 RUN --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
-    support-files/docker/run-tests.sh
+    tools/run-tests.sh

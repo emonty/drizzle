@@ -174,8 +174,7 @@ clean-local:
 	$(SPHINX_BUILDDIR)/qthelp $(SPHINX_BUILDDIR)/devhelp $(SPHINX_BUILDDIR)/epub \
 	$(SPHINX_BUILDDIR)/latex $(SPHINX_BUILDDIR)/latexpdf $(SPHINX_BUILDDIR)/text \
 	$(SPHINX_BUILDDIR)/man $(SPHINX_BUILDDIR)/changes $(SPHINX_BUILDDIR)/linkcheck \
-	$(SPHINX_BUILDDIR)/doctest deb-work-dir support-files/rpm/BUILDROOT/* \
-	support-files/rpm/BUILD/* support-files/rpm/SRPMS/* support-files/rpm/RPMS/*
+	$(SPHINX_BUILDDIR)/doctest
 
 maintainer-clean-local:
 	find . -type f -name '*~' -exec rm -f '{}' \;
@@ -209,7 +208,6 @@ include drizzled/internal/include.am
 include drizzled/algorithm/include.am
 include drizzled/util/include.am
 include client/include.am
-include support-files/include.am
 include tests/include.am
 include unittests/include.am
 include libdrizzle/include.am

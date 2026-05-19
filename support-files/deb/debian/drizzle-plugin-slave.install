@@ -1,3 +1,0 @@
-usr/lib/drizzle/libslave_plugin.so
-etc/drizzle/conf.d/slave.cnf
-debian/slave.cfg /etc/drizzle

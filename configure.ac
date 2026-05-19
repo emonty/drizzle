@@ -229,14 +229,8 @@ AM_GNU_GETTEXT([external])
 AC_CONFIG_FILES([Makefile 
                 po/Makefile.in 
                 drizzled/plugin/version.h 
-                support-files/rpm/SPECS/drizzle.spec 
                 libdrizzle-1.0/version.h 
-                support-files/drizzle.pc 
-                support-files/libdrizzle.pc 
-                support-files/libdrizzle-1.0.pc 
-                support-files/smf/install.sh 
-                support-files/smf/drizzle.xml 
-                support-files/smf/drizzle])
+])
 
 scheduling_plugins_available="
   pool_of_threads 

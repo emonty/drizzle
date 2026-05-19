@@ -1,2 +1,0 @@
-plugin-add=slave
-slave.config-file=/etc/drizzle/slave.cfg
