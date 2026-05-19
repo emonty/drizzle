@@ -17,7 +17,7 @@ dnl  along with this program; if not, write to the Free Software
 dnl  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-AC_INIT([drizzle],[7.2],[http://bugs.launchpad.net/drizzle],[drizzle],[http://drizzle.org/])
+AC_INIT([drizzle],[8.0.0],[http://bugs.launchpad.net/drizzle],[drizzle],[http://drizzle.org/])
 
 AC_CONFIG_AUX_DIR([config])
 
