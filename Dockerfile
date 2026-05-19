@@ -36,3 +36,16 @@ RUN --mount=type=bind,source=.,target=/host-src,readonly \
     autoreconf -i && ./configure && make -j"$(nproc)" && \
     mkdir -p /opt/drizzle && \
     cp -au /build/. /opt/drizzle/
+
+# Libtool bakes rpaths to the build dir into the wrappers and binaries;
+# the symlink makes those resolve to /opt/drizzle in the final image.
+RUN ln -s /opt/drizzle /build
+
+FROM build AS test
+
+# Test-time deps (DTR is Perl; `make unit` is boost.test, already built).
+RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b test) \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/drizzle
+CMD ["/opt/drizzle/support-files/docker/run-tests.sh"]
