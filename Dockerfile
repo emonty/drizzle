@@ -29,13 +29,13 @@ FROM base AS build
 # cache, so make sees only the files that actually changed.
 # Final cp -au lifts the build tree into the image layer so downstream stages
 # (and `podman run`) can use it without re-mounting the cache.
-RUN --mount=type=bind,source=.,target=/host-src,readonly \
+RUN --mount=type=bind,source=.,target=/host-src,readonly,Z \
     --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
-    cp -au /host-src/. /build/ && \
+    cp -au --no-preserve=context /host-src/. /build/ && \
     cd /build && \
     autoreconf -i && ./configure && make -j"$(nproc)" && \
     mkdir -p /opt/drizzle && \
-    cp -au /build/. /opt/drizzle/
+    cp -au --no-preserve=context /build/. /opt/drizzle/
 
 # Libtool bakes rpaths to the build dir into the wrappers and binaries;
 # the symlink makes those resolve to /opt/drizzle in the final image.
