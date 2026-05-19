@@ -1048,7 +1048,16 @@ int lex_one_token(ParserType *yylval, drizzled::Session *session)
           /* Accept 'M' 'm' 'm' 'd' 'd' */
           lip->yySkipn(pos-1);
 
-          if (version <= DRIZZLE_VERSION_ID)
+          /*
+            `/`*`!NNNNN ...` is a MySQL-style version-conditional
+            comment whose NNNNN follows MMmmpp encoding. Compare
+            against a MySQL-compat threshold rather than
+            DRIZZLE_VERSION_ID, which is now date-based (e.g.
+            202605) and would let every plausible MySQL version
+            evaluate. Drizzle forked from the MySQL 6.0 alpha
+            line; treat <= 6.0.0 markers as live SQL.
+          */
+          if (version <= 60000ULL)
           {
             /* Expand the content of the special comment as real code */
             lip->set_echo(true);

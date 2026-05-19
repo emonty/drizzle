@@ -10,4 +10,3 @@
 # this baseline is the gate.
 
 rabbitmq.variables   # needs a running rabbitmq-server/rabbitmqctl; will get its own Zuul job
-main.comments        # `/*!72301 ... */` version comment parsed as live SQL; real parser bug, fix in a later phase
