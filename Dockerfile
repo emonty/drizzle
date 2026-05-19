@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1.4
-FROM quay.io/inaugust/bindep-rs as bindep_rs
-FROM docker.io/library/ubuntu:12.04
+FROM quay.io/inaugust/bindep-rs AS bindep_rs
+
+FROM docker.io/library/ubuntu:12.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -17,9 +18,11 @@ WORKDIR /src
 # copy bindep.txt seperately to help with layer caching
 COPY bindep.txt /src/bindep.txt
 
-# Build deps (hardcoded until the rust bindep lands)
+# Compile-time deps
 RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b compile) \
     && rm -rf /var/lib/apt/lists/*
+
+FROM base AS build
 
 # Build in a cache mount so artifacts persist across `podman build` runs.
 # Source is bind-mounted read-only; cp -au only copies changed files into the
