@@ -43,17 +43,31 @@ export RABBITMQ_MNESIA_BASE="`pwd`/$DIR/mnesia"
 export RABBITMQ_LOG_BASE="`pwd`/$DIR/logs"
 
 
+RABBITMQCTL="/usr/lib/rabbitmq/bin/rabbitmqctl -q -n $RABBITMQ_NODENAME"
+
 startup()
 {
-   /usr/lib/rabbitmq/bin/rabbitmq-server -detached
-   sleep 5
+  /usr/lib/rabbitmq/bin/rabbitmq-server -detached || return 1
+  # `rabbitmq-server -detached` returns before the broker accepts
+  # connections. Poll status until rabbitmqctl can talk to it so
+  # downstream tests don't run against a half-started broker.
+  for _ in $(seq 1 30); do
+    if $RABBITMQCTL status >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "rabbitmq-server did not become reachable within 30s" >&2
+  return 1
 }
 
 shutdown()
 {
-  /usr/lib/rabbitmq/bin/rabbitmqctl -q -n $RABBITMQ_NODENAME stop
-  sleep 5
+  # If the broker isn't running this exits non-zero — fine, we still
+  # want to tear down the data dir below.
+  $RABBITMQCTL stop >/dev/null 2>&1 || true
   rm -rf $DIR
+  return 0
 }
 
 restart()
