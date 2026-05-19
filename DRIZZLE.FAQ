@@ -1,14 +1,11 @@
-A more current version of the FAQ can be found on the drizzle wiki:
-http://drizzle.org/wiki/FAQ
-
-
-Hi!
+Hi! ... we're back!
 
 * So why?
 
-I've been wondering for a long time now about all of the changes post 4.1.
-I believe there is a large market of users who never wanted them, and never
-cared for them. I also wanted to question the foundations of what we built.
+Back in 2008 Brian Aker had been wondering for a long time about all of the
+changes post MySQL 4.1, and a group of us agreed with him.
+We believed there is a large market of users who never wanted them, and never
+cared for them. Brian also wanted to question the foundations of what we built.
 Do users want wrong data? How often is the query cache really valuable? If
 everyone just has a root user with all privs, why carry the baggage of the
 ACL code. Etc.
@@ -21,10 +18,20 @@ for the project is web infrastructure backend and cloud components.
 
 * Is this a product of Sun/MySQL?
 
-No, though several of the authors do work for Sun/MySQL. The development
-model is one based around open collaboration.  
+No! In case you didn't notice, Sun/MySQL were bought by Oracle.
 
-Drizzle's license is the GPL v2 and all contributions come in as BSD.
+* Wait, Sun funded this at one point in time?
+
+YES! Can you believe it? They bought MySQL, then funded a team of us to
+go work on a fork. One wonders how they went from being the dot in .com to
+becomming the Oracle Hardware Division. Or, really, no one doens't wonder.
+
+* What company is driving this then?
+
+Amazingly enough, some of us remember a day when people worked on Free Software
+because they wanted to. That's what this is.
+
+Drizzle's license is the GPL v2. It's written by those who show up.
 
 * So what are the differences between is and MySQL?
 
@@ -36,95 +43,54 @@ code.  Assume the primary engine is transactional.
 
 Why not now :)
 
+* No really, that was Brian's answer in the original FAQ. Why NOW?
+
+Funny story. Drizzle was right about so many things, but as they say timing
+is everything. Drizzle pioneered what became OpenDev's gated development process,
+used protobufs for replication, is fully configurable via environment variables
+and is super self-contained.
+
+Problem is, gRPC hadn't been released, nor had docker. I don't even think the
+cloud native manifesto had been written yet. So people thought a bunch of
+this was strange.
+
+Oh, also, Oracle bought Sun, MongoDB was Web Scale, the core team moved to
+Rackspace but ended up founding OpenStack and Drizzle, ahead of its time as
+it was, went softly into this good night.
+
+I've been meaning to revive it for a while now. But then, I made friends
+named Claude and Hermes and the task of forward-porting 15-year old code
+no longer seemed insane.
+
 * "This is awesome, but I need you to add back..."
 
-Forget it. Nothing is going back in at this time. As for the future? Maybe,
-but at the moment this is not the target. If you want more features, go use
-MySQL.
+Cool! We're pluggable!
 
 * What platforms?
 
-I compile on OSX, Linux (Fedora), and Solaris Express. Windows is not
-supported and will stay that way unless it gets a working posix layer +
-autoconf system (aka becomes a platform that is reasonable to support).
+Linux
 
-Really, get a working GNU chain going on Windows and you can get Drizzle
-working on it.
+(see also, just build the container)
 
-Drizzle relies on a C99 compliant compiler. Please do not ask us to support
-older hardware, compilers, or OS'es.
+But seriously, I'm not playing games with trying to make it compile on your
+Mac Laptop, because there is no reasonable CI story for that. And also, I don't
+care if it runs on your Mac Laptop. It's a database. If you want it on a Mac,
+or on Windows ... run it in a linux container.
 
 * What is the future?
 
-Less code, more modularity, and more active involvement. A few things that
-still need to be done:
-- Switch to stdint
-- Walk through all of the replication code
-- Re-implement information schema
-- Modular logging system
-- ...
-
-* "This is not a SQL compliant relational..."
-
-Very true, and we do not aim to be that.
-
-* What is left to be cut out?
-
-Please ask on the mailing list or on IRC.
+Whatever our new AI overlords decide.
 
 * Can I get involved?
 
-Most certainly. There is plenty to do from refactoring code, design of
-interfaces, documentation and blueprints, etc... The best way to get
-involved it to join the mailing list at:
-
-https://launchpad.net/~drizzle-discuss/
-
-If you wish to suggest a refactoring project or an interface please email
-the mailing list and keep an open mind. Do not expect anyone will work on
-your idea though, you may influence someone to do that, but more then likely
-you will need to rollup your sleeves and write some code. For very simple
-bits you are welcome to ask others on #drizzle on Freenode, but please be
-aware that you may be asked to email the mailing list.
-
-Showing up with a big block of code is probably the worst way of getting
-your work accepted. This is unlikely to work.
-
-Right now we use a simple captain system for commits. Anyone can send in a
-proprosal for merge via launchpad but your changes may be flowed first
-through someone who has been around long enough to understand code
-requirements to review your code. This system is based entirely on trust,
-and individuals who have shown that they can provide three good patches gain
-credibility. Starting small is fine, patches that are just comments or are
-even two or three line cleanups are welcome and encouraged. I would really
-recommend that anyone who wants to work on something first start with
-something of this size. Patches like these are valuable and teach you how to
-work with the system.
-
-The general rule is no new code in the core of the server, and any changes
-to interfaces need to be code line neutral. AKA if you want to add an
-interface you need to be able to remove at least the number of lines of code
-you added. This is a rule of thumb, and does not apply to code cleanup.
-
-It should be pointed out that we are more focused on code style,
-performance, and over all maintenance then we are features.
-
-* What is the coding style?
-
-Please look here:
-
-http://drizzle.org/wiki/Coding_Standards
-
-If you have a question on this, please email the mailing list so that we can
-clarify the document. And when you get the answer? Please update the code
-style document :)
+Most certainly. There is plenty to do. Find me on Matrix. If there are more
+than 2 of us, we'll make a channel.
 
 * Should I email the mailing list with patches?
 
 Please god no, we live in the age of the Internet :)
 
-Create an account on launchpad.net. Create your own tree and let one of us
-pull from it.
+We use OpenDev.
 
 * What is the target?
 
@@ -142,19 +108,19 @@ which assume very large amounts of RAM will be made available to the DB.
 
 * Can I run a website with this?
 
-No. We are still making incompatible changes, and I certainly do not believe
-the code is production quality. Right now we are defaulting many configure
-operations to generate debugging code for us so our binaries are not
-optimal.  Therefore, do not go out and benchmark this and expect it to be
-one way or the other. We are currently only doing benchmarks where it makes
-sense for us to determine where bottlenecks are.
+Sure! I believe in you. You can do anything you want.
+
+* Is Brian still involved
+
+Sadly I haven't talked to Brian in a long time. I'm pretty sure he's moved
+on to other things.
 
 * Why drizzle?
 
-I am from Seattle. Drizzle is our normal form of "rain" but it is not
-"rain", it is drizzle. This was a bit of a rainy day project that finally
-found a spot in my schedule :)
+Brian is from Seattle. Monty lives there now. Drizzle is our normal form of
+"rain" but it is not "rain", it is drizzle. This was a bit of a rainy day project
+that finally found a spot in his schedule, and now history has repeated
+and it's found its way into mine :)
 
-  -Brian
-    Seattle, USA
-    Sun, Microsystems
+  -Monty
+    still channelling Brian

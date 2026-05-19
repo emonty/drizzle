@@ -50,6 +50,13 @@ Contributing
    contributing/documentation
    contributing/more_ways
 
+Specifications
+--------------
+.. toctree::
+   :maxdepth: 2
+
+   specs/index
+
 Installing
 ----------
 .. toctree::
