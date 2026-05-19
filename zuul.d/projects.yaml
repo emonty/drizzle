@@ -1,0 +1,32 @@
+---
+- project:
+    check:
+      jobs:
+        - drizzle-lint
+    vouched:
+      jobs:
+        - drizzle-build-image
+        - drizzle-unit-tests:
+            dependencies:
+              - drizzle-build-image
+        - drizzle-dtr-tests:
+            dependencies:
+              - drizzle-build-image
+        - drizzle-distcheck:
+            dependencies:
+              - drizzle-build-image
+    gate:
+      jobs:
+        - drizzle-build-image
+        - drizzle-unit-tests:
+            dependencies:
+              - drizzle-build-image
+        - drizzle-dtr-tests:
+            dependencies:
+              - drizzle-build-image
+        - drizzle-distcheck:
+            dependencies:
+              - drizzle-build-image
+    promote:
+      jobs:
+        - drizzle-promote-image
