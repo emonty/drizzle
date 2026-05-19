@@ -2234,12 +2234,6 @@ static void fix_paths()
   drizzle_tmpdir= fs::path(fs::system_complete(fs::path(drizzle_tmpdir))).string();
   assert(drizzle_tmpdir.size());
 
-  assert(getuid() != 0 and geteuid() != 0);
-  if (getuid() == 0 or geteuid() == 0)
-  {
-    drizzled_abort << "Drizzle cannot be run as root, please see the Security piece of the manual for more information.";
-  }
-
   if (mkdir(drizzle_tmpdir.c_str(), 0777) == -1)
   {
     if (errno != EEXIST)
