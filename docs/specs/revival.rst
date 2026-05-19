@@ -357,8 +357,6 @@ Risks
   ``build`` and ``test`` stages.
 * Rootless podman port binding can collide. ``--net=host`` solves it
   for now; revisit if multi-tenant CI runners need isolation.
-* Phase 0's skiplist may be larger than expected. That is acceptable —
-  the gate is "no growth," not "no failures."
 
 
 Phase 1 — Strip dead platforms, delete dead-dep plugins
@@ -580,7 +578,8 @@ Template tasks
       podman build --platform linux/amd64 --target=test .
       podman run --rm --net=host <image>
 
-   Fix test failures, or grow the skiplist with a rationale.
+   Fix test failures. If fixing is impossible, stop and discuss
+   whether skiplist is acceptible.
 
 5. Build on arm64:
 
@@ -807,7 +806,7 @@ CI runs on OpenDev Zuul. Pipeline mapping:
 
 Everything must always pass. There is no "soft" job; flaky tests get
 fixed or get added to ``tests/skiplist.<phase>.txt`` with a recorded
-reason.
+reason only after explcit discussion as a last resort.
 
 Job design (buildset-registry pattern)
 --------------------------------------

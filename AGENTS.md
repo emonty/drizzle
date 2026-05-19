@@ -129,8 +129,9 @@ CI runs on OpenDev Zuul. Pipelines:
 - **promote** — pushes the merged image to the permanent registry,
   tagged with the merge SHA, `latest`, and the phase name.
 
-Everything must always pass. Flaky tests get fixed or get added to
-`tests/skiplist.<phase>.txt` with a recorded reason.
+Everything must always pass. Flaky tests get fixed. Tests only get
+added to `tests/skiplist.<phase>.txt` with a recorded reason after
+explicit discussion as a last result.
 
 ## Quick links
 
