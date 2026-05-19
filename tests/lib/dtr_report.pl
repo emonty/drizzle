@@ -40,6 +40,12 @@ sub dtr_verbose (@);
 
 my $tot_real_time= 0;
 
+# Set non-zero by anything that detects a problem outside the per-test
+# pass/fail tally (e.g. dtr_check_stop_servers when it has to SIGKILL a
+# server). dtr_report_stats checks this to decide whether the run as a
+# whole should be reported as failed.
+our $found_problems= 0;
+
 
 
 ##############################################################################
@@ -180,7 +186,6 @@ sub dtr_report_stats ($) {
   my $tot_failed= 0;
   my $tot_tests=  0;
   my $tot_restarts= 0;
-  my $found_problems= 0; # Some warnings in the logfiles are errors...
 
   foreach my $tinfo (@$tests)
   {

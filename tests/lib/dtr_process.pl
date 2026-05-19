@@ -577,6 +577,10 @@ sub dtr_check_stop_servers ($) {
 	dtr_tofile($srv->{'errfile'}, "Note: Forcing kill of process $pid\n");
       }
       dtr_warning("Forcing kill of process $pid");
+      # Flag the run as problematic: a server that needs SIGKILL after
+      # SIGTERM is either hanging or crashing on shutdown, and we'd
+      # rather notice than have it hide behind otherwise-green tests.
+      $::found_problems++;
 
     }
     else
