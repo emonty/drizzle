@@ -27,6 +27,11 @@ libv8-dev            [compile platform:ubuntu-precise]
 libtokyocabinet-dev  [compile platform:ubuntu-precise]
 libhaildb-dev        [compile platform:ubuntu-precise]
 
+# Test dependencies
+# DTR (tests/test-run.pl) is Perl and uses only core modules.
+# Additional helpers (DBI, subunit) get added when an actual test needs them.
+perl                 [test platform:dpkg]
+
 # Runtime dependencies
 libprotobuf7                   [platform:ubuntu-precise]
 libcurl3-gnutls                [platform:ubuntu-precise]
