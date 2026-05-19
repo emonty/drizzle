@@ -27,8 +27,12 @@ FROM base AS build
 # Build in a cache mount so artifacts persist across `podman build` runs.
 # Source is bind-mounted read-only; cp -au only copies changed files into the
 # cache, so make sees only the files that actually changed.
+# Final cp -au lifts the build tree into the image layer so downstream stages
+# (and `podman run`) can use it without re-mounting the cache.
 RUN --mount=type=bind,source=.,target=/host-src,readonly \
     --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
     cp -au /host-src/. /build/ && \
     cd /build && \
-    autoreconf -i && ./configure && make -j"$(nproc)"
+    autoreconf -i && ./configure && make -j"$(nproc)" && \
+    mkdir -p /opt/drizzle && \
+    cp -au /build/. /opt/drizzle/
