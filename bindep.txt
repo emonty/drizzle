@@ -32,6 +32,7 @@ libhaildb-dev        [compile platform:ubuntu-precise]
 # DTR (tests/test-run.pl) is Perl and uses only core modules.
 # Additional helpers (DBI, subunit) get added when an actual test needs them.
 perl                 [test platform:dpkg]
+curl                 [test platform:dpkg]
 
 # Runtime dependencies
 libprotobuf7                   [platform:ubuntu-precise]

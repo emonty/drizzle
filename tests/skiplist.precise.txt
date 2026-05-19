@@ -9,6 +9,5 @@
 # their own skiplist files (e.g. skiplist.trusty.txt) and the diff against
 # this baseline is the gate.
 
-json_server.basic    # needs curl in the test image; not yet installed
-rabbitmq.variables   # needs a running rabbitmq-server/rabbitmqctl; not yet installed
+rabbitmq.variables   # needs a running rabbitmq-server/rabbitmqctl; will get its own Zuul job
 main.comments        # `/*!72301 ... */` version comment parsed as live SQL; real parser bug, fix in a later phase
