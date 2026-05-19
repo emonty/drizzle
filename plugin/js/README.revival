@@ -1,0 +1,13 @@
+js — JavaScript UDF plugin (planned rewrite)
+
+This plugin is disabled pending a rewrite against a current Node.js or V8
+embedding API.  The 2013-era V8 API it uses is incompatible with any V8
+release since approximately 5.0 and no longer available in supported Ubuntu
+releases.
+
+The source is retained in-tree as a reference for the scope of the
+replacement.  It captures the UDF surface and embedding contract that the
+rewrite must cover.  The target is a clean embedding against the V8
+Platform/Isolate API at Node 20+ (or an equivalent modern V8 surface).
+
+Tracked in docs/specs/revival.rst under *Future work → v8 plugin rewrite*.
