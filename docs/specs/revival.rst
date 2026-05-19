@@ -32,7 +32,7 @@ Drizzle was last actively developed around 2013. The current state:
   m4 macro layer (~55 of 136 m4 files).
 * 82 plugins are registered via ``config/pandora-plugin.ini`` and a
   ``config/pandora-plugin`` Python enumeration script.
-* The repo's ``Dockerfile`` builds against Ubuntu 12.04 (Precise, long
+* The repo's ``Containerfile`` builds against Ubuntu 12.04 (Precise, long
   EOL) using ``bindep-rs`` to install ``bindep.txt``. The build runs;
   tests do not.
 * Sphinx docs are well established (65 RST files); a ``Doxyfile`` also
@@ -40,7 +40,7 @@ Drizzle was last actively developed around 2013. The current state:
 
 We are reviving the project with a small set of strong constraints:
 
-* **Single OS target, ever.** Whatever the ``Dockerfile`` ``FROM``
+* **Single OS target, ever.** Whatever the ``Containerfile`` ``FROM``
   line says is the *only* environment we support. No portability code
   paths.
 * **Two CPU architectures**: ``linux/amd64`` and ``linux/arm64``. Both
@@ -249,13 +249,13 @@ Tasks
 -----
 
 Each bullet is a candidate commit. Sequence within the phase is
-fluid; the test-stage Dockerfile work and the Zuul work can land in
+fluid; the test-stage Containerfile work and the Zuul work can land in
 parallel stacks.
 
 * Land this spec at ``docs/specs/revival.rst`` and wire it into
   ``docs/index.rst`` under a new ``Specifications`` section.
 * Create ``docs/specs/index.rst``.
-* Refactor ``Dockerfile`` into three named stages:
+* Refactor ``Containerfile`` into three named stages:
 
   - ``base`` — apt sources + bindep install.
   - ``build`` — ``autoreconf -i && ./configure && make -j$(nproc)``
@@ -556,7 +556,7 @@ afterward.
 Template tasks
 --------------
 
-1. Bump ``Dockerfile`` ``FROM ubuntu:X.04``. Verify Canonical
+1. Bump ``Containerfile`` ``FROM ubuntu:X.04``. Verify Canonical
    publishes both ``linux/amd64`` and ``linux/arm64`` for the image
    (true for all current LTS images).
 2. Update ``bindep.txt``: replace ``[platform:ubuntu-PREVIOUS]``
@@ -742,7 +742,7 @@ The user's stated target topology for CI:
    "A job builds a production container, then a second job runs all
    the tests against a server running from the container."
 
-If appetite exists in Phase 10, split the Dockerfile into:
+If appetite exists in Phase 10, split the Containerfile into:
 
 * ``production`` stage — ``drizzled`` binary + minimal runtime deps,
   no test harness, no perl.
@@ -826,7 +826,7 @@ Jobs:
   container. ``autoreconf -i``, ``./configure --no-create``, docs
   build smoke. ~2 minutes.
 * ``drizzle-build-image`` — ``parent: opendev-build-container-image``.
-  Builds the ``test`` Dockerfile stage into the buildset registry.
+  Builds the ``test`` Containerfile stage into the buildset registry.
   Runs once per arch (``linux/amd64``, ``linux/arm64``) via Zuul's
   per-arch nodesets, producing two tags in the buildset registry.
 * ``drizzle-unit-tests`` —
@@ -885,7 +885,7 @@ them up:
 * **v8 plugin rewrite** against modern V8 or Node embedding. The
   current plugin source stays in tree as a placeholder with
   ``build_conditional=false``.
-* **Production/test-client Dockerfile split.** Described under
+* **Production/test-client Containerfile split.** Described under
   :ref:`Phase 10 <spec-revival>`. The image we ship is the image we
   test.
 * **kewpie revival** (Python 3 port) if/when interest arises. Skipped

@@ -53,12 +53,12 @@ Local mirror of CI:
 ```
 
 Build deps live in `bindep.txt` (consumed by `bindep-rs` in the
-Dockerfile). Use `[compile platform:dpkg]` for build-time deps and
+Containerfile). Use `[compile platform:dpkg]` for build-time deps and
 `[test platform:dpkg]` for DTR/test deps.
 
 ## Repo layout
 
-- `Dockerfile` — three named stages: `base` (apt + bindep), `build`
+- `Containerfile` — three named stages: `base` (apt + bindep), `build`
   (autoreconf/configure/make), `test` (DTR runtime + entrypoint).
 - `bindep.txt` — build/test/runtime package list.
 - `configure.ac` + `m4/` — autotools build. **Stay autotools.** Pandora
