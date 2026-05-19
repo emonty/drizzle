@@ -150,6 +150,7 @@ AX_PTHREAD([
 AC_CHECK_PROGS([DOXYGEN],[doxygen])
 AC_CHECK_PROGS([LEX],['flex'],[:])
 AC_CHECK_PROGS([YACC],['bison'],[:])
+AC_PATH_PROG([PERL],[perl],[AC_MSG_ERROR([perl is required to run the test suite])])
 
 # Checks for libraries.
 LT_LIB_M
