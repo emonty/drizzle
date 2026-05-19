@@ -26,6 +26,5 @@ if make test-drizzle 2>&1 | tee "${DTR_LOG}"; then
     exit 0
 fi
 
-echo "run-tests: unexpected DTR failures:" >&2
-echo "${unexpected}" >&2
+echo "run-tests: DTR reported failures" >&2
 exit 1
