@@ -76,10 +76,16 @@ AC_DEFUN([PANDORA_BUILDING_FROM_VC],[
       fi
     elif test "${pandora_building_from_git}" = "yes"; then
       echo "# Grabbing changelog and version information from git"
-      PANDORA_GIT_REVID=`git --no-pager log --max-count=1 | cut -f2 -d' ' | head -1`
-      if test "x$PANDORA_GIT_REVID" != "x${PANDORA_VC_REVNO}" ; then
-         PANDORA_VC_REVID="${PANDORA_GIT_REVID}"
-         PANDORA_VC_BRANCH=`git branch | grep -Ei "\* (.*)" | cut -f2 -d' '`
+      PANDORA_VC_REVID=`git rev-parse HEAD 2>/dev/null`
+      PANDORA_VC_REVNO=`git rev-list --count HEAD 2>/dev/null`
+      PANDORA_VC_BRANCH=`git rev-parse --abbrev-ref HEAD 2>/dev/null`
+      # Tag pointing at HEAD: HEAD itself is a release. Most recent
+      # ancestor tag otherwise: used to build a `<tag>.<revno>-snapshot`
+      # version. `git describe --abbrev=0` yields the bare tag.
+      PANDORA_VC_TAG=`git tag --points-at HEAD 2>/dev/null | head -1`
+      PANDORA_VC_LATEST_TAG=`git describe --tags --abbrev=0 2>/dev/null`
+      if test "x${vc_changelog}" = "xyes"; then
+        git --no-pager log --pretty=format:"%h %an %ad  %s" > ChangeLog 2>/dev/null
       fi
     fi
 
@@ -87,7 +93,7 @@ AC_DEFUN([PANDORA_BUILDING_FROM_VC],[
       mkdir -p config
     fi
 
-    if test "${pandora_building_from_bzr}" = "yes" -o ! -f config/pandora_vc_revinfo ; then 
+    if test "${pandora_building_from_bzr}" = "yes" -o "${pandora_building_from_git}" = "yes" -o ! -f config/pandora_vc_revinfo ; then
       cat > config/pandora_vc_revinfo.tmp <<EOF
 PANDORA_VC_REVNO=${PANDORA_VC_REVNO}
 PANDORA_VC_REVID=${PANDORA_VC_REVID}
