@@ -167,6 +167,10 @@ Phase map
      - Strip dead platforms; delete dead-dep plugins
      - 12.04
      - L
+   * - 1.5
+     - Performance baseline harness
+     - 12.04
+     - M
    * - 2
      - Pandora slim-down to ``m4/drizzle.m4``
      - 12.04
@@ -485,6 +489,89 @@ Risks
   removal in its own commit so a revert is cheap.
 * ``m4/pandora_extensions.m4`` provides ``AC_USE_SYSTEM_EXTENSIONS``
   wrapping. Verify it isn't load-bearing before deletion.
+
+
+Phase 1.5 — Performance baseline harness
+========================================
+
+Objective
+---------
+
+Stand up a deterministic, hardware-independent performance measurement
+*before* any code is restructured, so every later phase can be judged
+against a frozen baseline. We have no dedicated performance hardware
+and CI runs on shared nodes, so wall-clock time is meaningless.
+Instead, count work synthetically: callgrind simulates execution and
+counts instructions, which is reproducible run-to-run and identical on
+any host.
+
+This phase ships only measurement infrastructure — it changes no
+server code. It exists so that Phase 2 onward have a signal.
+
+Tasks
+-----
+
+* Add ``valgrind`` to ``bindep.txt`` under a new ``[perf
+  platform:dpkg]`` profile (``callgrind``, ``massif`` and
+  ``callgrind_annotate`` all ship with it). Add the Perl ``DBI`` /
+  ``DBD`` packages ``sql-bench`` needs under the same profile.
+* Workload: drive ``tests/test_tools/sql-bench`` against a drizzled
+  instance — it already carries a drizzle server profile. Pin the
+  dataset and iteration counts; single connection. If the ``DBD``
+  path against the MySQL-protocol port proves unworkable on Precise,
+  fall back to a bespoke deterministic SQL workload under ``perf/``;
+  record which path was taken in the commit message.
+* ``tools/perf.sh`` — launch drizzled with a minimal plugin config
+  (no ``json_server`` / ``logging_stats`` / ``rabbitmq``; their
+  background threads add jitter) under ``valgrind --tool=callgrind
+  --cache-sim=yes --branch-sim=yes --collect-atstart=no``. Toggle
+  collection on only after startup and data load so server boot is
+  excluded. Parse ``callgrind_annotate`` into a JSON metrics file:
+  total Ir, estimated cycles, and the per-ELF-object split (drizzled
+  vs libc / libstdc++ / libssl / boost).
+* Second pass over the same workload under ``valgrind --tool=massif``
+  for peak heap.
+* Record ``size(1)`` output for ``drizzled`` and every plugin
+  ``.so`` — code-size tracking is free and tracks toolchain bloat.
+* Commit captured numbers under a ``perf/`` directory in the tree.
+  ``tools/perf.sh`` writes the current run there and diffs it against
+  the committed baseline.
+* Zuul: add a ``drizzle-perf`` job to the ``vouched`` and ``gate``
+  pipelines running ``tools/perf.sh`` on every commit. **Non-gating**
+  — it reports the delta against baseline; it does not fail the
+  build.
+* At the close of every later phase, run ``tools/perf.sh`` by hand
+  and commit the resulting numbers under ``perf/`` tagged with the
+  phase. The time series is then the git history of ``perf/`` — no
+  external dashboard.
+
+Done when
+---------
+
+* ``tools/perf.sh`` produces its JSON metrics file deterministically:
+  run-to-run variance under 0.5% on amd64.
+* A Phase 1 baseline is committed under ``perf/``.
+* callgrind and massif are both available in the container via
+  ``bindep.txt``.
+* The ``drizzle-perf`` job runs in ``vouched`` and ``gate``.
+
+Risks
+-----
+
+* ``sql-bench`` is Perl/DBI; the ``DBD`` path against drizzle's
+  MySQL-protocol port may not work cleanly on Precise. The fallback
+  is a bespoke ``perf/`` workload — circle back if ``DBD`` fights us.
+* callgrind is a ~20–50× slowdown and the job runs per commit. Keep
+  the workload small enough that the ``vouched``/``gate`` pass stays
+  in single-digit minutes — run a subset of ``sql-bench``, not all of
+  it.
+* Across an LTS bump valgrind itself changes, which slightly shifts
+  the instruction count; within a phase it is constant. The
+  per-object split isolates drizzled's own code from platform
+  movement — read the numbers with that in mind.
+* Background threads and non-deterministic SQL (``NOW()``, ``RAND()``,
+  ``UUID()``) destroy reproducibility. The minimal-plugin config and a
+  curated workload are load-bearing, not optional.
 
 
 Phase 2 — Pandora slim-down to ``m4/drizzle.m4``
