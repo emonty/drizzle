@@ -43,18 +43,28 @@ ServerDetect::ServerDetect(drizzle_con_st *connection) :
     {
       type = SERVER_DRIZZLE_FOUND;
     }
-    else 
+    else
     {
       type = SERVER_MYSQL_FOUND;
     }
   }
+  else if(ret_ptr == DRIZZLE_RETURN_ERROR_CODE)
+  {
+    // The server answered with an error packet, so the connection
+    // itself is healthy — we just could not read vc_release_id. An
+    // authorization policy denying data_dictionary is the expected
+    // cause (see the regex_policy / simple_user_policy suites, and
+    // the drizzle/drizzledump tools connecting as a restricted
+    // user). Only Drizzle has data_dictionary and those policy
+    // plugins, so a probe that fails this way is still Drizzle.
+    type = SERVER_DRIZZLE_FOUND;
+  }
   else
   {
-    // The vc_release_id probe can only fail on a half-set-up or
-    // unhealthy connection — every Drizzle build exposes that
-    // sys_var. Falling through to "assume MySQL" used to hide
-    // real connection problems inside otherwise-green tests, so
-    // bail loudly instead.
+    // A non-error-code failure means the connection itself is
+    // broken (server gone, dropped mid-probe, protocol error).
+    // There is no server to detect, so report the libdrizzle error
+    // and exit rather than guessing a type and masking the failure.
     std::cerr << "Server version not detectable: "
               << drizzle_con_error(connection) << std::endl;
     drizzle_result_free(result);
