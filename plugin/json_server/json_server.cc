@@ -460,11 +460,10 @@ extern "C" void process_json_ddl_schema_drop_req(struct evhttp_request *req, voi
 }
 
 
-static void shutdown_event(int fd, short, void *arg)
+static void shutdown_event(int, short, void *arg)
 {
   struct event_base *base= (struct event_base *)arg;
   event_base_loopbreak(base);
-  close(fd);
 }
 
 static void run(struct event_base *base)
@@ -475,23 +474,29 @@ static void run(struct event_base *base)
 }
 
 
+// Per-thread state. Each worker thread needs its own event base,
+// evhttp listener and wakeup event: a struct event can only be
+// registered with a single base at a time.
+struct JsonWorker
+{
+  struct event_base *base;
+  struct evhttp *httpd;
+  struct event wakeup_event;
+};
+
 class JsonServer : public drizzled::plugin::Daemon , public HTTPServer
 {
 private:
   std::vector<drizzled::thread_ptr> json_threads;
+  std::vector<JsonWorker *> workers;
   in_port_t _port;
-  struct evhttp *httpd;
-  struct event_base *base;
   int wakeup_fd[2];
-  struct event wakeup_event;
   int nfd;
 
 public:
   JsonServer(in_port_t port_arg) :
     drizzled::plugin::Daemon("json_server"),
-    _port(port_arg),
-    httpd(NULL),
-    base(NULL)
+    _port(port_arg)
   { }
 
   bool init()
@@ -534,25 +539,48 @@ public:
   {
     for(uint32_t i =0;i<num_threads;i++)
     {
-      if ((base= event_init()) == NULL)
+      JsonWorker *worker= new JsonWorker;
+
+      if ((worker->base= event_init()) == NULL)
       {
         sql_perror("event_init()");
+        delete worker;
         return false;
       }
 
-      if ((httpd= evhttp_new(base)) == NULL)
+      if ((worker->httpd= evhttp_new(worker->base)) == NULL)
       {
         sql_perror("evhttp_new()");
+        event_base_free(worker->base);
+        delete worker;
         return false;
       }
 
-      if(evhttp_accept_socket(httpd,nfd))
+      // evhttp_free() closes the accept socket, so each worker needs its
+      // own descriptor for the shared listening socket — otherwise the
+      // first worker torn down closes the fd out from under the rest.
+      int accept_fd= dup(nfd);
+      if (accept_fd < 0)
+      {
+        sql_perror("dup");
+        evhttp_free(worker->httpd);
+        event_base_free(worker->base);
+        delete worker;
+        return false;
+      }
+
+      if(evhttp_accept_socket(worker->httpd,accept_fd))
       {
         sql_perror("evhttp_accept_socket()");
+        close(accept_fd);
+        evhttp_free(worker->httpd);
+        event_base_free(worker->base);
+        delete worker;
         return false;
       }
 
-      // These URLs are available. Bind worker method to each of them. 
+      struct evhttp *httpd= worker->httpd;
+      // These URLs are available. Bind worker method to each of them.
       evhttp_set_cb(httpd, "/", process_root_request, NULL);
       // API 0.1
       evhttp_set_cb(httpd, "/0.1/version", process_api01_version_req, NULL);
@@ -571,39 +599,54 @@ public:
       evhttp_set_cb(httpd, "/json", process_json_req, NULL);
       evhttp_set_cb(httpd,"/json/ddl/schema/create", process_json_ddl_schema_create_req, NULL);
       evhttp_set_cb(httpd,"/json/ddl/schema/drop", process_json_ddl_schema_drop_req, NULL);
-        
 
-        event_set(&wakeup_event, wakeup_fd[0], EV_READ | EV_PERSIST, shutdown_event, base);
-        event_base_set(base, &wakeup_event);
-        if (event_add(&wakeup_event, NULL) < 0)
-        {
-          sql_perror("event_add");
-          return false;
-        }
-        drizzled::thread_ptr local_thread;
-        local_thread.reset(new boost::thread((boost::bind(&run, base))));
-        json_threads.push_back(local_thread);
+      event_set(&worker->wakeup_event, wakeup_fd[0], EV_READ | EV_PERSIST,
+                shutdown_event, worker->base);
+      event_base_set(worker->base, &worker->wakeup_event);
+      if (event_add(&worker->wakeup_event, NULL) < 0)
+      {
+        sql_perror("event_add");
+        evhttp_free(worker->httpd);
+        event_base_free(worker->base);
+        delete worker;
+        return false;
+      }
+      workers.push_back(worker);
 
-        if (not json_threads[i])
-          return false;
+      drizzled::thread_ptr local_thread;
+      local_thread.reset(new boost::thread((boost::bind(&run, worker->base))));
+      json_threads.push_back(local_thread);
+
+      if (not json_threads.back())
+        return false;
     }
     return true;
   }
 
   ~JsonServer()
   {
-    // If we can't write(), we will just muddle our way through the shutdown
+    // The byte is never read back out, so wakeup_fd[0] stays readable
+    // and every worker's loop — each watching it with its own event —
+    // breaks. If we can't write(), muddle through the shutdown anyway.
     char buffer[1];
     buffer[0]= 4;
     if ((write(wakeup_fd[1], &buffer, 1)) == 1)
     {
-      for(uint32_t i=0;i<max_threads;i++)
+      for(size_t i=0;i<json_threads.size();i++)
       {
         json_threads[i]->join();
       }
-      evhttp_free(httpd);
-      event_base_free(base);
+      // Only safe once the threads that dispatch these bases have exited.
+      for(size_t i=0;i<workers.size();i++)
+      {
+        evhttp_free(workers[i]->httpd);
+        event_base_free(workers[i]->base);
+        delete workers[i];
+      }
     }
+    close(wakeup_fd[0]);
+    close(wakeup_fd[1]);
+    close(nfd);
   }
 };
 JsonServer *server=NULL;
