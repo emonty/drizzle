@@ -542,9 +542,12 @@ Tasks
   — it reports the delta against baseline; it does not fail the
   build.
 * At the close of every later phase, run ``tools/perf.sh`` by hand
-  and commit the resulting numbers under ``perf/`` tagged with the
-  phase. The time series is then the git history of ``perf/`` — no
-  external dashboard.
+  and commit the numbers as ``perf/<release>.json`` —
+  ``perf/14.04.json`` when Phase 3 lands, ``perf/16.04.json`` for
+  Phase 4, and so on. ``perf/baseline.json`` (the 12.04 result) is
+  never overwritten. The accumulating set of per-release files is the
+  performance time series, all in one place — no external dashboard.
+  Once the revival reaches 26.04 we revisit how to re-baseline.
 
 Done when
 ---------

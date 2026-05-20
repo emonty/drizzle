@@ -10,10 +10,17 @@ Contents
 --------
 
 ``baseline.json``
-   The committed reference numbers. ``tools/perf.sh`` diffs each run
-   against this file. It is regenerated and committed **deliberately**,
-   at the close of each phase — so the git history of this file *is*
-   the performance time series.
+   The Phase 1 reference numbers — Ubuntu 12.04. ``tools/perf.sh``
+   diffs every run against this file, so a per-commit run shows how
+   far the tree has moved from the 12.04 starting point. It is **never
+   overwritten**.
+
+``<release>.json`` (``14.04.json``, ``16.04.json``, …)
+   A phase result, recorded at the close of each LTS phase and never
+   modified afterwards. The growing set of these files is the
+   performance time series — every distro release's numbers in one
+   place. Once the revival reaches 26.04 we revisit how to
+   re-baseline and measure going forward.
 
 ``last-run.json``
    Written by ``tools/perf.sh`` on every run. Not committed.
@@ -47,13 +54,15 @@ the diff accordingly — sub-~3% movement is noise; the harness is for
 catching the larger shifts an LTS bump or a real refactor produces.
 ``size`` is bit-exact and ``peak_heap`` is near-stable.
 
-Updating the baseline
----------------------
+Recording a phase result
+------------------------
 
 At the end of a phase::
 
     podman build --platform linux/amd64 --target=perf .
 
 Take the JSON between the ``PERF METRICS BEGIN/END`` markers in the
-build output, write it to ``baseline.json``, and commit it with a
-message naming the phase.
+build output and commit it as ``perf/<release>.json`` — e.g.
+``perf/14.04.json`` when Phase 3 lands. Do **not** overwrite
+``baseline.json``: each release's file is kept so the whole series
+stays visible together.
