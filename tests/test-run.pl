@@ -312,7 +312,6 @@ sub environment_setup ();
 sub kill_running_servers ();
 sub remove_stale_vardir ();
 sub setup_vardir ();
-sub check_running_as_root();
 sub drizzled_wait_started($);
 sub run_benchmarks ($);
 sub initialize_servers ();
@@ -1843,40 +1842,6 @@ sub setup_vardir() {
 }
 
 
-sub  check_running_as_root () {
-  # Check if running as root
-  # i.e a file can be read regardless what mode we set it to
-  my $test_file= "$opt_vardir/test_running_as_root.txt";
-  dtr_tofile($test_file, "Drizzle");
-  chmod(oct("0000"), $test_file);
-
-  my $result="";
-  if (open(FILE,"<",$test_file))
-  {
-    $result= join('', <FILE>);
-    close FILE;
-  }
-
-  # Some filesystems( for example CIFS) allows reading a file
-  # although mode was set to 0000, but in that case a stat on
-  # the file will not return 0000
-  my $file_mode= (stat($test_file))[2] & 07777;
-
-  $ENV{'DRIZZLE_TEST_ROOT'}= "NO";
-  dtr_verbose("result: $result, file_mode: $file_mode");
-  if ($result eq "Drizzle" && $file_mode == 0)
-  {
-    dtr_warning("running this script as _root_ will cause some " .
-                "tests to be skipped");
-    $ENV{'DRIZZLE_TEST_ROOT'}= "YES";
-  }
-
-  chmod(oct("0755"), $test_file);
-  unlink($test_file);
-
-}
-
-
 sub check_debug_support ($) {
   my $drizzled_variables= shift;
 
@@ -2048,7 +2013,6 @@ sub initialize_servers () {
       }
     }
   }
-  check_running_as_root();
 
   dtr_log_init("$opt_vardir/log/drizzle-test-run.log");
 
