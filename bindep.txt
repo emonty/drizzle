@@ -32,6 +32,14 @@ perl                 [test platform:dpkg]
 curl                 [test platform:dpkg]
 rabbitmq-server      [compile platform:dpkg]
 
+# Performance-harness dependencies (Phase 1.5; tools/perf.sh).
+# valgrind provides callgrind + massif; libdbi-perl carries DBI and
+# DBI::DBD, needed to build the vendored DBD::drizzle and to drive
+# sql-bench; zlib1g-dev links DBD::drizzle against libdrizzle.
+valgrind             [perf platform:dpkg]
+libdbi-perl          [perf platform:dpkg]
+zlib1g-dev           [perf platform:dpkg]
+
 # Runtime dependencies
 libprotobuf7                   [platform:ubuntu-precise]
 libcurl3-gnutls                [platform:ubuntu-precise]

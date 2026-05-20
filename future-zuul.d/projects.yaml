@@ -15,6 +15,7 @@
         - drizzle-distcheck:
             dependencies:
               - drizzle-build-image
+        - drizzle-perf
     gate:
       jobs:
         - drizzle-build-image
@@ -27,6 +28,7 @@
         - drizzle-distcheck:
             dependencies:
               - drizzle-build-image
+        - drizzle-perf
     promote:
       jobs:
         - drizzle-promote-image

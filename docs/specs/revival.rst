@@ -521,14 +521,15 @@ Tasks
   path against the MySQL-protocol port proves unworkable on Precise,
   fall back to a bespoke deterministic SQL workload under ``perf/``;
   record which path was taken in the commit message.
-* ``tools/perf.sh`` — launch drizzled with a minimal plugin config
-  (no ``json_server`` / ``logging_stats`` / ``rabbitmq``; their
-  background threads add jitter) under ``valgrind --tool=callgrind
-  --cache-sim=yes --branch-sim=yes --collect-atstart=no``. Toggle
-  collection on only after startup and data load so server boot is
-  excluded. Parse ``callgrind_annotate`` into a JSON metrics file:
-  total Ir, estimated cycles, and the per-ELF-object split (drizzled
-  vs libc / libstdc++ / libssl / boost).
+* ``tools/perf.sh`` — install Drizzle and the workload driver, launch
+  drizzled under ``valgrind --tool=callgrind --cache-sim=yes
+  --branch-sim=yes``, run the workload, and parse
+  ``callgrind_annotate`` into a JSON metrics file: total instructions
+  (Ir), an estimated-cycles figure, and the L1-miss, LLC-miss and
+  branch-mispredict totals. The whole process is instrumented — boot
+  included — because toggling instrumentation mid-run needs ptrace,
+  which the build container's kernel restricts; server boot is a
+  stable constant, so it does not disturb deltas.
 * Second pass over the same workload under ``valgrind --tool=massif``
   for peak heap.
 * Record ``size(1)`` output for ``drizzled`` and every plugin
@@ -548,8 +549,13 @@ Tasks
 Done when
 ---------
 
-* ``tools/perf.sh`` produces its JSON metrics file deterministically:
-  run-to-run variance under 0.5% on amd64.
+* ``tools/perf.sh`` produces its JSON metrics file end to end and
+  diffs it against the baseline. Instruction count is reproducible to
+  within a low-single-digit percent — drizzled is multithreaded and
+  callgrind sums every thread, so background-thread work sets a
+  ~2% noise floor. The job is for catching larger shifts; treat
+  sub-~3% deltas as noise. (Driving the floor down — per-thread
+  collection, quieter background plugins — is a later refinement.)
 * A Phase 1 baseline is committed under ``perf/``.
 * callgrind and massif are both available in the container via
   ``bindep.txt``.
@@ -566,12 +572,13 @@ Risks
   in single-digit minutes — run a subset of ``sql-bench``, not all of
   it.
 * Across an LTS bump valgrind itself changes, which slightly shifts
-  the instruction count; within a phase it is constant. The
-  per-object split isolates drizzled's own code from platform
-  movement — read the numbers with that in mind.
-* Background threads and non-deterministic SQL (``NOW()``, ``RAND()``,
-  ``UUID()``) destroy reproducibility. The minimal-plugin config and a
-  curated workload are load-bearing, not optional.
+  the instruction count; within a phase it is constant.
+* drizzled is multithreaded and callgrind sums every thread, so
+  background-thread work (InnoDB and friends) gives the instruction
+  count a ~2% run-to-run noise floor. The harness lands with that
+  understood; tightening it is future work.
+* Non-deterministic SQL (``NOW()``, ``RAND()``, ``UUID()``) would
+  destroy reproducibility — the curated workload uses none.
 
 
 Phase 2 — Pandora slim-down to ``m4/drizzle.m4``

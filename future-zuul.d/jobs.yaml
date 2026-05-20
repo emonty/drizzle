@@ -70,6 +70,22 @@
     timeout: 3600
 
 - job:
+    name: drizzle-perf
+    description: |
+      Builds the `perf` Containerfile
+      stage, which runs tools/perf.sh: a fixed sql-bench workload under
+      callgrind and massif. It reports synthetic work counters and
+      diffs them against perf/baseline.json. Non-voting — it surfaces a
+      delta on every commit without blocking the change.
+    parent: opendev-build-container-image
+    voting: false
+    timeout: 5400
+    vars:
+      docker_images:
+        - context: .
+          target: perf
+
+- job:
     name: drizzle-promote-image
     description: |
       Re-tag the buildset-registry image into the permanent registry

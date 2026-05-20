@@ -38,3 +38,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b tes
 WORKDIR /build
 RUN --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
     tools/run-tests.sh
+
+FROM build AS perf
+
+# Phase 1.5 performance harness. valgrind (callgrind/massif) plus the
+# Perl DBI stack used to build DBD::drizzle and drive sql-bench.
+RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b perf) \
+    && rm -rf /var/lib/apt/lists/*
+
+# DBD::drizzle (the libdrizzle Perl DBI driver) is not packaged. Fetch
+# the pinned CPAN release; tools/perf.sh builds it against libdrizzle.
+ADD https://cpan.metacpan.org/authors/id/C/CA/CAPTTOFU/DBD-drizzle-0.304.tar.gz \
+    /opt/DBD-drizzle-0.304.tar.gz
+
+WORKDIR /build
+RUN --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
+    tools/perf.sh

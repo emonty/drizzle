@@ -18,8 +18,10 @@ of it. Read it before opening a PR.
 
 - Branch model: `drizzle-7.2` is the stable / default branch. Active
   revival work happens on `main`.
-- Revival phase: **Phase 0** (tests in container, Zuul CI wiring)
-  See the spec's Phase Map for what's next.
+- Revival phase: Phases 0, 1, and 1.5 are landed (tests in container,
+  dead-platform strip, performance baseline harness). **Phase 2**
+  (Pandora slim-down to `m4/drizzle.m4`) is next. See the spec's Phase
+  Map.
 - Build target: Ubuntu 12.04 (Precise). We will ratchet LTS-by-LTS to
   26.04 as Phases 3–9 land.
 - Base image: pulled from quay.io, never docker.io, so Zuul CI does
@@ -58,14 +60,26 @@ Local mirror of CI:
 ```
 
 Build deps live in `bindep.txt` (consumed by `bindep-rs` in the
-Containerfile). Use `[compile platform:dpkg]` for build-time deps and
-`[test platform:dpkg]` for DTR/test deps.
+Containerfile). Use `[compile platform:dpkg]` for build-time deps,
+`[test platform:dpkg]` for DTR/test deps, and `[perf platform:dpkg]`
+for the performance harness.
+
+Performance baseline (Phase 1.5):
+
+```console
+podman build --platform linux/amd64 --target=perf .
+```
+
+The `perf` stage runs `tools/perf.sh` — a fixed sql-bench workload
+under callgrind and massif, diffed against `perf/baseline.json`. See
+`perf/README.rst`.
 
 ## Repo layout
 
-- `Containerfile` — three named stages: `base` (apt + bindep), `build`
-  (autoreconf/configure/make), `test` (DTR runtime + entrypoint).
-- `bindep.txt` — build/test/runtime package list.
+- `Containerfile` — named stages: `base` (apt + bindep), `build`
+  (autoreconf/configure/make), `test` (DTR runtime + entrypoint),
+  `perf` (Phase 1.5 performance harness).
+- `bindep.txt` — build/test/perf/runtime package list.
 - `configure.ac` + `m4/` — autotools build. **Stay autotools.** Pandora
   macro layer is being slimmed in Phase 2; do not add new Pandora
   files.
@@ -76,8 +90,13 @@ Containerfile). Use `[compile platform:dpkg]` for build-time deps and
 - `tests/` — DTR (`test-run.pl`) harness and suites.
 - `unittests/` — boost.test unit tests. `make unit` runs them.
 - `tools/run-tests.sh` — test stage entrypoint.
+- `tools/perf.sh` — perf stage entrypoint; `tools/perf-report.pl`
+  parses its output.
+- `perf/` — performance baseline (`baseline.json`) and the vendored
+  DBD::drizzle tarball. See `perf/README.rst`.
 - `tools/regress.sh` — local CI mirror.
-- `zuul.d/` — Zuul pipeline + job definitions.
+- `future-zuul.d/` — Zuul pipeline + job definitions (scaffolding;
+  inert until CI is activated).
 - `docs/` — Sphinx documentation. `docs/specs/` for engineering
   specifications.
 
