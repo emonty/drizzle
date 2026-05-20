@@ -22,6 +22,7 @@
 #include "client/client_priv.h"
 #include "client/server_detect.h"
 
+#include <cstdlib>
 #include <iostream>
 
 ServerDetect::ServerDetect(drizzle_con_st *connection) :
@@ -49,8 +50,15 @@ ServerDetect::ServerDetect(drizzle_con_st *connection) :
   }
   else
   {
-    std::cerr << "Server version not detectable. Assuming MySQL." << std::endl;
-    type= SERVER_MYSQL_FOUND;
+    // The vc_release_id probe can only fail on a half-set-up or
+    // unhealthy connection — every Drizzle build exposes that
+    // sys_var. Falling through to "assume MySQL" used to hide
+    // real connection problems inside otherwise-green tests, so
+    // bail loudly instead.
+    std::cerr << "Server version not detectable: "
+              << drizzle_con_error(connection) << std::endl;
+    drizzle_result_free(result);
+    std::exit(EXIT_FAILURE);
   }
 
   drizzle_result_free(result);    
