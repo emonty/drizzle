@@ -22,6 +22,11 @@ of it. Read it before opening a PR.
   See the spec's Phase Map for what's next.
 - Build target: Ubuntu 12.04 (Precise). We will ratchet LTS-by-LTS to
   26.04 as Phases 3–9 land.
+- Base image: pulled from quay.io, never docker.io, so Zuul CI does
+  not hit docker.io's pull rate limits. EOL releases use
+  `quay.io/inaugust/unsafe-old-distro-danger:X.04` (apt sources
+  pre-pointed at old-releases); Ubuntu 22.04 onward switches to
+  `quay.io/opendevmirror/ubuntu`. See the spec's LTS-bump template.
 - Architectures: `linux/amd64` and `linux/arm64`. amd64 is gating now;
   arm64 becomes gating in Phase 9.
 

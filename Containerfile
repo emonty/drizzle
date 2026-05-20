@@ -1,15 +1,9 @@
 # syntax=docker/dockerfile:1.4
 FROM quay.io/inaugust/bindep-rs AS bindep_rs
 
-FROM docker.io/library/ubuntu:12.04 AS base
+FROM quay.io/inaugust/unsafe-old-distro-danger:12.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
-
-# Precise is EOL; archive + security mirrors live at old-releases now
-RUN sed -i \
-        -e 's|archive.ubuntu.com|old-releases.ubuntu.com|g' \
-        -e 's|security.ubuntu.com|old-releases.ubuntu.com|g' \
-        /etc/apt/sources.list
 
 COPY --chmod=0755 --from=bindep_rs /usr/local/bin/bindep-static /usr/local/bin/bindep
 

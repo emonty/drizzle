@@ -549,9 +549,20 @@ afterward.
 Template tasks
 --------------
 
-1. Bump ``Containerfile`` ``FROM ubuntu:X.04``. Verify Canonical
-   publishes both ``linux/amd64`` and ``linux/arm64`` for the image
-   (true for all current LTS images).
+1. Bump the ``FROM`` line of the ``Containerfile`` ``base`` stage.
+   Base images are pulled from quay.io rather than docker.io so that
+   Zuul never trips docker.io's pull rate limits:
+
+   - Through Ubuntu 20.04, use
+     ``quay.io/inaugust/unsafe-old-distro-danger:X.04`` — mirrors of
+     the EOL Ubuntu LTS images, with ``/etc/apt/sources.list``
+     already repointed at ``old-releases.ubuntu.com`` for the
+     releases that need it. This is why the ``base`` stage carries no
+     ``old-releases`` ``sed``.
+   - From Ubuntu 22.04 on, use ``quay.io/opendevmirror/ubuntu:X.04``,
+     the OpenDev infrastructure mirror of the still-supported images.
+
+   Both registries publish ``linux/amd64`` and ``linux/arm64``.
 2. Update ``bindep.txt``: replace ``[platform:ubuntu-PREVIOUS]``
    selector lines with ``[platform:ubuntu-CURRENT]``, adjusting
    versioned package names (boost, protobuf, etc.). One commit.
@@ -653,6 +664,10 @@ Bump ``BOOST_REQUIRE([1.46])`` to ``BOOST_REQUIRE([1.71])`` in
 Phase 7 — Ubuntu 22.04 (OpenSSL 3)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+* Switch the ``Containerfile`` ``base`` image from
+  ``quay.io/inaugust/unsafe-old-distro-danger`` to
+  ``quay.io/opendevmirror/ubuntu:22.04``. 22.04 is still supported, so
+  the OpenDev mirror carries it and its apt sources need no rewrite.
 * Migrate direct ``SHA1_*``/``MD5_*``/``HMAC_*`` calls to ``EVP_*``
   equivalents (``plugin/md5/``, ``plugin/auth_http/``,
   ``drizzled/sha1.cc`` if present).
