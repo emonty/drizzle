@@ -1344,7 +1344,11 @@ bool init_variables_before_daemonizing(int argc, char **argv)
     drizzled_abort << _("Duplicate entry for command line option");
   }
 
-  /* TODO: here is where we should add a process_env_vars */
+  /* TODO(mordred): here is where we should add:
+       po::store(po::parse_environment(full_options, "DRIZZLE_"), vm);
+    but we'll do that once we've up to speed. This will make running
+    in containers more nicer.
+  */
 
   /* We need a notify here so that plugin_init will work properly */
   try
