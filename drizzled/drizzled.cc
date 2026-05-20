@@ -606,8 +606,11 @@ passwd *check_user(const char *user)
     return NULL;
   }
 
-  if (strcmp(user, "root") == 0)
+  if (user == NULL || strcmp(user, "root") == 0)
   {
+    // No --user given, or --user=root: run as root without changing
+    // identity. user==NULL reached here only as the superuser, so a
+    // bare strcmp() would dereference NULL.
     return NULL;                        // Avoid problem with dynamic libraries
   }
 

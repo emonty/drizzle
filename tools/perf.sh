@@ -101,8 +101,7 @@ start_server() {
   local datadir="${WORK}/data"
   rm -rf "${datadir}"; mkdir -p "${datadir}"
 
-  # --user=root is required: run as root with no --user, check_user()
-  # in drizzled dereferences a NULL and segfaults.
+  # Run drizzled as root — the container's only user.
   ${prefix} "${DRIZZLED}" \
       --no-defaults \
       --user=root \
