@@ -54,6 +54,8 @@
 
 #include <drizzled/pthread_globals.h>
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+#include <stdexcept>
 
 
 #include <drizzled/version.h>
@@ -474,25 +476,178 @@ static void run(struct event_base *base)
 }
 
 
-// Per-thread state. Each worker thread needs its own event base,
-// evhttp listener and wakeup event: a struct event can only be
-// registered with a single base at a time.
-struct JsonWorker
+// Owns one file descriptor; closes it on destruction.
+class FileDescriptor
 {
-  struct event_base *base;
-  struct evhttp *httpd;
-  struct event wakeup_event;
+public:
+  explicit FileDescriptor(int fd= -1) : fd_(fd) { }
+  ~FileDescriptor() { reset(); }
+
+  int get() const { return fd_; }
+  bool valid() const { return fd_ != -1; }
+
+  void reset(int fd= -1)
+  {
+    if (fd_ != -1)
+      close(fd_);
+    fd_= fd;
+  }
+
+  // Hand the fd to a caller that will close it itself.
+  int release()
+  {
+    int fd= fd_;
+    fd_= -1;
+    return fd;
+  }
+
+private:
+  int fd_;
+  FileDescriptor(const FileDescriptor&);
+  FileDescriptor& operator=(const FileDescriptor&);
 };
+
+// Self-pipe used to wake the worker event loops at shutdown.
+class WakeupPipe
+{
+public:
+  WakeupPipe()
+  {
+    int fds[2];
+    if (pipe(fds) < 0)
+    {
+      sql_perror("pipe");
+      return;
+    }
+    read_.reset(fds[0]);
+    write_.reset(fds[1]);
+  }
+
+  bool valid() const { return read_.valid(); }
+  int read_fd() const { return read_.get(); }
+
+  bool makeReadNonBlocking()
+  {
+    int flags= fcntl(read_.get(), F_GETFL, 0);
+    if (flags < 0)
+    {
+      sql_perror("fcntl:F_GETFL");
+      return false;
+    }
+    if (fcntl(read_.get(), F_SETFL, flags | O_NONBLOCK) < 0)
+    {
+      sql_perror("fcntl:F_SETFL");
+      return false;
+    }
+    return true;
+  }
+
+  // Wake every loop watching the read end. The byte is never read
+  // back out, so the descriptor stays readable for all of them.
+  void signal()
+  {
+    char buffer= 4;
+    if (write(write_.get(), &buffer, 1) != 1)
+      sql_perror("write");
+  }
+
+private:
+  FileDescriptor read_;
+  FileDescriptor write_;
+};
+
+typedef boost::shared_ptr<struct event_base> event_base_ptr;
+typedef boost::shared_ptr<struct evhttp> evhttp_ptr;
+
+// One worker: its own event base, HTTP listener, wakeup event and
+// dispatch thread. Construction either yields a fully wired worker or
+// throws; the shared_ptr deleters release libevent's objects, in
+// reverse order, with no explicit free.
+class JsonWorker
+{
+public:
+  JsonWorker(int listen_fd, int wakeup_fd)
+  {
+    struct event_base *base= event_init();
+    if (base == NULL)
+      throw std::runtime_error("event_init() failed");
+    base_.reset(base, event_base_free);
+
+    struct evhttp *httpd= evhttp_new(base);
+    if (httpd == NULL)
+      throw std::runtime_error("evhttp_new() failed");
+    httpd_.reset(httpd, evhttp_free);
+
+    // evhttp_free() closes the accept socket, so each worker takes its
+    // own descriptor for the shared listening socket.
+    FileDescriptor accept_fd(dup(listen_fd));
+    if (not accept_fd.valid())
+      throw std::runtime_error("dup() of listening socket failed");
+
+    if (evhttp_accept_socket(httpd, accept_fd.get()) != 0)
+      throw std::runtime_error("evhttp_accept_socket() failed");
+    accept_fd.release();
+
+    registerRoutes(httpd);
+
+    event_set(&wakeup_event_, wakeup_fd, EV_READ | EV_PERSIST,
+              shutdown_event, base);
+    event_base_set(base, &wakeup_event_);
+    if (event_add(&wakeup_event_, NULL) < 0)
+      throw std::runtime_error("event_add() failed");
+  }
+
+  ~JsonWorker()
+  {
+    event_del(&wakeup_event_);
+  }
+
+  void start()
+  {
+    thread_.reset(new boost::thread(boost::bind(&run, base_.get())));
+  }
+
+  void join()
+  {
+    if (thread_)
+      thread_->join();
+  }
+
+private:
+  static void registerRoutes(struct evhttp *httpd)
+  {
+    evhttp_set_cb(httpd, "/", process_root_request, NULL);
+    evhttp_set_cb(httpd, "/0.1/version", process_api01_version_req, NULL);
+    evhttp_set_cb(httpd, "/0.2/version", process_api01_version_req, NULL);
+    evhttp_set_cb(httpd, "/0.3/version", process_version_req, NULL);
+    evhttp_set_cb(httpd, "/0.3/sql", process_sql_req, NULL);
+    evhttp_set_cb(httpd, "/0.3/json", process_json_req, NULL);
+    evhttp_set_cb(httpd, "/latest/version", process_version_req, NULL);
+    evhttp_set_cb(httpd, "/latest/sql", process_sql_req, NULL);
+    evhttp_set_cb(httpd, "/latest/json", process_json_req, NULL);
+    evhttp_set_cb(httpd, "/version", process_version_req, NULL);
+    evhttp_set_cb(httpd, "/sql", process_sql_req, NULL);
+    evhttp_set_cb(httpd, "/json", process_json_req, NULL);
+    evhttp_set_cb(httpd, "/json/ddl/schema/create",
+                  process_json_ddl_schema_create_req, NULL);
+    evhttp_set_cb(httpd, "/json/ddl/schema/drop",
+                  process_json_ddl_schema_drop_req, NULL);
+  }
+
+  // Declared so the deleters run httpd before base.
+  event_base_ptr base_;
+  evhttp_ptr httpd_;
+  struct event wakeup_event_;
+  drizzled::thread_ptr thread_;
+
+  JsonWorker(const JsonWorker&);
+  JsonWorker& operator=(const JsonWorker&);
+};
+
+typedef boost::shared_ptr<JsonWorker> JsonWorkerPtr;
 
 class JsonServer : public drizzled::plugin::Daemon , public HTTPServer
 {
-private:
-  std::vector<drizzled::thread_ptr> json_threads;
-  std::vector<JsonWorker *> workers;
-  in_port_t _port;
-  int wakeup_fd[2];
-  int nfd;
-
 public:
   JsonServer(in_port_t port_arg) :
     drizzled::plugin::Daemon("json_server"),
@@ -501,153 +656,58 @@ public:
 
   bool init()
   {
-    if (pipe(wakeup_fd) < 0)
-    {
-      sql_perror("pipe");
+    if (not wakeup_pipe_.valid())
       return false;
-    }
-
-    int returned_flags;
-    if ((returned_flags= fcntl(wakeup_fd[0], F_GETFL, 0)) < 0)
-    {
-      sql_perror("fcntl:F_GETFL");
+    if (not wakeup_pipe_.makeReadNonBlocking())
       return false;
-    }
 
-    if (fcntl(wakeup_fd[0], F_SETFL, returned_flags | O_NONBLOCK) < 0)
-
-    {
-      sql_perror("F_SETFL");
-      return false;
-    }
-    if ((nfd=BindSocket("0.0.0.0", getPort())) == -1)
+    int fd= BindSocket("0.0.0.0", getPort());
+    if (fd == -1)
     {
       sql_perror("evhttp_bind_socket()");
       return false;
     }
-    
-    // Create Max_thread number of threads.
-    if(not createThreads(max_threads))
-    {
-      return false;
-    }
-    
-    return true;
+    listen_fd_.reset(fd);
+
+    return createThreads(max_threads);
   }
 
   bool createThreads(uint32_t num_threads)
   {
-    for(uint32_t i =0;i<num_threads;i++)
+    for (uint32_t i= 0; i < num_threads; i++)
     {
-      JsonWorker *worker= new JsonWorker;
-
-      if ((worker->base= event_init()) == NULL)
+      try
       {
-        sql_perror("event_init()");
-        delete worker;
+        JsonWorkerPtr worker(new JsonWorker(listen_fd_.get(),
+                                            wakeup_pipe_.read_fd()));
+        worker->start();
+        workers_.push_back(worker);
+      }
+      catch (const std::exception &e)
+      {
+        errmsg_printf(error::ERROR,
+                      _("json_server: could not start worker: %s"),
+                      e.what());
         return false;
       }
-
-      if ((worker->httpd= evhttp_new(worker->base)) == NULL)
-      {
-        sql_perror("evhttp_new()");
-        event_base_free(worker->base);
-        delete worker;
-        return false;
-      }
-
-      // evhttp_free() closes the accept socket, so each worker needs its
-      // own descriptor for the shared listening socket — otherwise the
-      // first worker torn down closes the fd out from under the rest.
-      int accept_fd= dup(nfd);
-      if (accept_fd < 0)
-      {
-        sql_perror("dup");
-        evhttp_free(worker->httpd);
-        event_base_free(worker->base);
-        delete worker;
-        return false;
-      }
-
-      if(evhttp_accept_socket(worker->httpd,accept_fd))
-      {
-        sql_perror("evhttp_accept_socket()");
-        close(accept_fd);
-        evhttp_free(worker->httpd);
-        event_base_free(worker->base);
-        delete worker;
-        return false;
-      }
-
-      struct evhttp *httpd= worker->httpd;
-      // These URLs are available. Bind worker method to each of them.
-      evhttp_set_cb(httpd, "/", process_root_request, NULL);
-      // API 0.1
-      evhttp_set_cb(httpd, "/0.1/version", process_api01_version_req, NULL);
-      // API 0.2
-      evhttp_set_cb(httpd, "/0.2/version", process_api01_version_req, NULL);
-      // API 0.3
-      evhttp_set_cb(httpd, "/0.3/version", process_version_req, NULL);
-      evhttp_set_cb(httpd, "/0.3/sql", process_sql_req, NULL);
-      evhttp_set_cb(httpd, "/0.3/json", process_json_req, NULL);
-      // API "latest" and also available in top level
-      evhttp_set_cb(httpd, "/latest/version", process_version_req, NULL);
-      evhttp_set_cb(httpd, "/latest/sql", process_sql_req, NULL);
-      evhttp_set_cb(httpd, "/latest/json", process_json_req, NULL);
-      evhttp_set_cb(httpd, "/version", process_version_req, NULL);
-      evhttp_set_cb(httpd, "/sql", process_sql_req, NULL);
-      evhttp_set_cb(httpd, "/json", process_json_req, NULL);
-      evhttp_set_cb(httpd,"/json/ddl/schema/create", process_json_ddl_schema_create_req, NULL);
-      evhttp_set_cb(httpd,"/json/ddl/schema/drop", process_json_ddl_schema_drop_req, NULL);
-
-      event_set(&worker->wakeup_event, wakeup_fd[0], EV_READ | EV_PERSIST,
-                shutdown_event, worker->base);
-      event_base_set(worker->base, &worker->wakeup_event);
-      if (event_add(&worker->wakeup_event, NULL) < 0)
-      {
-        sql_perror("event_add");
-        evhttp_free(worker->httpd);
-        event_base_free(worker->base);
-        delete worker;
-        return false;
-      }
-      workers.push_back(worker);
-
-      drizzled::thread_ptr local_thread;
-      local_thread.reset(new boost::thread((boost::bind(&run, worker->base))));
-      json_threads.push_back(local_thread);
-
-      if (not json_threads.back())
-        return false;
     }
     return true;
   }
 
   ~JsonServer()
   {
-    // The byte is never read back out, so wakeup_fd[0] stays readable
-    // and every worker's loop — each watching it with its own event —
-    // breaks. If we can't write(), muddle through the shutdown anyway.
-    char buffer[1];
-    buffer[0]= 4;
-    if ((write(wakeup_fd[1], &buffer, 1)) == 1)
-    {
-      for(size_t i=0;i<json_threads.size();i++)
-      {
-        json_threads[i]->join();
-      }
-      // Only safe once the threads that dispatch these bases have exited.
-      for(size_t i=0;i<workers.size();i++)
-      {
-        evhttp_free(workers[i]->httpd);
-        event_base_free(workers[i]->base);
-        delete workers[i];
-      }
-    }
-    close(wakeup_fd[0]);
-    close(wakeup_fd[1]);
-    close(nfd);
+    // Wake every worker loop, then wait for the threads to exit before
+    // the workers_ destructor tears their event bases down.
+    wakeup_pipe_.signal();
+    for (size_t i= 0; i < workers_.size(); i++)
+      workers_[i]->join();
   }
+
+private:
+  in_port_t _port;
+  WakeupPipe wakeup_pipe_;
+  FileDescriptor listen_fd_;
+  std::vector<JsonWorkerPtr> workers_;
 };
 JsonServer *server=NULL;
 
