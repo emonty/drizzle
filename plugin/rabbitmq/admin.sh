@@ -47,7 +47,12 @@ RABBITMQCTL="/usr/lib/rabbitmq/bin/rabbitmqctl -q -n $RABBITMQ_NODENAME"
 
 startup()
 {
-  /usr/lib/rabbitmq/bin/rabbitmq-server -detached || return 1
+  # rabbitmq-server prints a plugin-activation banner to stdout before
+  # it detaches; capture it to a log so it doesn't leak into the test
+  # run output. shutdown() removes the log dir, so recreate it first.
+  mkdir -p "$RABBITMQ_LOG_BASE"
+  /usr/lib/rabbitmq/bin/rabbitmq-server -detached \
+    >"$RABBITMQ_LOG_BASE/startup.log" 2>&1 || return 1
   # `rabbitmq-server -detached` returns before the broker accepts
   # connections. Poll status until rabbitmqctl can talk to it so
   # downstream tests don't run against a half-started broker.
