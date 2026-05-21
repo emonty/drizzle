@@ -272,20 +272,6 @@ echo "   * Warnings as failure:       $ac_cv_warnings_as_errors"
 echo ""
 echo "---"
 
-case "$host_os" in
-  *freebsd*)
-    echo "*****"
-    echo "*"
-    echo "*  NOTE: You are on FreeBSD. BSD make will not work."
-    echo "*"
-    echo "*   use 'gmake' To build Drizzle"
-    echo "*"
-    echo "*  And ensure that /usr/local/lib/gcc44 is in your LD_LIBRARY_PATH"
-    echo "*" 
-    echo "*****"
-  ;;
-esac
-
 
 dnl libtoolize scans configure.ac  and needs to see some text
 m4_define([LIBTOOLIZE_AC_INIT], [])
