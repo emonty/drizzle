@@ -70,7 +70,8 @@ AS_IF([test "x${pandora_cv_skip_requires}" != "xno"],[
 
   AC_FUNC_STRERROR_R
 
-  DRIZZLE_STACK_DIRECTION
+  dnl The stack grows downward on amd64 and arm64.
+  AC_DEFINE([STACK_DIRECTION],[-1],[Direction of stack growth])
 
   PANDORA_USE_BETTER_MALLOC
   AC_CHECK_FUNC(inet_ntoa, [], [AC_CHECK_LIB(nsl, inet_ntoa)])
