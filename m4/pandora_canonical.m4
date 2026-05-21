@@ -41,7 +41,6 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
   ifdef([m4_undefine],,[define([m4_undefine],   defn([undefine]))])
   m4_define([PCT_ALL_ARGS],[$*])
   m4_define([PCT_REQUIRE_CXX],[no])
-  m4_define([PCT_FORCE_GCC42],[no])
   m4_define([PCT_DONT_SUPPRESS_INCLUDE],[no])
   m4_define([PCT_NO_VC_CHANGELOG],[no])
   m4_define([PCT_VERSION_FROM_VC],[no])
@@ -51,10 +50,6 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
       [require-cxx], [
         m4_undefine([PCT_REQUIRE_CXX])
         m4_define([PCT_REQUIRE_CXX],[yes])
-      ],
-      [force-gcc42], [
-        m4_undefine([PCT_FORCE_GCC42])
-        m4_define([PCT_FORCE_GCC42],[yes])
       ],
       [skip-visibility], [
         m4_undefine([PCT_USE_VISIBILITY])
@@ -89,9 +84,6 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
   PANDORA_EXTENSIONS
 
   AC_REQUIRE([AC_PROG_CC])
-  m4_if(PCT_FORCE_GCC42, [yes], [
-    AC_REQUIRE([PANDORA_ENSURE_GCC_VERSION])
-  ])
   AC_REQUIRE([PANDORA_64BIT])
 
   m4_if(PCT_NO_VC_CHANGELOG,yes,[

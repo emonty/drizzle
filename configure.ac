@@ -36,7 +36,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([drizzled/drizzled.cc])
 
 dnl TODO: drop less-warnings once -Weffc++ and -Wold-style-cast are clean.
-PANDORA_CANONICAL_TARGET([less-warnings, require-cxx, force-gcc42, version-from-vc])
+PANDORA_CANONICAL_TARGET([less-warnings, require-cxx, version-from-vc])
 
 m4_include([m4/libdrizzle_version.m4])
 
