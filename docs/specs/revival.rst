@@ -171,6 +171,10 @@ Phase map
      - Performance baseline harness
      - 12.04
      - M
+   * - 1.6
+     - Constant-fold the hardcoded defines into the source
+     - 12.04
+     - S
    * - 2
      - Pandora slim-down to ``m4/drizzle.m4``
      - 12.04
@@ -582,6 +586,79 @@ Risks
   understood; tightening it is future work.
 * Non-deterministic SQL (``NOW()``, ``RAND()``, ``UUID()``) would
   destroy reproducibility — the curated workload uses none.
+
+
+Phase 1.6 — Constant-fold the hardcoded defines into the source
+===============================================================
+
+Objective
+---------
+
+Phase 1 replaced a raft of autoconf probes with fixed ``AC_DEFINE``
+constants. A ``#define`` whose value can no longer vary makes every
+``#ifdef`` and ``#if`` that tests it dead-reckonable: the preprocessor
+branch is now always-taken or never-taken, and any C/C++ ``if`` written
+against the value is a constant condition.
+
+Phase 1 stopped at the configure layer. Phase 1.6 follows each
+hardcoded symbol into the source and removes the now-pointless
+indirection — delete the dead preprocessor branch, inline the constant,
+and simplify whatever conditional logic the old variability forced. A
+static define that still threads through ``#ifdef``\ s is only
+half-stripped; this phase finishes the job.
+
+This is a source-only phase; it changes no build behavior.
+
+Tasks
+-----
+
+Each symbol below is at least one commit. Audit every consumer
+(``grep`` the symbol across ``drizzled/``, ``client/``, ``plugin/``,
+``libdrizzle*``), then collapse.
+
+* ``STACK_DIRECTION`` (always ``-1``).
+  ``drizzled/check_stack_overrun.cc`` derives a constant from it and
+  branches on that constant; both the define-test and the branch fold
+  away, simplifying the function body.
+* ``HAVE_PTHREAD`` (always ``1``). Delete the ``#ifdef HAVE_PTHREAD``
+  guards; the guarded code is unconditional.
+* ``HAVE_VISIBILITY`` (always ``1``). Collapse the
+  ``#if HAVE_VISIBILITY`` ladders in the ``visibility.h`` headers to
+  their visibility-supported branch.
+* ``TARGET_OS_LINUX`` (always ``1``). Delete the ``#ifdef`` guards in
+  ``drizzled/definitions.h`` and ``libdrizzle/conn.cc``; the Linux
+  branch is unconditional.
+* ``SIZEOF_OFF_T`` / ``SIZEOF_SIZE_T`` / ``SIZEOF_LONG_LONG`` (always
+  ``8``). Fold any ``#if SIZEOF_* == n`` selection to the 8-byte arm.
+* Endianness. ``WORDS_BIGENDIAN`` is now never defined; delete the
+  big-endian arm of every ``#ifdef WORDS_BIGENDIAN`` so only the
+  little-endian path remains. Overlaps the Phase 1 architecture audit.
+* Any ``HAVE_*`` symbol the ``AC_CHECK_FUNCS``/``AC_CHECK_HEADERS``
+  audit chose to ``AC_DEFINE`` unconditionally rather than strip in
+  place — finish the deferred ``#ifdef`` removal here.
+
+When a folded symbol has no consumer left at all, drop the
+``AC_DEFINE`` too: it existed only to be tested.
+
+The same treatment applies to constants hardcoded in later phases
+(``HAVE_LIBZ`` and friends once Phase 2 moves to ``PKG_CHECK_MODULES``);
+fold those as they land rather than accumulating a backlog.
+
+Done when
+---------
+
+* No ``#ifdef``/``#if`` in first-party source tests a symbol whose
+  configure value is now a fixed constant.
+* Phase 0 tests still pass on amd64.
+* ``size(1)`` of ``drizzled`` is unchanged or smaller — this phase only
+  removes dead branches.
+
+Risks
+-----
+
+* A symbol tested in both a live and a dead branch can hide a behavior
+  change if the wrong branch is kept. Cross-check each collapse against
+  the value Phase 1 actually hardcoded.
 
 
 Phase 2 — Pandora slim-down to ``m4/drizzle.m4``
