@@ -178,20 +178,11 @@ AC_TYPE_SIZE_T
 AC_SYS_LARGEFILE
 PANDORA_CLOCK_GETTIME
 
-# off_t is not a builtin type
-AC_CHECK_SIZEOF(off_t, 4)
-AS_IF([test "$ac_cv_sizeof_off_t" -eq 0],[
-       PANDORA_MSG_ERROR("${PACKAGE} needs an off_t type.")
-       ])
-
-AC_CHECK_SIZEOF(size_t)
-AS_IF([test "$ac_cv_sizeof_size_t" -eq 0],[
-       PANDORA_MSG_ERROR("${PACKAGE} needs an size_t type.")
-       ])
-
-AC_DEFINE_UNQUOTED([SIZEOF_SIZE_T],[$ac_cv_sizeof_size_t],[Size of size_t as computed by sizeof()])
-AC_CHECK_SIZEOF(long long)
-AC_DEFINE_UNQUOTED([SIZEOF_LONG_LONG],[$ac_cv_sizeof_long_long],[Size of long long as computed by sizeof()])
+# Both supported architectures are 64-bit LP64: off_t, size_t and
+# long long are all 8 bytes wide.
+AC_DEFINE([SIZEOF_OFF_T],[8],[Size of off_t])
+AC_DEFINE([SIZEOF_SIZE_T],[8],[Size of size_t as computed by sizeof()])
+AC_DEFINE([SIZEOF_LONG_LONG],[8],[Size of long long as computed by sizeof()])
 
 
 
