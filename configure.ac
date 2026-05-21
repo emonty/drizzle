@@ -137,12 +137,11 @@ BOOST_TEST
 
 AM_CONDITIONAL([HAVE_BOOST_TEST],[ test "x$ac_cv_header_boost_test_unit_test_hpp" = "xyes" ])
 
-AX_PTHREAD([ 
-            AM_CFLAGS="${PTHREAD_CFLAGS} ${AM_CFLAGS}"
-            AM_CXXFLAGS="${PTHREAD_CFLAGS} ${AM_CXXFLAGS}"
-            AM_LDFLAGS="${PTHREAD_LIBS} ${AM_LDFLAGS}"
-            LIBS="${PTHREAD_LIBS} ${LIBS}"
-            ], [AC_MSG_ERROR([Drizzle requires pthreads])])
+dnl GCC drives both compilation and linking of threaded code with -pthread.
+AM_CFLAGS="-pthread ${AM_CFLAGS}"
+AM_CXXFLAGS="-pthread ${AM_CXXFLAGS}"
+AM_LDFLAGS="-pthread ${AM_LDFLAGS}"
+AC_DEFINE([HAVE_PTHREAD],[1],[Define if you have POSIX threads libraries and header files.])
 
 # Specialty checks
 
