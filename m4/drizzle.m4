@@ -1,11 +1,9 @@
-#  Copyright (C) 2009 Sun Microsystems, Inc.
-#  This file is free software; Sun Microsystems, Inc.
-#  gives unlimited permission to copy and/or distribute it,
-#  with or without modifications, as long as this notice is preserved.
+dnl  Copyright (C) 2009 Sun Microsystems, Inc.
+dnl This file is free software; Sun Microsystems, Inc.
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
-#
-# Test whether madvise() is declared in C++ code -- it is not on some
-# systems, such as Solaris
+dnl Test whether madvise() is declared in C++ code.
 AC_DEFUN([LOCAL_MADVISE],
     [AC_PREREQ([2.63])dnl
     AC_LANG_PUSH([C++])
@@ -18,7 +16,6 @@ AC_DEFUN([LOCAL_MADVISE],
     AC_LANG_POP([C++])
     ])
 
-# Which version of the canonical setup we're using
 AC_DEFUN([PANDORA_CANONICAL_VERSION],[0.175])
 
 AC_DEFUN([PANDORA_MSG_ERROR],[
@@ -35,99 +32,44 @@ AC_DEFUN([PANDORA_BLOCK_BAD_OPTIONS],[
   ])
 ])
 
-# The standard setup for how we build Pandora projects
-AC_DEFUN([PANDORA_CANONICAL_TARGET],[
-  ifdef([m4_define],,[define([m4_define],   defn([define]))])
-  ifdef([m4_undefine],,[define([m4_undefine],   defn([undefine]))])
-  m4_define([PCT_ALL_ARGS],[$*])
-  m4_define([PCT_REQUIRE_CXX],[no])
-  m4_define([PCT_DONT_SUPPRESS_INCLUDE],[no])
-  m4_define([PCT_NO_VC_CHANGELOG],[no])
-  m4_define([PCT_VERSION_FROM_VC],[no])
-  m4_define([PCT_USE_VISIBILITY],[yes])
-  m4_foreach([pct_arg],[$*],[
-    m4_case(pct_arg,
-      [require-cxx], [
-        m4_undefine([PCT_REQUIRE_CXX])
-        m4_define([PCT_REQUIRE_CXX],[yes])
-      ],
-      [skip-visibility], [
-        m4_undefine([PCT_USE_VISIBILITY])
-        m4_define([PCT_USE_VISIBILITY],[no])
-      ],
-      [dont-suppress-include], [
-        m4_undefine([PCT_DONT_SUPPRESS_INCLUDE])
-        m4_define([PCT_DONT_SUPPRESS_INCLUDE],[yes])
-      ],
-      [no-vc-changelog], [
-        m4_undefine([PCT_NO_VC_CHANGELOG])
-        m4_define([PCT_NO_VC_CHANGELOG],[yes])
-      ],
-      [version-from-vc], [
-        m4_undefine([PCT_VERSION_FROM_VC])
-        m4_define([PCT_VERSION_FROM_VC],[yes])
-    ])
-  ])
-
+dnl The single build-setup macro for Drizzle. It replaces the Pandora
+dnl PANDORA_CANONICAL_TARGET orchestration: the build targets one OS
+dnl (Linux) and one compiler (GCC), so the argument parsing that used to
+dnl select require-cxx / version-from-vc / visibility behaviour is gone
+dnl and those answers are fixed here.
+AC_DEFUN([DRIZZLE_BUILD_SETUP],[
   PANDORA_BLOCK_BAD_OPTIONS
 
-  # We need to prevent canonical target
-  # from injecting -O2 into CFLAGS - but we won't modify anything if we have
-  # set CFLAGS on the command line, since that should take ultimate precedence
+  # Prevent the build setup from injecting -O2 into CFLAGS; optimization
+  # is controlled through AM_CFLAGS. A CFLAGS set on the command line
+  # still takes precedence.
   AS_IF([test "x${ac_cv_env_CFLAGS_set}" = "x"],
         [CFLAGS=""])
   AS_IF([test "x${ac_cv_env_CXXFLAGS_set}" = "x"],
         [CXXFLAGS=""])
-  
+
   m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
   PANDORA_EXTENSIONS
 
   AC_REQUIRE([AC_PROG_CC])
 
-  m4_if(PCT_NO_VC_CHANGELOG,yes,[
-    vc_changelog=no
-  ],[
-    vc_changelog=yes
-  ])
-  m4_if(PCT_VERSION_FROM_VC,yes,[
-    PANDORA_VC_INFO_HEADER
-  ],[
-    PANDORA_TEST_VC_DIR
-
-    changequote(<<, >>)dnl
-    PANDORA_RELEASE_ID=`echo $VERSION | sed 's/[^0-9]//g'`
-    changequote([, ])dnl
-
-    PANDORA_RELEASE_COMMENT=""
-    AC_DEFINE_UNQUOTED([PANDORA_RELEASE_VERSION],["$VERSION"],
-                       [Version of the software])
-
-    AC_SUBST(PANDORA_RELEASE_COMMENT)
-    AC_SUBST(PANDORA_RELEASE_VERSION)
-    AC_SUBST(PANDORA_RELEASE_ID)
-  ])
+  vc_changelog=yes
+  PANDORA_VC_INFO_HEADER
   PANDORA_VERSION
 
-# Once we can use a modern autoconf, we can use this
-# AC_PROG_CC_C99
   AC_REQUIRE([AC_PROG_CXX])
   PANDORA_EXTENSIONS
   AM_PROG_CC_C_O
 
   PANDORA_PLATFORM
 
-# autoconf doesn't automatically provide a fail-if-no-C++ macro
-# so we check c++98 features and fail if we don't have them, mainly
-# for that reason
   PANDORA_CHECK_CXX_STANDARD
-  m4_if(PCT_REQUIRE_CXX, [yes], [
-    AS_IF([test "$ac_cv_cxx_stdcxx_98" = "no"],[
-      PANDORA_MSG_ERROR([No working C++ Compiler has been found. ${PACKAGE} requires a C++ compiler that can handle C++98])
-    ])
+  AS_IF([test "$ac_cv_cxx_stdcxx_98" = "no"],[
+    PANDORA_MSG_ERROR([No working C++ Compiler has been found. ${PACKAGE} requires a C++ compiler that can handle C++98])
   ])
   AX_CXX_CINTTYPES
-  
+
   PANDORA_CHECK_C_VERSION
   PANDORA_CHECK_CXX_VERSION
 
@@ -160,7 +102,7 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
 
   PANDORA_HEADER_ASSERT
 
-  PANDORA_WARNINGS(PCT_ALL_ARGS)
+  PANDORA_WARNINGS
 
   PANDORA_ENABLE_DTRACE
 
@@ -168,11 +110,7 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
 
   AX_PROG_SPHINX_BUILD
 
-  m4_if(m4_substr(m4_esyscmd(test -d src && echo 0),0,1),0,[
-    AM_CPPFLAGS="-I\$(top_srcdir)/src -I\$(top_builddir)/src ${AM_CPPFLAGS}"
-  ],[
-    AM_CPPFLAGS="-I\$(top_srcdir) -I\$(top_builddir) ${AM_CPPFLAGS}"
-  ])
+  AM_CPPFLAGS="-I\$(top_srcdir) -I\$(top_builddir) ${AM_CPPFLAGS}"
 
   PANDORA_USE_PIPE
 
@@ -180,8 +118,7 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-/* _SYS_FEATURE_TESTS_H is Solaris, _FEATURES_H is GCC */
-#if defined( _SYS_FEATURE_TESTS_H) || defined(_FEATURES_H)
+#if defined(_FEATURES_H)
 #error "You should include config.h as your first include file"
 #endif
 
@@ -189,10 +126,6 @@ AC_DEFUN([PANDORA_CANONICAL_TARGET],[
 ])
   mkdir -p config
   cat > config/top.h.stamp <<EOF_CONFIG_TOP
-
-#if defined(i386) && !defined(__i386__)
-#define __i386__
-#endif
 
 #if defined(_FILE_OFFSET_BITS)
 # undef _FILE_OFFSET_BITS
