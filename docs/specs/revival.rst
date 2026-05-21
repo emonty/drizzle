@@ -171,14 +171,14 @@ Phase map
      - Performance baseline harness
      - 12.04
      - M
-   * - 1.6
-     - Constant-fold the hardcoded defines into the source
-     - 12.04
-     - S
    * - 2
      - Pandora slim-down to ``m4/drizzle.m4``
      - 12.04
      - M
+   * - 2.5
+     - Constant-fold the hardcoded defines into the source
+     - 12.04
+     - S
    * - 3
      - LTS bump 14.04
      - 14.04
@@ -462,25 +462,27 @@ one commit; many are multiple commits.
 Done when
 ---------
 
-.. code-block:: console
-
-   grep -ri 'solaris\|freebsd\|mingw32\|SUNCC\|INTELCC\|TARGET_OSX\|cloog' m4/ configure.ac
-
-returns empty.
+``configure.ac`` carries no dead-platform or dead-architecture
+conditional:
 
 .. code-block:: console
 
-   grep -ri 'i386\|i686\|powerpc\|ppc64\|sparc\|mips\|s390\|ia64\|alpha\|BIG_ENDIAN' m4/ configure.ac
+   grep -nE 'solaris|freebsd|mingw32|darwin|SUNCC|INTELCC|TARGET_OSX|cloog' configure.ac
+   grep -nE 'i386|i686|powerpc|ppc64|sparc|mips|s390|ia64|BIG_ENDIAN' configure.ac
 
-returns only the curated amd64/arm64 branches we intentionally kept.
+Both return empty.
 
-.. code-block:: console
+The grep is scoped to ``configure.ac`` deliberately. The first-party
+``m4/pandora_*.m4`` macros still carry Solaris/Intel/PowerPC arms at
+the close of Phase 1; they are removed as each file is folded into
+``m4/drizzle.m4`` in Phase 2 — writing the macro afresh drops the dead
+arms without a throwaway in-place edit first. The vendored m4 files
+(``boost.m4``, the gettext set, ``ax_pthread.m4``) keep their
+portability code: they are upstream and regenerated, not hand-edited.
+The ≥40% ``wc -l m4/*.m4`` reduction is consequently a Phase 2
+outcome, measured there.
 
-   wc -l m4/*.m4
-
-shows a ≥40% drop in total line count vs the Phase 0 baseline.
-
-* Phase 0 tests still pass on amd64
+* Phase 0 tests still pass on amd64.
 * ``podman build --platform linux/arm64 --target=build`` still gets
   through ``./configure`` cleanly. Test failures on arm64 are recorded
   in :ref:`spec-revival-multiarch-hazards` but not gating until
@@ -588,24 +590,92 @@ Risks
   destroy reproducibility — the curated workload uses none.
 
 
-Phase 1.6 — Constant-fold the hardcoded defines into the source
+Phase 2 — Pandora slim-down to ``m4/drizzle.m4``
+================================================
+
+Objective
+---------
+
+Excise the Pandora macro layer as a *layer* while preserving every
+piece of behavior it provides. End state: a single ``m4/drizzle.m4``
+(~400 lines) plus a small number of upstream third-party m4 files
+(``boost.m4``, the kept-deliberately ``pandora_plugins.m4``,
+gettext machinery).
+
+Tasks
+-----
+
+* Create ``m4/drizzle.m4`` consolidating the live Pandora
+  responsibilities into a single ``DRIZZLE_BUILD_SETUP`` macro.
+  Inside the macro, hardcode the Phase 1 answers: ``-pthread``, the
+  visibility settings, the sizeof defines, ``STACK_DIRECTION``,
+  ``TARGET_OS_LINUX``, and the GCC warning flags. (Compiler hardening
+  is deliberately *not* among these — see :ref:`future work
+  <spec-revival-future-work>`.)
+* As each ``pandora_*.m4`` macro is folded into ``drizzle.m4``, write
+  it afresh for GCC on amd64/arm64 — its dead Solaris/Intel/PowerPC
+  arms simply do not get carried over. This absorbs the in-place
+  dead-arm strip deferred from Phase 1: there is no throwaway
+  intermediate edit, the arms vanish when the macro is rewritten.
+* Rewrite ``configure.ac:39`` to call ``DRIZZLE_BUILD_SETUP`` in place
+  of ``PANDORA_CANONICAL_TARGET``.
+* Replace each library-presence macro with straight
+  ``PKG_CHECK_MODULES``. ``libprotobuf``, ``libz``, ``libssl``,
+  ``libpcre``, ``libreadline``, ``libdl`` all have stable
+  pkg-config files on modern Ubuntu. Each replacement is its own
+  commit.
+* Strip the dead ``AC_CHECK_SIZEOF`` probes from
+  ``plugin/innobase/plugin.ac`` (the one ``plugin.ac`` carrying
+  dead-platform cruft); hardcode the LP64 sizes it measured.
+* Keep ``m4/pandora_plugins.m4`` and ``config/pandora-plugin``
+  (load-bearing plugin enumeration).
+* Delete the now-unused ``m4/pandora_*.m4`` files (one or more
+  commits).
+
+Done when
+---------
+
+* ``ls m4/pandora_*.m4`` returns ≤2 files (``pandora_plugins.m4``,
+  possibly a thin ``pandora_canonical.m4`` compatibility shim if any
+  external scripts reference it).
+* ``configure.ac`` is under 250 lines.
+* ``grep -rnE 'solaris|freebsd|SUNCC|INTELCC|i386|powerpc|sparc'``
+  over the first-party m4 (everything but ``boost.m4`` and the
+  vendored gettext set) returns empty.
+* ``wc -l m4/*.m4`` shows a ≥40% drop versus the Phase 0 baseline —
+  the reduction the Phase 1 strip set up, realized here.
+* Phase 0 tests still pass on amd64.
+* ``./configure`` succeeds on arm64.
+
+Risks
+-----
+
+* ``pandora_plugins.m4`` is the most opaque file in the layer — it
+  generates ``am__plugin_LIST`` and the load-list. Treat it as
+  load-bearing infrastructure. Do not rewrite; verify it still works
+  after surrounding deletions.
+
+
+Phase 2.5 — Constant-fold the hardcoded defines into the source
 ===============================================================
 
 Objective
 ---------
 
 Phase 1 replaced a raft of autoconf probes with fixed ``AC_DEFINE``
-constants. A ``#define`` whose value can no longer vary makes every
-``#ifdef`` and ``#if`` that tests it dead-reckonable: the preprocessor
-branch is now always-taken or never-taken, and any C/C++ ``if`` written
-against the value is a constant condition.
+constants, and Phase 2 adds more as it moves to ``PKG_CHECK_MODULES``.
+A ``#define`` whose value can no longer vary makes every ``#ifdef``
+and ``#if`` that tests it dead-reckonable: the preprocessor branch is
+now always-taken or never-taken, and any C/C++ ``if`` written against
+the value is a constant condition.
 
-Phase 1 stopped at the configure layer. Phase 1.6 follows each
+Phases 1 and 2 stop at the configure layer. Phase 2.5 follows each
 hardcoded symbol into the source and removes the now-pointless
-indirection — delete the dead preprocessor branch, inline the constant,
-and simplify whatever conditional logic the old variability forced. A
-static define that still threads through ``#ifdef``\ s is only
-half-stripped; this phase finishes the job.
+indirection — delete the dead preprocessor branch, inline the
+constant, and simplify whatever conditional logic the old variability
+forced. A static define still threaded through ``#ifdef``\ s is only
+half-stripped; this phase finishes the job, in one pass over both
+phases' constants.
 
 This is a source-only phase; it changes no build behavior.
 
@@ -632,17 +702,14 @@ Each symbol below is at least one commit. Audit every consumer
   ``8``). Fold any ``#if SIZEOF_* == n`` selection to the 8-byte arm.
 * Endianness. ``WORDS_BIGENDIAN`` is now never defined; delete the
   big-endian arm of every ``#ifdef WORDS_BIGENDIAN`` so only the
-  little-endian path remains. Overlaps the Phase 1 architecture audit.
-* Any ``HAVE_*`` symbol the ``AC_CHECK_FUNCS``/``AC_CHECK_HEADERS``
-  audit chose to ``AC_DEFINE`` unconditionally rather than strip in
-  place — finish the deferred ``#ifdef`` removal here.
+  little-endian path remains.
+* The ``HAVE_LIB*`` symbols Phase 2's ``PKG_CHECK_MODULES`` switch
+  left as foregone conclusions, and any ``HAVE_*`` the
+  ``AC_CHECK_FUNCS``/``AC_CHECK_HEADERS`` audit chose to ``AC_DEFINE``
+  unconditionally rather than strip in place.
 
 When a folded symbol has no consumer left at all, drop the
 ``AC_DEFINE`` too: it existed only to be tested.
-
-The same treatment applies to constants hardcoded in later phases
-(``HAVE_LIBZ`` and friends once Phase 2 moves to ``PKG_CHECK_MODULES``);
-fold those as they land rather than accumulating a backlog.
 
 Done when
 ---------
@@ -650,66 +717,15 @@ Done when
 * No ``#ifdef``/``#if`` in first-party source tests a symbol whose
   configure value is now a fixed constant.
 * Phase 0 tests still pass on amd64.
-* ``size(1)`` of ``drizzled`` is unchanged or smaller — this phase only
-  removes dead branches.
+* ``size(1)`` of ``drizzled`` is unchanged or smaller — this phase
+  only removes dead branches.
 
 Risks
 -----
 
 * A symbol tested in both a live and a dead branch can hide a behavior
   change if the wrong branch is kept. Cross-check each collapse against
-  the value Phase 1 actually hardcoded.
-
-
-Phase 2 — Pandora slim-down to ``m4/drizzle.m4``
-================================================
-
-Objective
----------
-
-Excise the Pandora macro layer as a *layer* while preserving every
-piece of behavior it provides. End state: a single ``m4/drizzle.m4``
-(~400 lines) plus a small number of upstream third-party m4 files
-(``boost.m4``, the kept-deliberately ``pandora_plugins.m4``,
-gettext machinery).
-
-Tasks
------
-
-* Create ``m4/drizzle.m4`` consolidating the live Pandora
-  responsibilities into a single ``DRIZZLE_BUILD_SETUP`` macro.
-  Inside the macro, hardcode the Phase 1 answers: ``-pthread``,
-  ``-fvisibility=hidden``, the sizeof defines, ``_FILE_OFFSET_BITS=64``,
-  the GCC warning flags, the hardening flags.
-* Rewrite ``configure.ac:39`` to call ``DRIZZLE_BUILD_SETUP`` in place
-  of ``PANDORA_CANONICAL_TARGET``.
-* Replace each library-presence macro with straight
-  ``PKG_CHECK_MODULES``. ``libprotobuf``, ``libz``, ``libssl``,
-  ``libpcre``, ``libreadline``, ``libdl`` all have stable
-  pkg-config files on modern Ubuntu. Each replacement is its own
-  commit.
-* Keep ``m4/pandora_plugins.m4`` and ``config/pandora-plugin``
-  (load-bearing plugin enumeration).
-* Delete the now-unused ``m4/pandora_*.m4`` files (one or more
-  commits).
-
-Done when
----------
-
-* ``ls m4/pandora_*.m4`` returns ≤2 files (``pandora_plugins.m4``,
-  possibly a thin ``pandora_canonical.m4`` compatibility shim if any
-  external scripts reference it).
-* ``configure.ac`` is under 250 lines.
-* Phase 0 tests still pass on amd64.
-* ``./configure`` succeeds on arm64.
-
-Risks
------
-
-* ``pandora_plugins.m4`` is the most opaque file in the layer — it
-  generates ``am__plugin_LIST`` and the load-list. Treat it as
-  load-bearing infrastructure. Do not rewrite; verify it still works
-  after surrounding deletions.
+  the value the configure layer actually hardcoded.
 
 
 .. _spec-revival-lts-template:
