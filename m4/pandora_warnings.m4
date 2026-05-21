@@ -96,21 +96,6 @@ AC_DEFUN([PANDORA_WARNINGS],[
     NO_STRICT_ALIASING="-fno-strict-aliasing -Wno-strict-aliasing"
     NO_SHADOW="-Wno-shadow"
 
-    AS_IF([test "$INTELCC" = "yes"],[
-      m4_if(PW_LESS_WARNINGS,[no],[
-        BASE_WARNINGS="-w1 -Werror -Wcheck -Wp64 -Woverloaded-virtual -Wcast-qual -diag-disable 188"
-      ],[
-        dnl 2203 is like old-style-cast
-        dnl 1684 is like strict-aliasing
-        dnl 188 is about using enums as bitfields
-        dnl 1683 is a warning about _EXPLICIT_ casting, which we want
-        BASE_WARNINGS="-w1 -Werror -Wcheck -Wp64 -Woverloaded-virtual -Wcast-qual -diag-disable 188,981,2259,2203,1683,1684"
-      ])
-      CC_WARNINGS="${BASE_WARNINGS}"
-      CXX_WARNINGS="${BASE_WARNINGS}"
-      PROTOSKIP_WARNINGS="-diag-disable 188,981,967,2259,1683,1684,2203"
-      
-    ],[
       m4_if(PW_LESS_WARNINGS,[no],[
         BASE_WARNINGS_FULL="${W_CONVERSION} -Wstrict-aliasing -Wswitch-enum "
         CC_WARNINGS_FULL="-Wswitch-default -Wswitch-enum -Wwrite-strings"
@@ -361,7 +346,6 @@ inline const EnumDescriptor* GetEnumDescriptor<Table_TableOptions_RowType>() {
       AS_IF([test "$host_vendor" = "apple"],[
         BOOSTSKIP_WARNINGS="-Wno-uninitialized"
       ])
-    ])
   ])
 
   AS_IF([test "$SUNCC" = "yes"],[
