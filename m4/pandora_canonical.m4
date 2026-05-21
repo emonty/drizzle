@@ -236,23 +236,12 @@ EOF_CONFIG_TOP
 typedef unsigned long int ulong;
 #endif
 
-/* To hide the platform differences between MS Windows and Unix, I am
- * going to use the Microsoft way and #define the Microsoft-specific
- * functions to the unix way. Microsoft use a separate subsystem for sockets,
- * but Unix normally just use a filedescriptor on the same functions. It is
- * a lot easier to map back to the unix way with macros than going the other
- * way without side effect ;-)
- */
-#ifdef TARGET_OS_WINDOWS
-#define random() rand()
-#define srandom(a) srand(a)
-#define get_socket_errno() WSAGetLastError()
-#else
+/* Drizzle's networking code speaks the Win32 socket vocabulary; on a
+ * POSIX target these map onto plain file-descriptor semantics. */
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 #define closesocket(a) close(a)
 #define get_socket_errno() errno
-#endif
 
 #if defined(__cplusplus)
 # if defined(DEBUG)
