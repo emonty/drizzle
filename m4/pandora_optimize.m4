@@ -6,7 +6,7 @@ dnl with or without modifications, as long as this notice is preserved.
 AC_DEFUN([PANDORA_OPTIMIZE],[
   dnl Build optimized or debug version ?
   dnl First check for gcc and g++
-  AS_IF([test "$GCC" = "yes" -a "$INTELCC" = "no"],[
+  AS_IF([test "$GCC" = "yes"],[
 
     dnl The following is required for portable results of floating point 
     dnl calculations on PowerPC. The same must also be done for IA-64, but 
