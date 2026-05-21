@@ -45,7 +45,15 @@ LT_INIT
 LT_LANG([C++])
 
 
-gl_VISIBILITY
+dnl GCC supports symbol visibility; gl_VISIBILITY used to probe for it.
+dnl CFLAG_VISIBILITY is applied per-target (the libdrizzle libraries);
+dnl see the spec's future-work note on a build-wide visibility pass.
+HAVE_VISIBILITY=1
+CFLAG_VISIBILITY="-fvisibility=hidden"
+AC_SUBST([CFLAG_VISIBILITY])
+AC_SUBST([HAVE_VISIBILITY])
+AC_DEFINE([HAVE_VISIBILITY],[1],
+  [Define if the compiler supports __attribute__((visibility(...)))])
 
 dnl Set the default datadir location to /usr/local/var/drizzle. If a
 dnl localstatedir is explicitly given, just use that.

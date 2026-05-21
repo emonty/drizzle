@@ -993,6 +993,13 @@ them up:
   test.
 * **kewpie revival** (Python 3 port) if/when interest arises. Skipped
   from the test-target list in Phase 0.
+* **Symbol visibility.** The build compiles ``drizzled`` and the
+  plugins without ``-fvisibility=hidden``; only the ``libdrizzle``
+  targets pass ``CFLAG_VISIBILITY`` per-target. Switching the whole
+  build to hidden-by-default visibility is worthwhile — smaller
+  exported symbol tables, faster loads — but it needs a dedicated
+  pass to annotate every genuinely-public symbol first, so it is not
+  folded into the Pandora slim-down.
 * **Compiler hardening flags.** Phase 1 deleted the probe-based
   ``AX_HARDEN_COMPILER_FLAGS`` machinery (it was already commented out
   in ``configure.ac``), so the build currently applies no hardening.
