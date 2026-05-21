@@ -159,9 +159,6 @@ AC_PATH_PROG([PERL],[perl],[AC_MSG_ERROR([perl is required to run the test suite
 # Checks for libraries.
 LT_LIB_M
 
-# Checks for header files.
-AC_CHECK_HEADERS([sys/socket.h])
-
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE

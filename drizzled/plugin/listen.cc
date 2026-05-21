@@ -26,9 +26,7 @@
 #include <drizzled/plugin/listen.h>
 #include <drizzled/plugin/null_client.h>
 
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 
 #include <poll.h>
 
