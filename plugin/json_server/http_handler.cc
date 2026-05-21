@@ -108,8 +108,13 @@ namespace json_server
         _json_in["query"]["_id"] = (Json::Value::UInt) atol(_id);
       }
     }
-    // Check parameters from URI string
-    if((_json_in["query"]["_id"].isNull() || _json_in["query"]["_id"].asString()=="")  && _req->type==EVHTTP_REQ_DELETE && !allow_drop_table)
+    // Check parameters from URI string. asString() is only safe on a
+    // string value in jsoncpp 0.6 — an _id of any other type is, by
+    // definition, present and non-empty.
+    const Json::Value &request_id= _json_in["query"]["_id"];
+    bool id_missing= request_id.isNull() ||
+                     (request_id.isString() && request_id.asString().empty());
+    if(id_missing && _req->type==EVHTTP_REQ_DELETE && !allow_drop_table)
     {
       generateDropTableError();
       return true;

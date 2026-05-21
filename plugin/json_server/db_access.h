@@ -23,7 +23,7 @@
  */
 
 #include <config.h>
-#include <plugin/json_server/json/json.h>
+#include <json/json.h>
 #include <plugin/json_server/sql_generator.h>
 #include <plugin/json_server/sql_executor.h>
 #include <plugin/json_server/sql_to_json_generator.h>

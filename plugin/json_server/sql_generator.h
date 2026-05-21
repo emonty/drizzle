@@ -26,7 +26,7 @@
 #include <cstring>
 #include <cstdio>
 #include <boost/program_options.hpp>
-#include <plugin/json_server/json/json.h>
+#include <json/json.h>
 #include <plugin/json_server/http_handler.h>
 
 using namespace std;

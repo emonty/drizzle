@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#include <plugin/json_server/json/json.h>
+#include <json/json.h>
 #include <evhttp.h>
 #include <event.h>
 #include <drizzled/session.h>

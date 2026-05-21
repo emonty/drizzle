@@ -31,6 +31,25 @@ namespace drizzle_plugin
 {
 namespace json_server
 {
+namespace
+{
+  // jsoncpp 0.6's Value::asString() throws on a non-string scalar, so
+  // render numbers and booleans into their SQL literal form here.
+  std::string jsonScalarToString(const Json::Value &value)
+  {
+    if (value.isString())
+      return value.asString();
+    if (value.isNull())
+      return "";
+    Json::FastWriter writer;
+    std::string rendered= writer.write(value);   // FastWriter appends '\n'
+    std::string::size_type newline= rendered.find('\n');
+    if (newline != std::string::npos)
+      rendered.erase(newline);
+    return rendered;
+  }
+}
+
   SQLGenerator::SQLGenerator(const Json::Value json_in ,const char* schema ,const char* table)
   {
     _json_in=json_in["query"];
@@ -59,7 +78,7 @@ namespace json_server
     if ( _json_in["_id"].asBool() )
     {
   	  _sql.append(" WHERE _id = ");
-	    _sql.append(_json_in["_id"].asString());
+	    _sql.append(jsonScalarToString(_json_in["_id"]));
     }
     _sql.append(";");
   
@@ -123,7 +142,7 @@ namespace json_server
         case Json::uintValue:
         case Json::realValue:
         case Json::booleanValue:
-          _sql.append(_json_in[key].asString());
+          _sql.append(jsonScalarToString(_json_in[key]));
           break;
         case Json::stringValue:
           _sql.append("'\"");
@@ -154,7 +173,7 @@ namespace json_server
       _sql.append(_table);
       _sql.append("`");
       _sql.append(" WHERE _id = ");
-      _sql.append(_json_in["_id"].asString());
+      _sql.append(jsonScalarToString(_json_in["_id"]));
       _sql.append(";");
     }
     else

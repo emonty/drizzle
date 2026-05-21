@@ -59,7 +59,7 @@
 
 
 #include <drizzled/version.h>
-#include <plugin/json_server/json/json.h>
+#include <json/json.h>
 #include <plugin/json_server/db_access.h>
 #include <plugin/json_server/http_handler.h>
 #include <plugin/json_server/http_server.h>
@@ -305,7 +305,7 @@ extern "C" void process_sql_req(struct evhttp_request *req, void* )
     {
       if (not result_set.isNull(x))
       {
-        json_row[x]= result_set.getString(x);
+        json_row[static_cast<Json::Value::ArrayIndex>(x)]= result_set.getString(x);
       }
     }
     root["result_set"].append(json_row);

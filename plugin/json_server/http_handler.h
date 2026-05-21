@@ -25,7 +25,7 @@
 
 #include <config.h>
 #include <evhttp.h>
-#include <plugin/json_server/json/json.h>
+#include <json/json.h>
 #include <drizzled/plugin.h>
 
 using namespace std;

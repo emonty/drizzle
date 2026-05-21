@@ -22,7 +22,7 @@
  */
 
 #include <config.h>
-#include <plugin/json_server/json/json.h>
+#include <json/json.h>
 #include <plugin/json_server/sql_executor.h>
 #include <plugin/json_server/http_handler.h>
 #include <string>
