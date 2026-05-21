@@ -194,3 +194,78 @@ inline To down_cast(From* f) {                   // so we only accept pointers
   AC_SUBST([AM_LDFLAGS])
 
 ])
+
+AC_DEFUN([PANDORA_EXTENSIONS],[
+  m4_ifdef([AC_USE_SYSTEM_EXTENSIONS],
+    [AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])],
+    [AC_REQUIRE([AC_GNU_SOURCE])])
+])
+
+AC_DEFUN([gl_USE_SYSTEM_EXTENSIONS],[
+  AC_REQUIRE([PANDORA_EXTENSIONS])
+])
+
+dnl Use -pipe to keep the compiler from spilling temp files to disk.
+AC_DEFUN([PANDORA_USE_PIPE],[
+  AS_IF([test "$GCC" = "yes"],[
+    AC_CACHE_CHECK([for working -pipe], [pandora_cv_use_pipe], [
+      AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+#include <stdio.h>
+
+int main(int argc, char** argv)
+{
+  (void) argc; (void) argv;
+  return 0;
+}
+      ]])],
+      [pandora_cv_use_pipe=yes],
+      [pandora_cv_use_pipe=no])
+    ])
+    AS_IF([test "$pandora_cv_use_pipe" = "yes"],[
+      AM_CFLAGS="-pipe ${AM_CFLAGS}"
+      AM_CXXFLAGS="-pipe ${AM_CXXFLAGS}"
+    ])
+  ])
+])
+
+dnl Check whether to enable assertions.
+AC_DEFUN([PANDORA_HEADER_ASSERT],[
+  AC_CHECK_HEADERS(assert.h)
+  AC_MSG_CHECKING([whether to enable assertions])
+  AC_ARG_ENABLE([assert],
+    [AS_HELP_STRING([--disable-assert],
+       [Turn off assertions])],
+    [ac_cv_assert="no"],
+    [ac_cv_assert="yes"])
+  AC_MSG_RESULT([$ac_cv_assert])
+
+  AS_IF([test "$ac_cv_assert" = "no"],
+    [AC_DEFINE(NDEBUG, 1, [Define to 1 if assertions should be disabled.])])
+])
+
+dnl Check for GCC atomic builtins.
+AC_DEFUN([PANDORA_HAVE_GCC_ATOMICS],[
+  AC_CACHE_CHECK(
+    [whether the compiler provides atomic builtins],
+    [ac_cv_gcc_atomic_builtins],
+    [AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM([],[[
+        int foo= -10; int bar= 10;
+        if (!__sync_fetch_and_add(&foo, bar) || foo)
+          return -1;
+        bar= __sync_lock_test_and_set(&foo, bar);
+        if (bar || foo != 10)
+          return -1;
+        bar= __sync_val_compare_and_swap(&bar, foo, 15);
+        if (bar)
+          return -1;
+        return 0;
+        ]])],
+      [ac_cv_gcc_atomic_builtins=yes],
+      [ac_cv_gcc_atomic_builtins=no])])
+
+  AS_IF([test "x$ac_cv_gcc_atomic_builtins" = "xyes"],[
+    AC_DEFINE(HAVE_GCC_ATOMIC_BUILTINS, 1,
+              [Define to 1 if compiler provides atomic builtins.])
+  ])
+])
