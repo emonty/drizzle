@@ -166,7 +166,6 @@ LT_LIB_M
 AC_CHECK_HEADERS([sys/socket.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_C_BIGENDIAN
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
