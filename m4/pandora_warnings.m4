@@ -348,51 +348,6 @@ inline const EnumDescriptor* GetEnumDescriptor<Table_TableOptions_RowType>() {
       ])
   ])
 
-  AS_IF([test "$SUNCC" = "yes"],[
-
-    AS_IF([test "$ac_profiling" = "yes"],
-          [CC_PROFILING="-xinstrument=datarace"])
-
-    AS_IF([test "$ac_cv_warnings_as_errors" = "yes"],
-          [W_FAIL="-errwarn=%all"])
-
-    AC_CACHE_CHECK([whether E_PASTE_RESULT_NOT_TOKEN is usable],
-      [ac_cv_paste_result],
-      [
-        save_CFLAGS="${CFLAGS}"
-        CFLAGS="-errwarn=%all -erroff=E_PASTE_RESULT_NOT_TOKEN ${CFLAGS}"
-        AC_COMPILE_IFELSE(
-          [AC_LANG_PROGRAM([
-            AC_INCLUDES_DEFAULT
-          ],[
-            int x= 0;])],
-          [ac_cv_paste_result=yes],
-          [ac_cv_paste_result=no])
-        CFLAGS="${save_CFLAGS}"
-      ])
-    AS_IF([test $ac_cv_paste_result = yes],
-      [W_PASTE_RESULT=",E_PASTE_RESULT_NOT_TOKEN"])
-
-
-    m4_if(PW_LESS_WARNINGS, [no],[
-      CC_WARNINGS_FULL="-erroff=E_STATEMENT_NOT_REACHED,E_INTEGER_OVERFLOW_DETECTED${W_PASTE_RESULT}"
-      CXX_WARNINGS_FULL="-erroff=inllargeuse"
-    ],[
-      CC_WARNINGS_FULL="-erroff=E_ATTRIBUTE_NOT_VAR,E_STATEMENT_NOT_REACHED"
-      CXX_WARNINGS_FULL="-erroff=attrskipunsup,doubunder,reftotemp,inllargeuse,truncwarn1,signextwarn,inllargeint"
-    ])
-
-    CC_WARNINGS="-v -errtags=yes ${W_FAIL} ${CC_WARNINGS_FULL}"
-    CXX_WARNINGS="+w +w2 -xwe -xport64 -errtags=yes ${CXX_WARNINGS_FULL} ${W_FAIL}"
-    PROTOSKIP_WARNINGS="-erroff=attrskipunsup,doubunder,reftotemp,wbadinitl,identexpected,inllargeuse,truncwarn1,signextwarn,partinit,notused,badargtype2w,wbadinit"
-    BOOSTSKIP_WARNINGS="-erroff=attrskipunsup,doubunder,reftotemp,inllargeuse,truncwarn1,signextwarn,inllargeint,hidef,wvarhidenmem"
-    PERMISSIVE_WARNINGS="-erroff=attrskipunsup,doubunder,reftotemp,inllargeuse,truncwarn1,signextwarn,inllargeint,hidef,wvarhidenmem,notused,badargtype2w,wunreachable"
-    INNOBASE_SKIP_WARNINGS="-erroff=attrskipunsup,doubunder,reftotemp,wbadinitl,identexpected,inllargeuse,truncwarn1,signextwarn,partinit,notused,badargtype2w,wbadinit,wunreachable"
-    NO_UNREACHED="-erroff=E_STATEMENT_NOT_REACHED"
-    NO_WERROR="-errwarn=%none"
-
-  ])
-
   AC_SUBST(NO_CONVERSION)
   AC_SUBST(NO_REDUNDANT_DECLS)
   AC_SUBST(NO_UNREACHED)
