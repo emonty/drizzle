@@ -1066,8 +1066,16 @@ A running list, populated during Phase 1's architecture audit and
 extended through Phases 3–8. Each entry describes an x86-specific
 construct in the source and a sketch of the aarch64 fix.
 
-*(populated incrementally — leave this section short until the audit
-runs)*
+**Phase 1 audit (amd64 source sweep).** The first-party source
+(``drizzled/``, ``client/``, ``libdrizzle*``) was grepped for x86-only
+intrinsics (``__builtin_ia32_*``, ``_mm_*``, the SSE/AVX
+``*intrin.h`` headers), inline assembly (``__asm``, ``asm volatile``),
+and architecture-pinned constructs (``rdtsc``, ``cpuid``, byte-swap
+intrinsics). **No hazards found** — the server carries no hand-written
+x86 codegen. Atomics already go through GCC's portable ``__sync``/
+``__atomic`` builtins (see ``m4/pandora_have_gcc_atomics.m4``), which
+lower correctly on aarch64. The list below therefore stays empty until
+an LTS bump introduces something.
 
 
 .. _spec-revival-future-work:
