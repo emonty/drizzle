@@ -65,16 +65,12 @@ AS_IF([test "x${pandora_cv_skip_requires}" != "xno"],[
 
   AC_PATH_PROG([GPERF],[gperf],[AC_MSG_ERROR([Drizzle requires gperf to build.])])
 
-  # libexecinfo provides backtrace_symbols on FreeBSD
-  AC_SEARCH_LIBS(backtrace_symbols, [execinfo])
-
   AC_FUNC_STRERROR_R
 
   dnl The stack grows downward on amd64 and arm64.
   AC_DEFINE([STACK_DIRECTION],[-1],[Direction of stack growth])
 
   PANDORA_USE_BETTER_MALLOC
-  AC_CHECK_FUNC(inet_ntoa, [], [AC_CHECK_LIB(nsl, inet_ntoa)])
 
 
   AC_ARG_WITH([server-suffix],
