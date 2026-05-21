@@ -993,3 +993,12 @@ them up:
   test.
 * **kewpie revival** (Python 3 port) if/when interest arises. Skipped
   from the test-target list in Phase 0.
+* **Compiler hardening flags.** Phase 1 deleted the probe-based
+  ``AX_HARDEN_COMPILER_FLAGS`` machinery (it was already commented out
+  in ``configure.ac``), so the build currently applies no hardening.
+  Re-introduce ``-fstack-protector-strong``, ``-D_FORTIFY_SOURCE``, and
+  ``-Wl,-z,relro,-z,now`` once the revival reaches the 26.04 toolchain,
+  where every flag is unconditionally available — GCC 4.6 on 12.04 has
+  no ``-fstack-protector-strong``. Land it as its own change so the
+  ``perf/`` time series can attribute the instruction-count delta to
+  hardening rather than to a build-system phase.
