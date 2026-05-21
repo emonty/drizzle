@@ -183,10 +183,6 @@ AC_DEFINE([SIZEOF_LONG_LONG],[8],[Size of long long as computed by sizeof()])
 
 
 
-# Checks for library functions.
-AC_CHECK_FUNC([setsockopt],[],[AC_CHECK_LIB(socket, setsockopt)])
-AC_CHECK_FUNC([bind],[],[AC_CHECK_LIB(bind, bind)])
-
 AX_AM_JOBSERVER([yes])
 
 #########################################################################
