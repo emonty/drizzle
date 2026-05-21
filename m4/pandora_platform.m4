@@ -22,27 +22,6 @@ AC_DEFUN([PANDORA_PLATFORM],[
   AC_DEFINE_UNQUOTED([TARGET_CPU], ["$target_cpu"], [CPU of Target System])
 
 
-  case "$host_os" in
-    *solaris*)
-    AS_IF([test "x${ac_cv_env_CPPFLAGS_set}" = "x"],[
-      CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
-    ])
-
-    AS_IF([test "x${ac_cv_env_LDFLAGS_set}" = "x"],[
-      LDFLAGS="${LDFLAGS} -L/usr/local/lib"
-    ])
-    ;;
-    *freebsd*)
-    AS_IF([test "x${ac_cv_env_CPPFLAGS_set}" = "x"],[
-      CPPFLAGS="${CPPFLAGS} -isystem /usr/local/include"
-    ])
-
-    AS_IF([test "x${ac_cv_env_LDFLAGS_set}" = "x"],[
-      LDFLAGS="${LDFLAGS} -L/usr/local/lib"
-    ])
-    ;;
-  esac
-
   PANDORA_OPTIMIZE_BITFIELD=1
 
   case "$target_os" in
