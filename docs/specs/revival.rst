@@ -646,6 +646,21 @@ Tasks
   (load-bearing plugin enumeration).
 * Delete the now-unused ``m4/pandora_*.m4`` files (one or more
   commits).
+* Strip the dead version-control arms from the build-from-VC code in
+  ``drizzle.m4``. ``PANDORA_TEST_VC_DIR`` and ``PANDORA_BUILDING_FROM_VC``
+  probe for ``.bzr``, ``.svn``, ``.hg`` and ``.git``; the project is
+  git and bzr/svn/hg are as dead as Solaris. Keep only the git arm —
+  the ``bzr revno``/``bzr nick``/``bzr log`` extraction and the svn/hg
+  branches go.
+* Re-prefix the build macros from ``PANDORA_`` to ``DRIZZLE_``
+  (``PANDORA_MSG_ERROR`` → ``DRIZZLE_MSG_ERROR``, ``PANDORA_WARNINGS``
+  → ``DRIZZLE_WARNINGS``, and so on for every macro now living in
+  ``drizzle.m4``), updating call sites in ``configure.ac``. This
+  finishes excising the Pandora layer — once done, no ``PANDORA_``
+  name survives outside the deliberately-kept ``pandora_plugins.m4``
+  and the plugin-dependency have-lib macros (those re-prefix, or
+  retire, with the Phase 10 plugin sweep). Land it last, as a
+  mechanical rename once the macro set has settled.
 
 Done when
 ---------
