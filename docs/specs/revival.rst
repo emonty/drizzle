@@ -619,11 +619,26 @@ Tasks
   intermediate edit, the arms vanish when the macro is rewritten.
 * Rewrite ``configure.ac:39`` to call ``DRIZZLE_BUILD_SETUP`` in place
   of ``PANDORA_CANONICAL_TARGET``.
-* Replace each library-presence macro with straight
-  ``PKG_CHECK_MODULES``. ``libprotobuf``, ``libz``, ``libssl``,
-  ``libpcre``, ``libreadline``, ``libdl`` all have stable
-  pkg-config files on modern Ubuntu. Each replacement is its own
-  commit.
+* Replace the library-presence macros with ``PKG_CHECK_MODULES``,
+  one commit each. ``libz``, ``libssl``, ``libpcre`` and
+  ``libprotobuf`` ship pkg-config files on the 12.04 base
+  (``zlib.pc``, ``libssl.pc``, ``libpcre.pc``, ``protobuf.pc`` —
+  verified). Two exceptions:
+
+  - ``libdl`` has no pkg-config file on any release — ``dlopen`` is
+    in glibc. Replace ``PANDORA_REQUIRE_LIBDL`` with
+    ``AC_SEARCH_LIBS([dlopen],[dl])``.
+  - ``readline`` did not ship ``readline.pc`` until readline 6.3
+    (≈Ubuntu 16.04); the 12.04 readline 6.2 has none. Keep
+    ``pandora_have_libreadline.m4`` for now; convert it to
+    ``PKG_CHECK_MODULES`` at the LTS bump where ``readline.pc``
+    first appears.
+
+  Each replacement must keep the variables the ``Makefile.am`` files
+  consume — ``$(LIBZ)``, ``$(LIBSSL)``, ``$(LIBPCRE)``/``$(LTLIBPCRE)``,
+  ``$(LIBPROTOBUF)``/``$(LTLIBPROTOBUF)``, ``$(LIBDL_LIBS)`` — assigned
+  from the ``*_LIBS`` pkg-config output, plus the ``HAVE_LIB*``
+  ``config.h`` defines.
 * Strip the dead ``AC_CHECK_SIZEOF`` probes from
   ``plugin/innobase/plugin.ac`` (the one ``plugin.ac`` carrying
   dead-platform cruft); hardcode the LP64 sizes it measured.
@@ -635,15 +650,22 @@ Tasks
 Done when
 ---------
 
-* ``ls m4/pandora_*.m4`` returns ≤2 files (``pandora_plugins.m4``,
-  possibly a thin ``pandora_canonical.m4`` compatibility shim if any
-  external scripts reference it).
+* The Pandora build-setup layer is gone: ``m4/drizzle.m4`` is the only
+  orchestration file, and the surviving ``pandora_*.m4`` files are
+  ``pandora_plugins.m4`` plus the plugin-dependency ``have-lib``
+  macros still called by ``plugin/*/plugin.ac`` (``libaio``,
+  ``libcurl``, ``libevent``, ``libgearman``, ``libldap``,
+  ``libmemcached``, ``libv8``, flex). Those retire in Phase 10 with
+  the plugin sweep — Phase 2 does not reach the original "≤2 files"
+  target, and is not meant to.
 * ``configure.ac`` is under 250 lines.
 * ``grep -rnE 'solaris|freebsd|SUNCC|INTELCC|i386|powerpc|sparc'``
   over the first-party m4 (everything but ``boost.m4`` and the
   vendored gettext set) returns empty.
-* ``wc -l m4/*.m4`` shows a ≥40% drop versus the Phase 0 baseline —
-  the reduction the Phase 1 strip set up, realized here.
+* ``wc -l m4/*.m4`` shows a substantial drop versus the Phase 0
+  baseline. The original ≥40% figure assumed the plugin have-lib
+  macros also went; with those correctly deferred to Phase 10, report
+  the actual figure rather than forcing it.
 * Phase 0 tests still pass on amd64.
 * ``./configure`` succeeds on arm64.
 
