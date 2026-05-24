@@ -1,7 +1,9 @@
 # syntax=docker/dockerfile:1.4
+ARG UBUNTU=12.04
+
 FROM quay.io/inaugust/bindep-rs AS bindep_rs
 
-FROM quay.io/inaugust/unsafe-old-distro-danger:12.04 AS base
+FROM quay.io/inaugust/unsafe-old-distro-danger:${UBUNTU} AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -18,12 +20,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b com
 
 FROM base AS build
 ARG TARGETPLATFORM
+ARG UBUNTU
 
 # Build in a per-arch cache mount for incremental rebuilds, then cp the
 # tree out of the cache into the image layer so the test and perf stages
 # — and `podman run drizzle:test` — work against a self-contained tree.
 RUN --mount=type=bind,source=.,target=/host-src,readonly,Z \
-    --mount=type=cache,target=/build,id=drizzle-build-${TARGETPLATFORM},sharing=locked \
+    --mount=type=cache,target=/build,id=drizzle-build-${TARGETPLATFORM}-${UBUNTU},sharing=locked \
     cp -au --no-preserve=context /host-src/. /build/ && \
     cd /build && \
     if [ ! -f Makefile ] ; then autoreconf -i && ./configure ; fi && \
@@ -47,6 +50,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b tes
 CMD ["tools/run-tests.sh"]
 
 FROM build AS perf
+ARG TARGETPLATFORM
+ARG UBUNTU
 
 # Phase 2 performance harness. valgrind (callgrind/massif) plus the
 # Perl DBI stack used to build DBD::drizzle and drive sql-bench.
