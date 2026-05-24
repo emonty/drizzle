@@ -21,7 +21,7 @@
 #pragma once
 
 #include <boost/thread/mutex.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <drizzled/identifier.h>
 #include <drizzled/identifier/catalog.h>
@@ -47,7 +47,7 @@ class Instance
 
 
 public:
-  typedef boost::shared_ptr<Instance> shared_ptr;
+  typedef std::shared_ptr<Instance> shared_ptr;
   typedef std::vector<shared_ptr> vector;
   typedef const Instance* const_pointer;
   typedef const Instance& const_reference;
@@ -68,14 +68,14 @@ public:
   static shared_ptr make_shared(message::catalog::shared_ptr &message_arg)
   {
     assert(not message_arg->name().empty());
-    return boost::make_shared<Instance>(message_arg);
+    return std::make_shared<Instance>(message_arg);
   };
 
   static shared_ptr make_shared(const identifier::Catalog &identifier)
   {
     drizzled::message::catalog::shared_ptr new_message= drizzled::message::catalog::make_shared(identifier);
     assert(not new_message->name().empty());
-    return boost::make_shared<Instance>(new_message);
+    return std::make_shared<Instance>(new_message);
   }
 
   const drizzled::identifier::Catalog &identifier() const

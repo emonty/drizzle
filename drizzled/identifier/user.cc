@@ -18,7 +18,7 @@
  */
 
 #include <config.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <drizzled/identifier/user.h>
 
 namespace drizzled {
@@ -26,7 +26,7 @@ namespace identifier {
 
 user::mptr User::make_shared()
 {
-  return boost::make_shared<User>();
+  return std::make_shared<User>();
 }
 
 } /* namespace identifier */

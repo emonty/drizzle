@@ -27,7 +27,7 @@
 #include <iosfwd>
 
 #include <boost/regex.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
@@ -107,7 +107,7 @@ public:
 
 typedef std::list<PolicyItem *> PolicyItemList;
 typedef std::vector<std::string> LruList;
-typedef boost::unordered_map<std::string, bool> UnorderedCheckMap;
+typedef std::unordered_map<std::string, bool> UnorderedCheckMap;
 
 class CheckMap
 {

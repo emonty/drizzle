@@ -145,12 +145,12 @@ int64_t session_test_options(const Session *session, int64_t test_options)
 class Session::impl_c
 {
 public:
-  typedef boost::unordered_map<std::string, util::Storable*, util::insensitive_hash, util::insensitive_equal_to> properties_t;
+  typedef std::unordered_map<std::string, util::Storable*, util::insensitive_hash, util::insensitive_equal_to> properties_t;
   typedef std::map<std::string, plugin::EventObserverList*> schema_event_observers_t;
 
   impl_c(Session& session) :
     open_tables(session, g_refresh_version),
-    schema(boost::make_shared<std::string>())
+    schema(std::make_shared<std::string>())
   {
   }
 
@@ -176,7 +176,7 @@ public:
   system_status_var status_var;
   session::TableMessages table_message_cache;
   util::string::mptr schema;
-  boost::shared_ptr<session::State> state;
+  std::shared_ptr<session::State> state;
   boost::ptr_vector<table::Singular> temporary_shares;
 	session::Times times;
 	session::Transactions transaction;
@@ -711,10 +711,10 @@ void Session::readAndStoreQuery(str_ref v)
   while (not v.empty() && (v.back() == ';' || charset()->isspace(v.back())))
   	v.pop_back();
 
-  util::string::mptr new_query= boost::make_shared<std::string>(v.data(), v.size());
+  util::string::mptr new_query= std::make_shared<std::string>(v.data(), v.size());
   plugin::QueryRewriter::rewriteQuery(*impl_->schema, *new_query);
   query= new_query;
-  impl_->state= boost::make_shared<session::State>(v);
+  impl_->state= std::make_shared<session::State>(v);
 }
 
 bool Session::endTransaction(enum_mysql_completiontype completion)
@@ -1506,7 +1506,7 @@ void Session::send_kill_message() const
 
 void Session::set_schema(const std::string& new_db)
 {
-  impl_->schema = boost::make_shared<std::string>(new_db);
+  impl_->schema = std::make_shared<std::string>(new_db);
 }
 
 
@@ -1933,7 +1933,7 @@ void Session::resetQueryString()
   impl_->state.reset();
 }
 
-const boost::shared_ptr<session::State>& Session::state()
+const std::shared_ptr<session::State>& Session::state()
 {
   return impl_->state;
 }

@@ -27,7 +27,7 @@
 #include <drizzled/catalog.h>
 #include <drizzled/plugin/catalog.h>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <boost/thread/mutex.hpp>
 
 namespace drizzled {
@@ -49,7 +49,7 @@ public:
   static bool unlock(const identifier::Catalog&, error_t&);
   static void copy(catalog::Instance::vector&);
 
-  typedef boost::unordered_map<identifier::Catalog, catalog::Instance::shared_ptr> unordered_map;
+  typedef std::unordered_map<identifier::Catalog, catalog::Instance::shared_ptr> unordered_map;
 
   static unordered_map cache;
   static boost::mutex _mutex;

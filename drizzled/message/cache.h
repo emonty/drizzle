@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
+#include <unordered_map>
+#include <memory>
 
 #include <drizzled/message.h>
 #include <drizzled/identifier/table.h>
@@ -53,7 +53,7 @@ public:
   bool insert(const identifier::Table &identifier, table::shared_ptr share);
   bool insert(const identifier::Table &identifier, Table &share);
 private:
-  typedef boost::unordered_map<identifier::Table::Key, table::shared_ptr> Map;
+  typedef std::unordered_map<identifier::Table::Key, table::shared_ptr> Map;
 
   boost::mutex _access;
   Map cache;

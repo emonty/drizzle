@@ -30,7 +30,7 @@
 #include <drizzled/identifier.h>
 #include <drizzled/util/find_ptr.h>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace drizzled {
 namespace {

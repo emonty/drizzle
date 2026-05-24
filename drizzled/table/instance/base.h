@@ -27,10 +27,10 @@
 
 #include <string>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/dynamic_bitset.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/scoped_ptr.hpp>
 
 #include <drizzled/memory/root.h>
@@ -50,7 +50,7 @@ class TableShare
   typedef std::vector<std::string> StringVector;
 
 public:
-  typedef boost::shared_ptr<TableShare> shared_ptr;
+  typedef std::shared_ptr<TableShare> shared_ptr;
   typedef std::vector <shared_ptr> vector;
 
   TableShare(const identifier::Table::Type type_arg);
@@ -148,7 +148,7 @@ public:
 
 private:
   /* hash of field names (contains pointers to elements of field array) */
-  typedef boost::unordered_map<std::string, Field**, util::insensitive_hash, util::insensitive_equal_to> FieldMap;
+  typedef std::unordered_map<std::string, Field**, util::insensitive_hash, util::insensitive_equal_to> FieldMap;
   FieldMap name_hash; /* hash of field names */
 
 public:

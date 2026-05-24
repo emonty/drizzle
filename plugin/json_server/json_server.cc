@@ -54,7 +54,7 @@
 
 #include <drizzled/pthread_globals.h>
 #include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 
 
@@ -556,8 +556,8 @@ private:
   FileDescriptor write_;
 };
 
-typedef boost::shared_ptr<struct event_base> event_base_ptr;
-typedef boost::shared_ptr<struct evhttp> evhttp_ptr;
+typedef std::shared_ptr<struct event_base> event_base_ptr;
+typedef std::shared_ptr<struct evhttp> evhttp_ptr;
 
 // One worker: its own event base, HTTP listener, wakeup event and
 // dispatch thread. Construction either yields a fully wired worker or
@@ -644,7 +644,7 @@ private:
   JsonWorker& operator=(const JsonWorker&);
 };
 
-typedef boost::shared_ptr<JsonWorker> JsonWorkerPtr;
+typedef std::shared_ptr<JsonWorker> JsonWorkerPtr;
 
 class JsonServer : public drizzled::plugin::Daemon , public HTTPServer
 {

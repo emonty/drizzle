@@ -46,7 +46,7 @@ public:
 private:
   static void CopyFrom(table::instance::Shared::vector&);
 
-  typedef boost::unordered_map< identifier::Table::Key, table::instance::Shared::shared_ptr> Map;
+  typedef std::unordered_map< identifier::Table::Key, table::instance::Shared::shared_ptr> Map;
 
   static Map cache;
   static boost::mutex _mutex;

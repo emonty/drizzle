@@ -20,8 +20,8 @@
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/unordered/unordered_set.hpp>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <plugin/user_locks/lock.h>
 
@@ -46,7 +46,7 @@ const size_t LARGEST_LOCK_NAME= 64;
 class Locks
 {
 public:
-  typedef boost::unordered_map<user_locks::Key, user_locks::Lock::shared_ptr> LockMap;
+  typedef std::unordered_map<user_locks::Key, user_locks::Lock::shared_ptr> LockMap;
 
   static Locks &getInstance(void)
   {

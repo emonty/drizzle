@@ -12,7 +12,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/eof_iterator.hpp>
 #include <boost/type_traits/is_same.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/algorithm/string.hpp>
 
 #include <boost/noncopyable.hpp>
@@ -387,7 +387,7 @@ private: // base overrides
   bool getline(std::string&);
 
 private: // internal data
-  boost::shared_ptr<std::basic_istream<charT> > is;
+  std::shared_ptr<std::basic_istream<charT> > is;
 };
 
 typedef basic_config_file_iterator<char> config_file_iterator;

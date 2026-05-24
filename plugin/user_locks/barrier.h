@@ -30,7 +30,7 @@
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/foreach.hpp>
 
 #include "observer.h"
@@ -56,7 +56,7 @@ namespace barriers {
 // Barrier starts in a blocking posistion
 class Barrier {
 public:
-  typedef boost::shared_ptr<Barrier> shared_ptr;
+  typedef std::shared_ptr<Barrier> shared_ptr;
 
   Barrier(drizzled::session_id_t owner_arg) :
     owner(owner_arg),

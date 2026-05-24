@@ -20,8 +20,8 @@
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/unordered/unordered_set.hpp>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <string>
 
@@ -45,7 +45,7 @@ enum return_t {
 class Barriers
 {
 public:
-  typedef boost::unordered_map<user_locks::Key, Barrier::shared_ptr> Map;
+  typedef std::unordered_map<user_locks::Key, Barrier::shared_ptr> Map;
 
   static Barriers &getInstance(void)
   {

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include <drizzled/visibility.h>
 
 namespace drizzled {
@@ -75,7 +75,7 @@ public:
     return doGetNewTransactionId(session);
   }
 
-  typedef ::boost::unordered_set<my_xid> commit_list_set;
+  typedef ::std::unordered_set<my_xid> commit_list_set;
   /** 
    * The below static class methods wrap the interaction
    * of the vector of registered XA storage engines.

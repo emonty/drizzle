@@ -30,7 +30,7 @@
 
 #include <drizzled/charset.h>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "engine_state_history.h"
 

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <drizzled/common_fwd.h>
 #include <drizzled/message/catalog.pb.h>
 
@@ -29,7 +29,7 @@ namespace drizzled {
 namespace message {
 namespace catalog {
 
-typedef boost::shared_ptr<message::Catalog> shared_ptr;
+typedef std::shared_ptr<message::Catalog> shared_ptr;
 typedef std::vector< shared_ptr > vector;
 typedef message::Catalog value_type;
 

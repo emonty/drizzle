@@ -23,14 +23,14 @@
 #include <drizzled/util/string.h>
 #include <drizzled/message/table.h>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace drizzled {
 namespace session {
 
 class DRIZZLED_API TableMessages
 {
-  typedef boost::unordered_map<std::string, message::Table, util::insensitive_hash, util::insensitive_equal_to> Cache;
+  typedef std::unordered_map<std::string, message::Table, util::insensitive_hash, util::insensitive_equal_to> Cache;
 
   Cache table_message_cache;
 

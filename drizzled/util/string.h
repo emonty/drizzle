@@ -42,7 +42,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #define drizzle_literal_parameter(X) (X), size_t((sizeof(X) - 1))
 

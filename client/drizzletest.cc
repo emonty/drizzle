@@ -66,7 +66,7 @@
 #include PCRE_HEADER
 
 #include <stdarg.h>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 /* Added this for string translation. */
 #include <drizzled/gettext.h>
@@ -96,7 +96,7 @@ int get_one_option(int optid, const struct option *, char *argument);
 #define QUERY_SEND_FLAG  1
 #define QUERY_REAP_FLAG  2
 
-typedef boost::unordered_map<std::string, uint32_t> ErrorCodes;
+typedef std::unordered_map<std::string, uint32_t> ErrorCodes;
 ErrorCodes global_error_names;
 
 enum {
@@ -259,7 +259,7 @@ static inline int compare_ne_double(double f1, double f2)
 /*Perl/shell-like variable registers */
 boost::array<VAR, 10> var_reg;
 
-typedef boost::unordered_map<string, VAR *> var_hash_t;
+typedef std::unordered_map<string, VAR *> var_hash_t;
 var_hash_t var_hash;
 
 class st_connection

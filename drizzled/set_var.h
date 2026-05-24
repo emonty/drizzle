@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <drizzled/common_fwd.h>
 #include <drizzled/enum.h>
@@ -86,7 +86,7 @@ public:
   int update(Session *session);
 };
 
-typedef boost::shared_ptr<set_var_base> SetVarPtr;
+typedef std::shared_ptr<set_var_base> SetVarPtr;
 typedef std::vector<SetVarPtr> SetVarVector;
 int sql_set_variables(Session *session, const SetVarVector &var_list);
 

@@ -35,7 +35,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <cstring>
 #include <fstream>
 #include <libdrizzle-2.0/libdrizzle.h>
@@ -140,7 +140,7 @@ public:
     return drizzle_row_field_sizes(*this);
   }
 private:
-  boost::shared_ptr<drizzle_result_st> b_;
+  std::shared_ptr<drizzle_result_st> b_;
 };
 
 class connection_c : noncopyable

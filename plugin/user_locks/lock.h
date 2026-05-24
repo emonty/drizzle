@@ -30,7 +30,7 @@
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #pragma once
 
@@ -38,7 +38,7 @@ namespace user_locks {
 
 class Lock {
 public:
-  typedef boost::shared_ptr<Lock> shared_ptr;
+  typedef std::shared_ptr<Lock> shared_ptr;
   drizzled::session_id_t id;
 
   Lock(drizzled::session_id_t id_arg) :

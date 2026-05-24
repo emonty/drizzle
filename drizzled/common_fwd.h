@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/mutex.hpp>
 #include <cstring>
@@ -89,8 +89,8 @@ namespace identifier
 
   namespace user
   {
-    typedef boost::shared_ptr<const User> ptr;
-    typedef boost::shared_ptr<User> mptr;
+    typedef std::shared_ptr<const User> ptr;
+    typedef std::shared_ptr<User> mptr;
   }
 }
 
@@ -230,8 +230,8 @@ namespace util
 
   namespace string
   {
-    typedef boost::shared_ptr<const std::string> ptr;
-    typedef boost::shared_ptr<std::string> mptr;
+    typedef std::shared_ptr<const std::string> ptr;
+    typedef std::shared_ptr<std::string> mptr;
     typedef std::vector<std::string> vector;
   }
 }

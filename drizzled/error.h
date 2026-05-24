@@ -21,7 +21,7 @@
 #pragma once
 
 #include <string>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include <drizzled/common_fwd.h>
 #include <drizzled/definitions.h>
@@ -29,6 +29,17 @@
 #include <drizzled/error_t.h>
 #include <drizzled/identifier.h>
 #include <drizzled/visibility.h>
+
+namespace std {
+template<>
+struct hash<drizzled::error_t>
+{
+  size_t operator()(drizzled::error_t v) const
+  {
+    return static_cast<size_t>(v);
+  }
+};
+} /* namespace std */
 
 namespace drizzled {
 
@@ -45,7 +56,7 @@ class ErrorMap : boost::noncopyable
 {
 public:
   typedef std::pair<std::string, std::string> value_type;
-  typedef boost::unordered_map<error_t, value_type> ErrorMessageMap;
+  typedef std::unordered_map<error_t, value_type> ErrorMessageMap;
 
   ErrorMap();
 

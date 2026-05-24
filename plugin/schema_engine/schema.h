@@ -22,7 +22,7 @@
 
 #include <assert.h>
 #include <drizzled/plugin/storage_engine.h>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <boost/thread/shared_mutex.hpp>
 
 extern const drizzled::charset_info_st *default_charset_info;
@@ -36,7 +36,7 @@ class Schema : public drizzled::plugin::StorageEngine
   void prime_catalog(drizzled::identifier::Catalog &catalog_identifier);
   void prime();
 
-  typedef boost::unordered_map<std::string, drizzled::message::schema::shared_ptr> SchemaCache;
+  typedef std::unordered_map<std::string, drizzled::message::schema::shared_ptr> SchemaCache;
   SchemaCache schema_cache;
   bool schema_cache_filled;
 

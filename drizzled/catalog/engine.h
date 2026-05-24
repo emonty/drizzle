@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <drizzled/identifier/catalog.h>
 #include <drizzled/message/catalog.h>
 
@@ -30,7 +30,7 @@ namespace catalog {
 class Engine
 {
 public:
-  typedef boost::shared_ptr<Engine> shared_ptr;
+  typedef std::shared_ptr<Engine> shared_ptr;
   typedef std::vector<shared_ptr> vector;
 
 protected:

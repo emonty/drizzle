@@ -38,6 +38,7 @@
 
 #include <drizzled/util/backtrace.h>
 
+#include <functional>
 #include <string.h>
 
 #include <assert.h>
@@ -264,3 +265,22 @@ std::size_t hash_value(Table::Key const& b);
 
 } /* namespace identifier */
 } /* namespace drizzled */
+
+namespace std {
+template<>
+struct hash<drizzled::identifier::Table>
+{
+  size_t operator()(const drizzled::identifier::Table& v) const
+  {
+    return drizzled::identifier::hash_value(v);
+  }
+};
+template<>
+struct hash<drizzled::identifier::Table::Key>
+{
+  size_t operator()(const drizzled::identifier::Table::Key& v) const
+  {
+    return drizzled::identifier::hash_value(v);
+  }
+};
+} /* namespace std */

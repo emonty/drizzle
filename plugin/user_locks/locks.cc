@@ -21,7 +21,7 @@
 #include <config.h>
 #include <plugin/user_locks/module.h>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <boost/thread/locks.hpp>
 
 #include <string>
@@ -64,7 +64,7 @@ bool Locks::lock(drizzled::session_id_t id_arg, const user_locks::Key &arg, int6
   if (iter == lock_map.end())
   {
     create_cond.notify_all();
-    return lock_map.insert(std::make_pair(arg, boost::make_shared<Lock>(id_arg))).second;
+    return lock_map.insert(std::make_pair(arg, std::make_shared<Lock>(id_arg))).second;
   }
 
   return false;
@@ -108,7 +108,7 @@ bool Locks::lock(drizzled::session_id_t id_arg, const user_locks::Keys &arg)
     }
     else
     {
-      lock_map.insert(std::make_pair(*iter, boost::make_shared<Lock>(id_arg)));
+      lock_map.insert(std::make_pair(*iter, std::make_shared<Lock>(id_arg)));
       created.insert(*iter);
     }
   }

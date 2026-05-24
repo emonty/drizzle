@@ -26,8 +26,8 @@
 #include <boost/program_options.hpp>
 #include <boost/ptr_container/ptr_container.hpp>
 #include <boost/smart_ptr.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
+#include <unordered_map>
+#include <unordered_set>
 #include <boost/utility.hpp>
 #include <algorithm>
 #include <bitset>

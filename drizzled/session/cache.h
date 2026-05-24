@@ -30,7 +30,7 @@ namespace session {
 
 class DRIZZLED_API Cache 
 {
-  typedef boost::shared_ptr<drizzled::Session> session_ptr;
+  typedef std::shared_ptr<drizzled::Session> session_ptr;
 public:
   typedef std::list<session_ptr> list;
 

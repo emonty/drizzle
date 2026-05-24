@@ -22,13 +22,13 @@
 #pragma once
 
 #include <boost/thread/mutex.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <drizzled/identifier.h>
 
 namespace drizzled {
 namespace table {
 
-typedef boost::unordered_multimap<identifier::Table::Key, Concurrent*> CacheMap;
+typedef std::unordered_multimap<identifier::Table::Key, Concurrent*> CacheMap;
 typedef std::pair<CacheMap::const_iterator, CacheMap::const_iterator> CacheRange;
 
 class Cache 

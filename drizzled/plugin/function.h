@@ -28,7 +28,7 @@
 #include <vector>
 #include <functional>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include <drizzled/visibility.h>
 
@@ -57,8 +57,8 @@ public:
 
   static const plugin::Function *get(const std::string &name);
 
-  typedef boost::unordered_map<std::string, const plugin::Function *, util::insensitive_hash, util::insensitive_equal_to> UdfMap;
-  typedef boost::unordered_map<std::string, const plugin::Function *, util::insensitive_hash, util::insensitive_equal_to> Map;
+  typedef std::unordered_map<std::string, const plugin::Function *, util::insensitive_hash, util::insensitive_equal_to> UdfMap;
+  typedef std::unordered_map<std::string, const plugin::Function *, util::insensitive_hash, util::insensitive_equal_to> Map;
 
   static const UdfMap &getMap();
 };

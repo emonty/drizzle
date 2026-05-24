@@ -23,7 +23,7 @@
 
 #include <uuid/uuid.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <drizzled/message/table.pb.h>
 #include <drizzled/identifier.h>
 
@@ -31,7 +31,7 @@ namespace drizzled {
 namespace message {
 namespace table {
 
-typedef boost::shared_ptr <message::Table> shared_ptr;
+typedef std::shared_ptr <message::Table> shared_ptr;
 typedef const message::Table& const_reference;
 
 shared_ptr make_shared(const identifier::Table& identifier, const std::string &engine_arg);

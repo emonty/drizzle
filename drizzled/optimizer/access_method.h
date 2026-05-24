@@ -32,7 +32,7 @@ namespace optimizer {
 class AccessMethod
 {
 public:
-  typedef boost::shared_ptr<AccessMethod> ptr;
+  typedef std::shared_ptr<AccessMethod> ptr;
 
   virtual ~AccessMethod() {}
 

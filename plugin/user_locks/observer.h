@@ -30,7 +30,7 @@
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #pragma once
 
@@ -38,7 +38,7 @@ namespace user_locks {
 
 class Observer {
 public:
-  typedef boost::shared_ptr<Observer> shared_ptr;
+  typedef std::shared_ptr<Observer> shared_ptr;
   typedef std::list <shared_ptr> list;
 
   Observer(int64_t wait_until_arg) :

@@ -22,7 +22,7 @@
 
 #include <drizzled/session.h>
 #include <drizzled/util/storable.h>
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 
 namespace user_locks {
 

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <drizzled/plugin/table_function.h>
 #include <drizzled/util/string.h>
 
@@ -29,7 +29,7 @@ namespace drizzled {
 class FunctionContainer 
 {
 public:
-  typedef boost::unordered_map<std::string, Create_func*, util::insensitive_hash, util::insensitive_equal_to> Map;
+  typedef std::unordered_map<std::string, Create_func*, util::insensitive_hash, util::insensitive_equal_to> Map;
 
   static const Map& getMap();
   static Map& getMutableMap();

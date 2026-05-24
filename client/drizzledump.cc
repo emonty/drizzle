@@ -35,7 +35,7 @@
 #include <string>
 #include <iostream>
 #include <stdarg.h>
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include <algorithm>
 #include <fstream>
 #include <drizzled/gettext.h>
@@ -120,7 +120,7 @@ string password,
   opt_protocol,
   where;
 
-boost::unordered_set<string> ignore_table;
+std::unordered_set<string> ignore_table;
 
 void maybe_exit(int error);
 static void die(int error, const char* reason, ...);

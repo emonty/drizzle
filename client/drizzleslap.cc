@@ -1951,7 +1951,7 @@ static void timer_thread()
   }
 }
 
-typedef boost::shared_ptr<boost::thread> Thread;
+typedef std::shared_ptr<boost::thread> Thread;
 typedef std::vector <Thread> Threads;
 static void run_scheduler(Stats *sptr, Statement **stmts, uint32_t concur, uint64_t limit)
 {

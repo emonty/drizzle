@@ -27,8 +27,8 @@
 #include <drizzled/optimizer/access_method/index.h>
 #include <drizzled/optimizer/access_method/scan.h>
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <memory>
 
 using namespace drizzled;
 
@@ -37,16 +37,16 @@ optimizer::AccessMethod::ptr optimizer::AccessMethodFactory::create(access_metho
   switch (type)
   {
   case AM_SYSTEM:
-    return boost::make_shared<optimizer::System>();
+    return std::make_shared<optimizer::System>();
   case AM_CONST:
-    return boost::make_shared<optimizer::Const>();
+    return std::make_shared<optimizer::Const>();
   case AM_EQ_REF:
-    return boost::make_shared<optimizer::UniqueIndex>();
+    return std::make_shared<optimizer::UniqueIndex>();
   case AM_REF_OR_NULL:
   case AM_REF:
-    return boost::make_shared<optimizer::Index>();
+    return std::make_shared<optimizer::Index>();
   case AM_ALL:
-    return boost::make_shared<optimizer::Scan>();
+    return std::make_shared<optimizer::Scan>();
   default:
     assert(false);
   }

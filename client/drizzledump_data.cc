@@ -25,7 +25,7 @@
 #include <drizzled/gettext.h>
 #include <string>
 #include <iostream>
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include <boost/lexical_cast.hpp>
 
 #define EX_DRIZZLEERR 2
@@ -48,7 +48,7 @@ extern bool opt_autocommit;
 extern bool ignore_errors;
 extern std::string opt_destination_database;
 
-extern boost::unordered_set<std::string> ignore_table;
+extern std::unordered_set<std::string> ignore_table;
 extern void maybe_exit(int error);
 
 enum destinations {

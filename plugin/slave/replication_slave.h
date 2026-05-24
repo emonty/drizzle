@@ -25,7 +25,7 @@
 #include <plugin/slave/replication_schema.h>
 #include <drizzled/plugin/daemon.h>
 #include <boost/thread.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace drizzled
 {
@@ -48,7 +48,7 @@ public:
   {
     _consumer_thread.interrupt();
 
-    boost::unordered_map<uint32_t, Master *>::const_iterator it;
+    std::unordered_map<uint32_t, Master *>::const_iterator it;
 
     for (it= _masters.begin(); it != _masters.end(); ++it)
     {
@@ -110,7 +110,7 @@ private:
   boost::thread _consumer_thread;
 
   /** List of master objects, one per master */
-  boost::unordered_map<uint32_t, Master *> _masters;
+  std::unordered_map<uint32_t, Master *> _masters;
 
   /** Convenience method to get object reference */
   Master &master(size_t index)

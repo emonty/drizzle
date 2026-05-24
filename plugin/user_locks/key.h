@@ -20,8 +20,9 @@
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/unordered/unordered_set.hpp>
+#include <functional>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <string>
 
@@ -66,7 +67,18 @@ bool operator==(Key const& left, Key const& right);
 
 std::size_t hash_value(Key const& b);
 
-typedef boost::unordered_set<Key> Keys;
+typedef std::unordered_set<Key> Keys;
 
 } /* namespace user_locks */
+
+namespace std {
+template<>
+struct hash<user_locks::Key>
+{
+  size_t operator()(const user_locks::Key& v) const
+  {
+    return user_locks::hash_value(v);
+  }
+};
+} /* namespace std */
 

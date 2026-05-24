@@ -24,7 +24,7 @@
 #include <drizzled/message/catalog.h>
 #include <uuid/uuid.h>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace drizzled {
 namespace message {
@@ -33,7 +33,7 @@ namespace catalog {
 
 shared_ptr make_shared(const identifier::Catalog &identifier)
 {
-  shared_ptr message= boost::make_shared< value_type>();
+  shared_ptr message= std::make_shared< value_type>();
   assert(not identifier.getName().empty());
   message->set_name(identifier.getName());
 

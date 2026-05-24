@@ -22,14 +22,14 @@
 
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace client {
 
 // Wakeup starts in a blocking posistion
 class Wakeup {
 public:
-  typedef boost::shared_ptr<Wakeup> shared_ptr;
+  typedef std::shared_ptr<Wakeup> shared_ptr;
 
   Wakeup() :
     sleeping(true)

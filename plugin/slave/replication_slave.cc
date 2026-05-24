@@ -46,7 +46,7 @@ void ReplicationSlave::startup(Session &session)
   else
   {
     /* Start the IO threads */
-    boost::unordered_map<uint32_t, Master *>::const_iterator it;
+    std::unordered_map<uint32_t, Master *>::const_iterator it;
     for (it= _masters.begin(); it != _masters.end(); ++it)
     {
       it->second->start();
@@ -135,7 +135,7 @@ bool ReplicationSlave::initWithConfig()
       master(num).producer().setCachedMaxCommitId(vm[section + ".max-commit-id"].as<uint64_t>());
   }
 
-  boost::unordered_map<uint32_t, Master *>::const_iterator it;
+  std::unordered_map<uint32_t, Master *>::const_iterator it;
 
   for (it= _masters.begin(); it != _masters.end(); ++it)
   {

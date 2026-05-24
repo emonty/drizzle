@@ -25,6 +25,7 @@
 #include <drizzled/util/data_ref.h>
 #include <cstring>
 #include <cassert>
+#include <functional>
 #include <ostream>
 #include <vector>
 #include <algorithm>
@@ -102,3 +103,14 @@ inline std::size_t hash_value(Catalog const& b)
 
 } /* namespace identifier */
 } /* namespace drizzled */
+
+namespace std {
+template<>
+struct hash<drizzled::identifier::Catalog>
+{
+  size_t operator()(const drizzled::identifier::Catalog& v) const
+  {
+    return drizzled::identifier::hash_value(v);
+  }
+};
+} /* namespace std */

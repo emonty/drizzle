@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <drizzled/message/schema.pb.h>
 
 #include <drizzled/identifier.h>
@@ -31,7 +31,7 @@ namespace message {
 namespace schema {
 
 typedef message::Schema value_type;
-typedef boost::shared_ptr <message::Schema> shared_ptr;
+typedef std::shared_ptr <message::Schema> shared_ptr;
 typedef const message::Schema const_reference;
 
 shared_ptr make_shared(const identifier::Schema& identifier);

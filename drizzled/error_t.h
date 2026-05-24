@@ -20,7 +20,7 @@
 
 #pragma once
 
-namespace drizzled { 
+namespace drizzled {
 
 enum error_t {
 

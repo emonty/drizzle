@@ -64,7 +64,7 @@ bool Sessions::Generator::populate()
 {
   while (Session* tmp= session_generator)
   {
-    boost::shared_ptr<session::State> state(tmp->state());
+    std::shared_ptr<session::State> state(tmp->state());
     identifier::user::ptr tmp_sctx= tmp->user();
 
     /* ID */

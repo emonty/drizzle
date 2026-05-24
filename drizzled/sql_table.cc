@@ -51,7 +51,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 
 using namespace std;
 
@@ -359,7 +359,7 @@ static bool check_duplicates_in_interval(const char *set_or_name,
   unsigned int *cur_length= typelib->type_lengths;
   *dup_val_count= 0;
 
-  boost::unordered_set<typelib_set_member, typelib_set_member_hasher> interval_set;
+  std::unordered_set<typelib_set_member, typelib_set_member_hasher> interval_set;
 
   for ( ; tmp.count > 0; cur_value++, cur_length++)
   {

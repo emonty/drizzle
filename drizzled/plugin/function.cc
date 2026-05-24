@@ -21,7 +21,7 @@
 /* This implements 'user defined functions' */
 #include <config.h>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include <drizzled/gettext.h>
 #include <drizzled/plugin/function.h>

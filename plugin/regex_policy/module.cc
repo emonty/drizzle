@@ -24,7 +24,7 @@
 #include <config.h>
 
 #include <boost/foreach.hpp>
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include <boost/thread/locks.hpp>
 
 #include <drizzled/item.h>
@@ -349,7 +349,7 @@ bool* CheckMap::find(std::string const &k)
     uint64_t size_halfway= lru.size() / 2;
     LruList::iterator halfway= lru.begin();
     halfway += size_halfway;
-    boost::unordered_set<std::string> uniqs;
+    std::unordered_set<std::string> uniqs;
     uniqs.insert(lru.begin(), halfway);
 
     /* If we can save space, drop the oldest half */
@@ -375,7 +375,7 @@ void CheckMap::insert(std::string const &k, bool v)
   if (map.bucket_count() > max_cache_buckets)
   {
     /* Determine LRU key by running through the LRU list */
-    boost::unordered_set<std::string> found;
+    std::unordered_set<std::string> found;
 
     /* Must unfortunately lock the LRU list while we traverse it */
     boost::mutex::scoped_lock lock(lru_mutex);

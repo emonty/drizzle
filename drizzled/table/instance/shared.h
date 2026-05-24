@@ -38,7 +38,7 @@ class Shared : public drizzled::TableShare
   friend void release(TableShare::shared_ptr &share);
 
 public:
-  typedef boost::shared_ptr<Shared> shared_ptr;
+  typedef std::shared_ptr<Shared> shared_ptr;
   typedef std::vector <shared_ptr> vector;
 
   Shared(const identifier::Table::Type type_arg,

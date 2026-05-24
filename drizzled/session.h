@@ -21,7 +21,7 @@
 
 #include <algorithm>
 #include <bitset>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/mutex.hpp>
@@ -85,12 +85,12 @@ private:
 
   boost::scoped_ptr<impl_c> impl_;
 public:
-  typedef boost::shared_ptr<Session> shared_ptr;
+  typedef std::shared_ptr<Session> shared_ptr;
 
-  static shared_ptr make_shared(plugin::Client *client, boost::shared_ptr<catalog::Instance> instance_arg)
+  static shared_ptr make_shared(plugin::Client *client, std::shared_ptr<catalog::Instance> instance_arg)
   {
     assert(instance_arg);
-    return boost::make_shared<Session>(client, instance_arg);
+    return std::make_shared<Session>(client, instance_arg);
   }
 
   /*
@@ -134,17 +134,17 @@ public:
   enum_sql_command getSqlCommand() const;
 
   /** query associated with this statement */
-  typedef boost::shared_ptr<const std::string> QueryString;
+  typedef std::shared_ptr<const std::string> QueryString;
 
 private:
-  boost::shared_ptr<std::string> query;
+  std::shared_ptr<std::string> query;
 
   // Never allow for a modification of this outside of the class. c_str()
   // requires under some setup non const, you must copy the QueryString in
   // order to use it.
 public:
   void resetQueryString();
-  const boost::shared_ptr<session::State>& state();
+  const std::shared_ptr<session::State>& state();
 
   QueryString getQueryString() const
   {
@@ -184,7 +184,7 @@ public:
 
   plugin::Scheduler* scheduler; /**< Pointer to scheduler object */
 
-  typedef boost::unordered_map<std::string, user_var_entry*, util::insensitive_hash, util::insensitive_equal_to> UserVars;
+  typedef std::unordered_map<std::string, user_var_entry*, util::insensitive_hash, util::insensitive_equal_to> UserVars;
 
 private:
   typedef std::pair< UserVars::iterator, UserVars::iterator > UserVarsRange;
@@ -668,7 +668,7 @@ public:
     return first_successful_insert_id_in_prev_stmt;
   }
 
-  Session(plugin::Client*, boost::shared_ptr<catalog::Instance>);
+  Session(plugin::Client*, std::shared_ptr<catalog::Instance>);
   ~Session();
 
   void cleanup();
@@ -1087,7 +1087,7 @@ private:
     return not getrusage(RUSAGE_THREAD, &usage);
   }
 
-  boost::shared_ptr<catalog::Instance> _catalog;
+  std::shared_ptr<catalog::Instance> _catalog;
 
   /** Pointers to memory managed by the ReplicationServices component */
   message::Transaction *transaction_message;
