@@ -41,6 +41,7 @@
 #include <sys/types.h>
 
 #include <boost/foreach.hpp>
+#include <boost/make_shared.hpp>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 
@@ -100,7 +101,7 @@ void Schema::prime_catalog(identifier::Catalog &catalog_identifier)
       }
 
       pair<SchemaCache::iterator, bool> ret=
-        schema_cache.insert(make_pair(schema_identifier.getPath(), new message::Schema(schema_message)));
+        schema_cache.insert(make_pair(schema_identifier.getPath(), boost::make_shared<message::Schema>(schema_message)));
 
       (void)(ret);
       assert(ret.second); // If this has happened, something really bad is going down.
@@ -176,7 +177,7 @@ bool Schema::doCreateSchema(const drizzled::message::Schema &schema_message)
 
   boost::unique_lock<boost::shared_mutex> scopedLock(mutex);
   pair<SchemaCache::iterator, bool> ret= 
-    schema_cache.insert(make_pair(schema_identifier.getPath(), new message::Schema(schema_message)));
+    schema_cache.insert(make_pair(schema_identifier.getPath(), boost::make_shared<message::Schema>(schema_message)));
 
   assert(ret.second); // If this has happened, something really bad is going down.
   return ret.second;
@@ -235,7 +236,7 @@ bool Schema::doAlterSchema(const drizzled::message::Schema &schema_message)
     schema_cache.erase(schema_identifier.getPath());
 
     pair<SchemaCache::iterator, bool> ret=
-      schema_cache.insert(make_pair(schema_identifier.getPath(), new message::Schema(schema_message)));
+      schema_cache.insert(make_pair(schema_identifier.getPath(), boost::make_shared<message::Schema>(schema_message)));
 
     assert(ret.second); // If this has happened, something really bad is going down.
     return ret.second;
