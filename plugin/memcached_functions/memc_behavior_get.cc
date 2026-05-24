@@ -130,7 +130,7 @@ String *MemcachedBehaviorGet::val_str(String *str)
       size_t setting_len= 0;
       char tmp_buff[16];
 
-      snprintf(tmp_buff, 16, "%"PRIu64, isetting);
+      snprintf(tmp_buff, 16, "%" PRIu64, isetting);
       setting_len= strlen(tmp_buff);
       return_buff.realloc(setting_len);
       return_buff.length(setting_len);

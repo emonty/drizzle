@@ -75,7 +75,7 @@ String *MemcachedDecrement::val_str(String *str)
                     offset,
                     &value);
 
-  snprintf(tmp_buff, 32, "%"PRIu64, value);
+  snprintf(tmp_buff, 32, "%" PRIu64, value);
   val_len= strlen(tmp_buff);
 
   if (rc != MEMCACHED_SUCCESS)

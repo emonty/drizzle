@@ -2044,7 +2044,7 @@ static int read_and_execute(bool interactive)
       if (show_progress_size > 0)
       {
         if ((line_number % show_progress_size) == 0)
-          fprintf(stderr, _("Processing line: %"PRIu32"\n"), line_number);
+          fprintf(stderr, _("Processing line: %" PRIu32 "\n"), line_number);
       }
       if (!glob_buffer->empty())
         status.setQueryStartLine(line_number);
@@ -4396,7 +4396,7 @@ put_info(const char *str,INFO_TYPE info_type, uint32_t error, const char *sqlsta
       }
       if (status.getQueryStartLine() && line_numbers)
       {
-        (void) fprintf(file," at line %"PRIu32,status.getQueryStartLine());
+        (void) fprintf(file," at line %" PRIu32,status.getQueryStartLine());
         if (status.getFileName())
           (void) fprintf(file," in file: '%s'", status.getFileName());
       }

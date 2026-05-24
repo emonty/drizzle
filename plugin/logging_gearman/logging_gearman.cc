@@ -246,9 +246,9 @@ public:
   
     msgbuf_len=
       snprintf(msgbuf.get(), MAX_MSG_LEN,
-               "%"PRIu64",%"PRIu64",%"PRIu64",\"%.*s\",\"%s\",\"%.*s\","
-               "%"PRIu64",%"PRIu64",%"PRIu64",%"PRIu64",%"PRIu64","
-               "%"PRIu32",%"PRIu32",%"PRIu32",\"%s\"",
+               "%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",\"%.*s\",\"%s\",\"%.*s\","
+               "%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ","
+               "%" PRIu32 ",%" PRIu32 ",%" PRIu32 ",\"%s\"",
                t_mark,
                session->thread_id,
                session->getQueryId(),

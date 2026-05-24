@@ -429,7 +429,7 @@ ErrorMap::ErrorMap()
   // program that looks over the source for the N_() macros does not
   // (obviously) do macro expansion, so the string is entirely wrong for
   // what it is trying to output for every language except english.
-  ADD_ERROR_MESSAGE(ER_NEW_ABORTING_CONNECTION, N_("Aborted connection %"PRIi64" to db: '%-.192s' user: '%-.48s' host: '%-.64s' (%-.64s)"));
+  ADD_ERROR_MESSAGE(ER_NEW_ABORTING_CONNECTION, N_("Aborted connection %" PRIi64 " to db: '%-.192s' user: '%-.48s' host: '%-.64s' (%-.64s)"));
   ADD_ERROR_MESSAGE(ER_LOCK_OR_ACTIVE_TRANSACTION, N_("Can't execute the given command because you have active locked tables or an active transaction"));
   ADD_ERROR_MESSAGE(ER_UNKNOWN_SYSTEM_VARIABLE, N_("Unknown system variable '%-.64s'"));
   ADD_ERROR_MESSAGE(ER_CRASHED_ON_USAGE, N_("Table '%-.192s' is marked as crashed and should be repaired"));

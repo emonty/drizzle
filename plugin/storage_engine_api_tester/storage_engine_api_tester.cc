@@ -461,7 +461,7 @@ void SEAPITesterCursor::CURSOR_NEW_STATE(const string &new_state)
 
   std::string cursor_state_str("Cursor ");
   char nr[50];
-  snprintf(nr, sizeof(nr), "%"PRIu64, this->id);
+  snprintf(nr, sizeof(nr), "%" PRIu64, this->id);
   cursor_state_str.append(nr);
   cursor_state_str.append(" ");
   cursor_state_str.append(cursor_state);

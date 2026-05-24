@@ -2224,15 +2224,15 @@ void print_conclusions(Conclusions &con)
   printf("\tTotal time for tests: %ld.%03ld seconds\n",
          con.getSumOfTime() / 1000, con.getSumOfTime() % 1000);
   printf("\tStandard Deviation: %ld.%03ld\n", con.getStdDev() / 1000, con.getStdDev() % 1000);
-  printf("\tNumber of queries in create queries: %"PRIu64"\n", con.getCreateCount());
+  printf("\tNumber of queries in create queries: %" PRIu64 "\n", con.getCreateCount());
   printf("\tNumber of clients running queries: %u/%u\n",
          con.getUsers(), con.getRealUsers());
   printf("\tNumber of times test was run: %u\n", iterations);
-  printf("\tAverage number of queries per client: %"PRIu64"\n", con.getAvgRows());
+  printf("\tAverage number of queries per client: %" PRIu64 "\n", con.getAvgRows());
 
   uint64_t temp_val= failed_update_for_transaction; 
   if (temp_val)
-    printf("\tFailed number of updates %"PRIu64"\n", temp_val);
+    printf("\tFailed number of updates %" PRIu64 "\n", temp_val);
 
   printf("\n");
 }
@@ -2277,7 +2277,7 @@ void print_conclusions_csv(Conclusions &con)
 
   snprintf(buffer, HUGE_STRING_LENGTH,
            "%s,%s,%ld.%03ld,%ld.%03ld,%ld.%03ld,%ld.%03ld,%ld.%03ld,"
-           "%u,%u,%u,%"PRIu64"\n",
+           "%u,%u,%u,%" PRIu64 "\n",
            con.getEngine() ? con.getEngine() : "", /* Storage engine we ran against */
            label_buffer, /* Load type */
            con.getAvgTiming() / 1000, con.getAvgTiming() % 1000, /* Time to load */
@@ -2294,8 +2294,8 @@ void print_conclusions_csv(Conclusions &con)
   ssize_t write_ret= write(csv_file, (unsigned char*) buffer, buff_len);
   if (write_ret != (ssize_t)buff_len)
   {
-    fprintf(stderr, _("Unable to fully write %"PRIu64" bytes. "
-                      "Could only write %"PRId64"."), (uint64_t)write_ret,
+    fprintf(stderr, _("Unable to fully write %" PRIu64 " bytes. "
+                      "Could only write %" PRId64 "."), (uint64_t)write_ret,
                       (int64_t)buff_len);
     exit(-1);
   }

@@ -523,7 +523,7 @@ void _mi_report_crashed(MI_INFO *file, const char *message,
   Session *cur_session;
   if ((cur_session= file->in_use))
   {
-    errmsg_printf(error::ERROR, _("Got an error from thread_id=%"PRIu64", %s:%d"),
+    errmsg_printf(error::ERROR, _("Got an error from thread_id=%" PRIu64 ", %s:%d"),
                     cur_session->thread_id,
                     sfile, sline);
   }

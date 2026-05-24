@@ -1064,7 +1064,7 @@ static bool internal_alter_table(Session *session,
 
   set_table_default_charset(session->catalog().identifier(), create_info, new_table_identifier.getSchemaName().c_str());
 
-  snprintf(tmp_name, sizeof(tmp_name), "%s-%lx_%"PRIx64, TMP_FILE_PREFIX, (unsigned long) current_pid, session->thread_id);
+  snprintf(tmp_name, sizeof(tmp_name), "%s-%lx_%" PRIx64, TMP_FILE_PREFIX, (unsigned long) current_pid, session->thread_id);
 
   /* Create a temporary table with the new format */
   /**
@@ -1244,7 +1244,7 @@ static bool internal_alter_table(Session *session,
 
       session->set_proc_info("rename result table");
 
-      snprintf(old_name, sizeof(old_name), "%s2-%lx-%"PRIx64, TMP_FILE_PREFIX, (unsigned long) current_pid, session->thread_id);
+      snprintf(old_name, sizeof(old_name), "%s2-%lx-%" PRIx64, TMP_FILE_PREFIX, (unsigned long) current_pid, session->thread_id);
 
       files_charset_info->casedn_str(old_name);
 

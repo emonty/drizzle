@@ -368,7 +368,7 @@ char client_process(client_st *client, client_con_st *client_con)
           }
           else
           {
-            printf("     (%"PRIu64") %.*s\n", static_cast<uint64_t>(field_sizes[x]), (int32_t)field_sizes[x], row[x]);
+            printf("     (%" PRIu64 ") %.*s\n", static_cast<uint64_t>(field_sizes[x]), (int32_t)field_sizes[x], row[x]);
           }
         }
 

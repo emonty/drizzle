@@ -70,7 +70,7 @@ void drizzled_sigint_handler(int sig){
 void drizzled_print_signal_warning(int sig)
 {
   if (global_system_variables.log_warnings)
-    errmsg_printf(error::WARN, _("Got signal %d from thread %"PRIu32),
+    errmsg_printf(error::WARN, _("Got signal %d from thread %" PRIu32),
                   sig, global_thread_id);
 #ifndef HAVE_BSD_SIGNALS
   sigset_t set;
@@ -164,7 +164,7 @@ void drizzled_handle_segfault(int sig)
                     "the problem, but since we have already crashed, "
                     "something is definitely wrong\nand this may fail.\n\n"));
   fprintf(stderr, "read_buffer_size=%ld\n", (long) global_system_variables.read_buff_size);
-  fprintf(stderr, "max_used_connections=%"PRIu64"\n", current_global_counters.max_used_connections);
+  fprintf(stderr, "max_used_connections=%" PRIu64 "\n", current_global_counters.max_used_connections);
   fprintf(stderr, "connection_count=%u\n", uint32_t(connection_count));
   fprintf(stderr, _("It is possible that drizzled could use up to \n"
                     "(read_buffer_size + sort_buffer_size)*thread_count\n"

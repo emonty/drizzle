@@ -148,7 +148,7 @@ module::Library *module::Library::loadLibrary(const string &plugin_name, bool bu
     errmsg_printf(error::ERROR,
                   _("Plugin module %s was compiled for version %" PRIu64 ", "
                     "which does not match the current running version of "
-                    "Drizzle: %" PRIu64"."),
+                    "Drizzle: %" PRIu64 "."),
                  dlpath.c_str(), module_manifest->drizzle_version,
                  static_cast<uint64_t>(DRIZZLE_VERSION_ID));
     return NULL;
