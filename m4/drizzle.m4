@@ -62,10 +62,7 @@ AC_DEFUN([DRIZZLE_BUILD_SETUP],[
 
   PANDORA_PLATFORM
 
-  PANDORA_CHECK_CXX_STANDARD
-  AS_IF([test "$ac_cv_cxx_stdcxx_98" = "no"],[
-    PANDORA_MSG_ERROR([No working C++ Compiler has been found. ${PACKAGE} requires a C++ compiler that can handle C++98])
-  ])
+  AX_CXX_COMPILE_STDCXX([11],[ext],[mandatory])
   AX_CXX_CINTTYPES
 
   PANDORA_CHECK_C_VERSION
@@ -400,24 +397,6 @@ AC_DEFUN([PANDORA_VERSION],[
   PANDORA_HEX_VERSION=`echo $VERSION | sed 's|[\-a-z0-9]*$||' | \
     awk -F. '{printf "0x%0.2d%0.3d%0.3d", $[]1, $[]2, $[]3}'`
   AC_SUBST([PANDORA_HEX_VERSION])
-])
-
-AC_DEFUN([PANDORA_CHECK_CXX_STANDARD],[
-  AS_IF([test "$GCC" = "yes"],
-        [AS_IF([test "$ac_cv_cxx_compile_cxx0x_native" = "yes"],[],
-               [AS_IF([test "$ac_cv_cxx_compile_cxx0x_gxx" = "yes"],
-                      [CXX_STANDARD="-std=gnu++0x"],
-                      [CXX_STANDARD="-std=gnu++98"])
-               ])
-        ])
-  AM_CXXFLAGS="${CXX_STANDARD} ${AM_CXXFLAGS}"
-
-  save_CXXFLAGS="${CXXFLAGS}"
-  CXXFLAGS="${CXXFLAGS} ${CXX_STANDARD}"
-  AX_CXX_HEADER_STDCXX_98
-  CXXFLAGS="${save_CXXFLAGS}"
-
-  AC_SUBST([CXX_STANDARD])
 ])
 
 dnl Record the compiler version strings for the configure summary.
