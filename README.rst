@@ -30,35 +30,41 @@ Scope
 * Simple design for ease of use and administration
 * Reliable, ACID transactional
 
-Getting Drizzle running
-=======================
+Compiling from source
+=====================
 
-Drizzle is container-first. The repo ships a ``Containerfile`` and a
-``bindep.txt`` package list; every documented build and test invocation
-is a ``podman`` command against that container. The revival is still
-forward-porting from Ubuntu Precise, so a host build is not supported.
+Just build the container::
 
-Inner loop — build only, fast iteration::
+    podman build .
 
-    podman build --platform linux/amd64 --target=build -t drizzle:build .
+Yes, docker works too, don't be silly. But I love rootless podman myself.
 
-Verification — build then run tests::
+Dependencies
+------------
 
-    podman build --platform linux/amd64 --target=test -t drizzle:test .
-    podman run --rm drizzle:test
+The dependencies are listed in ``bindep.txt`` to be used with either ``bindep``
+or ``bindep-rs``. The Containerfile uses ``bindep-rs`` to avoid polluting the
+dependency list.
 
-arm64 readiness check (configure + compile, tests not gating yet)::
+Compiling
+---------
 
-    podman build --platform linux/arm64 --target=build -t drizzle:build-arm64 .
+::
 
-Local mirror of CI::
+    autoreconf -i
+    ./configure && make && make test
 
-    ./tools/regress.sh
+But seriously, just build the container. The chances this builds TODAY on your
+laptop are pretty much none, as we're still forward-porting from Ubuntu Precise.
 
-Build, test, and perf dependencies live in ``bindep.txt`` (consumed by
-``bindep-rs`` inside the ``Containerfile``). For the full revival
-roadmap and contributor conventions, see ``AGENTS.md`` and
-``docs/specs/revival.rst``.
+Running Drizzle
+---------------
+
+Just run the container!
+
+Fun story - every config value in Drizzle is settable via env vars which is
+how all the fancy container people like it. Been that way since 2008. What's
+old is new again.
 
 Cheers!
 
