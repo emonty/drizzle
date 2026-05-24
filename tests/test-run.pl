@@ -3530,8 +3530,8 @@ sub drizzled_wait_started($){
 sub collapse_path ($) {
 
     my $c_path= rel2abs(shift);
-    my $updir  = updir($c_path);
-    my $curdir = curdir($c_path);
+    my $updir  = updir();
+    my $curdir = curdir();
 
     my($vol, $dirs, $file) = splitpath($c_path);
     my @dirs = splitdir($dirs);
