@@ -8,6 +8,45 @@ Drizzle Revival (2026)
 :Target endpoint: Ubuntu 26.04 LTS, multi-arch (amd64 + arm64) container
 :Last updated: 2026-05
 
+Status and next
+===============
+
+A fast orientation for any agent or contributor opening this file
+cold. Read this block first; the rest of the spec is the roadmap.
+
+* **Landed.** Phase 0 (tests in container, Zuul scaffolding sitting
+  inert under ``future-zuul.d/``, this spec landed), Phase 1
+  (dead-platform strip, ``m4/pandora_*.m4`` simplifications, dead-dep
+  plugins deleted), and Phase 2 (performance baseline harness under
+  ``perf/``). Each landed phase's commits are tagged in commit
+  messages, *under their old numbers* — what this spec now calls
+  Phase 2 appears in older commits as Phase 1.5. See the Renumber
+  note below for the full map.
+* **In flight, then paused.** Phase 11 (Pandora slim-down to
+  ``m4/drizzle.m4``) — what older commit messages call Phase 2. A
+  number of build-setup macros have folded into ``m4/drizzle.m4``
+  (version, C++ standard, dtrace, platform, optimize, warnings, VC
+  info); the headline work (library-presence macros to
+  ``PKG_CHECK_MODULES``, killing the last ``AX_PTHREAD`` caller,
+  finishing the bzr/svn/hg strip, the ``PANDORA_`` → ``DRIZZLE_``
+  rename) is open but **deliberately deferred** until after the LTS
+  ratchet reaches 26.04.
+* **Next.** Phase 3 (container hygiene and Phase 0 follow-ups),
+  then Phases 4–10 (the LTS-bump ratchet from 14.04 through 26.04).
+  The Pandora slim-down (Phase 11) is held back from this run because
+  the existing Pandora layer still works, and the LTS ratchet brings
+  in modern pkg-config / Boost / OpenSSL / protobuf that make the
+  macro conversion cleaner than fighting the 12.04 toolchain. Then
+  Phase 12 (constant-fold), Phase 13 (plugin enable-by-default
+  sweep), Phase 14 (Sphinx-only docs).
+
+**Renumber note.** This revision renumbered phases for linear
+sequencing. Map: 1.5 → 2, 1.6 → 3, old 3–9 → 4–10, old 2 → 11, old
+2.5 → 12, old 10 → 13, old 11 → 14. Commits landed under the old
+numbers keep their commit messages; future commits use the new
+numbers.
+
+
 This spec is the load-bearing roadmap for reviving the Drizzle code base
 from its 2013 state (Ubuntu 12.04 base, autotools + Pandora macro layer,
 no working tests in CI) to a modern, single-target, container-first
@@ -30,8 +69,8 @@ Drizzle was last actively developed around 2013. The current state:
 
 * ``configure.ac`` is at version 7.2; ~300 lines, plus a heavy "Pandora"
   m4 macro layer (~55 of 136 m4 files).
-* 82 plugins are registered via ``config/pandora-plugin.ini`` and a
-  ``config/pandora-plugin`` Python enumeration script.
+* The in-tree plugins are registered via ``config/pandora-plugin.ini``
+  and a ``config/pandora-plugin`` Python enumeration script.
 * The repo's ``Containerfile`` builds against Ubuntu 12.04 (Precise, long
   EOL) using ``bindep-rs`` to install ``bindep.txt``. The build runs;
   tests do not.
@@ -70,8 +109,12 @@ would have enabled on the target *must remain*. Examples:
 * 64-bit sizes — don't probe ``sizeof(void*)``; hardcode
   ``SIZEOF_VOIDP=8``, ``SIZEOF_LONG=8``, ``SIZEOF_SIZE_T=8``,
   ``SIZEOF_OFF_T=8``, ``SIZEOF_LONG_LONG=8``.
-* Large-file support — don't probe; unconditional
-  ``-D_FILE_OFFSET_BITS=64``.
+* Large-file support — don't probe. On LP64 Linux ``off_t`` is
+  already 8 bytes by default, so ``-D_FILE_OFFSET_BITS=64`` is a
+  no-op; ``config/top.h`` ``#undef``\ s any caller-supplied value as
+  deliberate neutralization (an outer build that sets
+  ``_FILE_OFFSET_BITS=64`` is fine; one that sets it to ``32`` won't
+  silently downgrade us).
 * POSIX/glibc-guaranteed functions (``memmove``, ``strerror``,
   ``inet_ntoa``, etc.) — delete the ``AC_CHECK_FUNCS`` probe; either
   delete the corresponding ``#ifdef HAVE_*`` in source or
@@ -79,7 +122,11 @@ would have enabled on the target *must remain*. Examples:
 * Standard C++ headers (``<cstdint>``, ``<unordered_map>``,
   ``<memory>``) — assume present.
 * Visibility — don't probe ``gl_VISIBILITY``; hardcode
-  ``-fvisibility=hidden -fvisibility-inlines-hidden``.
+  ``CFLAG_VISIBILITY="-fvisibility=hidden"`` and apply it per-target
+  on the libdrizzle libraries. A build-wide
+  ``-fvisibility=hidden -fvisibility-inlines-hidden`` pass needs
+  every genuinely-public symbol annotated first and is tracked in
+  :ref:`spec-revival-future-work`.
 * Stack-direction probe (``DRIZZLE_STACK_DIRECTION``) — hardcode
   "grows down".
 * Endianness — hardcode little-endian.
@@ -109,7 +156,7 @@ Aggressive commit splitting; every commit green
 * **Every commit is fully green.** ``podman build --target=build``
   succeeds, ``podman build --target=test`` succeeds, ``make unit``
   exits 0, ``make test-drizzle`` exits 0. No commit may break tests
-   — not even transiently. If a change requires a sequence, structure the
+  — not even transiently. If a change requires a sequence, structure the
   sequence so intermediate steps stay green (typical pattern:
   *add new code* → *migrate callers* → *delete old code*, three
   commits, each green).
@@ -133,6 +180,15 @@ The narrow exception: if a removal genuinely needs to *warn future
 contributors away* from re-introducing a pattern, a comment about the
 *constraint* is fine, but never about the *history*.
 
+Current in-tree violations to clean up (cleanup itself lives under
+:ref:`Phase 3 <spec-revival-container-hygiene>`):
+
+* ``configure.ac:47-49`` — describes what ``gl_VISIBILITY`` used to do.
+* ``m4/drizzle.m4:35-39`` — explains what ``DRIZZLE_BUILD_SETUP``
+  replaces.
+* ``m4/drizzle.m4:369-371`` — narrates the prior probe-gated warning
+  flags.
+
 Multi-arch readiness from the start
 -----------------------------------
 
@@ -151,6 +207,10 @@ pointer. These are safe hardcoded assumptions. But:
 Phase map
 =========
 
+Listed in execution order. The Pandora slim-down (Phase 11) and the
+constant-fold (Phase 12) sit *after* the LTS ratchet by design — see
+the Status and next preamble for the rationale.
+
 .. list-table::
    :header-rows: 1
    :widths: 5 35 12 8
@@ -167,51 +227,55 @@ Phase map
      - Strip dead platforms; delete dead-dep plugins
      - 12.04
      - L
-   * - 1.5
+   * - 2
      - Performance baseline harness
      - 12.04
      - M
-   * - 2
-     - Pandora slim-down to ``m4/drizzle.m4``
-     - 12.04
-     - M
-   * - 2.5
-     - Constant-fold the hardcoded defines into the source
+   * - 3
+     - Container hygiene and Phase 0 follow-ups
      - 12.04
      - S
-   * - 3
+   * - 4
      - LTS bump 14.04
      - 14.04
      - M
-   * - 4
+   * - 5
      - LTS bump 16.04 (C++11 baseline)
      - 16.04
      - M
-   * - 5
+   * - 6
      - LTS bump 18.04 (Boost 1.65, OpenSSL 1.1, fs v2→v3)
      - 18.04
      - L
-   * - 6
+   * - 7
      - LTS bump 20.04 (protobuf 3, C++17, PCRE2)
      - 20.04
      - XL
-   * - 7
+   * - 8
      - LTS bump 22.04 (OpenSSL 3)
      - 22.04
      - L
-   * - 8
+   * - 9
      - LTS bump 24.04
      - 24.04
      - M
-   * - 9
+   * - 10
      - LTS bump 26.04 (multi-arch gating, clean bindep)
      - 26.04
      - M
-   * - 10
+   * - 11
+     - Pandora slim-down to ``m4/drizzle.m4``
+     - 26.04
+     - M
+   * - 12
+     - Constant-fold the hardcoded defines into the source
+     - 26.04
+     - S
+   * - 13
      - Plugin enable-by-default sweep
      - 26.04
      - L
-   * - 11
+   * - 14
      - Sphinx-only docs (Doxygen removal)
      - 26.04
      - S
@@ -302,7 +366,7 @@ Verification — build then run tests:
 .. code-block:: console
 
    podman build --platform linux/amd64 --target=test -t drizzle:test .
-   podman run --rm --net=host drizzle:test
+   podman run --rm drizzle:test
 
 arm64 readiness check (no test gating yet, just configure+compile):
 
@@ -323,16 +387,15 @@ Test target choice
 * ``make test-drizzle`` with ``NORMAL_TESTS`` (DTR / Perl harness via
   ``tests/test-run.pl``).
 * **Skipped at this phase:** ``kewpie``, ``test-big``, ``test-randgen``.
-  Too slow and/or Python-2 dependent. Revisit in Phase 10 if useful.
+  Too slow and/or Python-2 dependent. Revisit in Phase 13 if useful.
 
 Container test runtime needs
 ----------------------------
 
 * Writable vardir under ``/build`` (the build cache mount).
 * ``DTR_BUILD_THREAD=$$`` for port-offset uniqueness within a single
-  container.
-* ``--net=host`` for port binding **on the test stage only**. The
-  ``build`` stage stays network-clean.
+  container. Server and client both live inside the container's
+  netns, so default networking is sufficient; no ``--net=host``.
 * No "drizzle" UNIX user required (the historical guard has already
   been removed; see ``a82202956``).
 
@@ -342,9 +405,9 @@ Done when
 * ``podman build --target=build`` succeeds on amd64 (regression check
   of current behavior).
 * ``podman build --target=test`` succeeds on amd64.
-* ``podman run --rm --net=host drizzle:test`` exits 0
+* ``podman run --rm drizzle:test`` exits 0
 * ``podman build --platform linux/arm64 --target=build`` succeeds
-  (configure + compile only; tests not gating until Phase 9).
+  (configure + compile only; tests not gating until Phase 10).
 * Zuul ``check`` pipeline runs ``drizzle-lint`` green.
 * Zuul ``vouched`` pipeline runs ``drizzle-build-image`` +
   ``drizzle-unit-tests`` + ``drizzle-dtr-tests`` + ``drizzle-distcheck``
@@ -357,8 +420,6 @@ Risks
 * DTR's vardir lives in ``/build`` (the cache mount), not in the
   read-only bind-mounted source. Confirm the cache survives between
   ``build`` and ``test`` stages.
-* Rootless podman port binding can collide. ``--net=host`` solves it
-  for now; revisit if multi-tenant CI runners need isolation.
 
 
 Phase 1 — Strip dead platforms, delete dead-dep plugins
@@ -412,7 +473,7 @@ one commit; many are multiple commits.
   enabling ``-D_FILE_OFFSET_BITS=64``) must remain. Replace the macro
   body with unconditional ``AC_DEFINE`` lines and the appropriate
   ``AM_CFLAGS += -D_FILE_OFFSET_BITS=64``. (Will fold into
-  ``m4/drizzle.m4`` in Phase 2.)
+  ``m4/drizzle.m4`` in Phase 11.)
 * Delete the ``AX_PTHREAD`` invocation; **hardcode** ``-pthread`` into
   ``AM_CFLAGS``/``AM_CXXFLAGS``/``AM_LDFLAGS`` and
   ``AC_DEFINE([HAVE_PTHREAD],[1])``.
@@ -448,6 +509,10 @@ one commit; many are multiple commits.
   ``_mm_*``, SSE/AVX) and x86 inline asm. List any findings in the
   :ref:`spec-revival-multiarch-hazards` appendix so later phases know
   where aarch64 paths are needed. Don't fix in Phase 1 unless trivial.
+  The Phase 1 audit's scope turned out to be narrower than its
+  "no hazards found" wording suggested — see the multi-arch
+  hazards appendix for the rewritten honest result and the
+  remaining queue.
 
 **Plugin and dependency deletions.** Each is its own commit:
 
@@ -475,18 +540,18 @@ Both return empty.
 The grep is scoped to ``configure.ac`` deliberately. The first-party
 ``m4/pandora_*.m4`` macros still carry Solaris/Intel/PowerPC arms at
 the close of Phase 1; they are removed as each file is folded into
-``m4/drizzle.m4`` in Phase 2 — writing the macro afresh drops the dead
+``m4/drizzle.m4`` in Phase 11 — writing the macro afresh drops the dead
 arms without a throwaway in-place edit first. The vendored m4 files
 (``boost.m4``, the gettext set, ``ax_pthread.m4``) keep their
 portability code: they are upstream and regenerated, not hand-edited.
-The ≥40% ``wc -l m4/*.m4`` reduction is consequently a Phase 2
+The ≥40% ``wc -l m4/*.m4`` reduction is consequently a Phase 11
 outcome, measured there.
 
 * Phase 0 tests still pass on amd64.
 * ``podman build --platform linux/arm64 --target=build`` still gets
   through ``./configure`` cleanly. Test failures on arm64 are recorded
   in :ref:`spec-revival-multiarch-hazards` but not gating until
-  Phase 9.
+  Phase 10.
 
 Risks
 -----
@@ -497,8 +562,8 @@ Risks
   wrapping. Verify it isn't load-bearing before deletion.
 
 
-Phase 1.5 — Performance baseline harness
-========================================
+Phase 2 — Performance baseline harness
+======================================
 
 Objective
 ---------
@@ -512,7 +577,7 @@ counts instructions, which is reproducible run-to-run and identical on
 any host.
 
 This phase ships only measurement infrastructure — it changes no
-server code. It exists so that Phase 2 onward have a signal.
+server code. It exists so that subsequent phases have a signal.
 
 Tasks
 -----
@@ -549,8 +614,8 @@ Tasks
   build.
 * At the close of every later phase, run ``tools/perf.sh`` by hand
   and commit the numbers as ``perf/<release>.json`` —
-  ``perf/14.04.json`` when Phase 3 lands, ``perf/16.04.json`` for
-  Phase 4, and so on. ``perf/baseline.json`` (the 12.04 result) is
+  ``perf/14.04.json`` when Phase 4 lands, ``perf/16.04.json`` for
+  Phase 5, and so on. ``perf/baseline.json`` (the 12.04 result) is
   never overwritten. The accumulating set of per-release files is the
   performance time series, all in one place — no external dashboard.
   Once the revival reaches 26.04 we revisit how to re-baseline.
@@ -590,8 +655,294 @@ Risks
   destroy reproducibility — the curated workload uses none.
 
 
-Phase 2 — Pandora slim-down to ``m4/drizzle.m4``
-================================================
+.. _spec-revival-container-hygiene:
+
+Phase 3 — Container hygiene and Phase 0 follow-ups
+==================================================
+
+Objective
+---------
+
+Land the parts of the Phase 0 test-image contract that weren't
+actually realized (built tree in the image layer, runtime ``CMD``,
+per-arch cache isolation, ``m4/drizzle.m4`` in ``EXTRA_DIST``),
+tighten dependency hygiene, and mirror this spec's decisions into
+the project's orientation docs and source-comment hygiene. The phase
+touches only build-system, container, and documentation files — no
+C++ source changes.
+
+This phase exists because every subsequent phase's "every commit
+green" invariant relies on ``podman run drizzle:test`` actually
+running tests against the just-built tree. Today it doesn't.
+
+Tasks
+-----
+
+Container hygiene (each item is a candidate commit, ordered):
+
+* Add ``m4/drizzle.m4`` to ``EXTRA_DIST`` in ``Makefile.am``. Lands
+  first — protects ``make distcheck`` while the rest of the stack
+  reshuffles the container build.
+* Make the build cache per-arch:
+  ``id=drizzle-build-${TARGETPLATFORM}`` in the three
+  ``--mount=type=cache`` lines of ``Containerfile``. amd64 and
+  arm64 stop reusing each other's object files and configure
+  results.
+* Materialize the built tree into the image layer (``cp -au`` out
+  of the cache mount inside the ``build`` stage); repoint ``test``
+  and ``perf`` stages at the in-image path; add
+  ``CMD ["tools/run-tests.sh"]`` to the ``test`` stage so
+  ``podman run drizzle:test`` runs tests at runtime; drop the
+  build-time ``RUN tools/run-tests.sh``. One commit — the four
+  pieces only make sense together.
+* Confirm ``tools/regress.sh`` runs the runtime contract end to
+  end (``podman run drizzle:regress-test``, no ``--net=host``);
+  align help text if needed.
+* Move ``rabbitmq-server`` from ``[compile platform:dpkg]`` to
+  ``[test platform:dpkg]`` in ``bindep.txt``. Safe only after the
+  test image carries its own tree *and* installs the ``test``
+  bindep profile.
+* Pin the perf-harness CPAN fetch in ``Containerfile`` with
+  ``ADD --checksum=sha256:<pin>`` for the ``DBD::drizzle`` tarball.
+  Remote fetch + checksum is the preferred pattern — vendoring is
+  deliberately avoided.
+* Verify the cache reconfigure behavior. The current
+  ``[ ! -f Makefile ]`` guard exists so a no-op iteration doesn't
+  re-run ``autoreconf -i && ./configure`` (which would churn
+  ``config.h`` and discard the build cache on every build). The
+  expectation is that the automake-generated ``Makefile`` already
+  detects edits to ``configure.ac`` / ``m4/*.m4`` / ``Makefile.am``
+  and re-runs the right pieces from inside the cache. Verify
+  during the next test pass; only add a smarter cache-bust (hash
+  the build-system inputs into a stamp file, compare on entry, run
+  ``autoreconf -i && ./configure`` on mismatch) if the self-regen
+  turns out to be unreliable across the cache mount. Do **not**
+  drop the guard.
+
+Companion doc and convention cleanup (separate sub-stack — mirror
+this spec's decisions into the orientation docs and source-comment
+hygiene):
+
+* Update ``AGENTS.md`` to match the spec: drop ``--net=host`` from
+  the verification example, refresh the test-runtime contract
+  line, replace any hardcoded plugin count with phrasing.
+* Rewrite ``README.rst`` so the front matter routes contributors to
+  the ``Containerfile`` / ``bindep.txt`` / ``tools/regress.sh``
+  flow. No Docker, no PPAs, no source-install. Deeper docs pruning
+  stays in Phase 14.
+* Clean up the gravestone comments listed in the
+  Foundational principles "No gravestone comments" violation list
+  above — rewrite as forward-looking constraints, or delete.
+* ``future-zuul.d/projects.yaml`` currently schedules only
+  ``drizzle-build-image`` (amd64). Either add a scheduled
+  ``drizzle-build-image-arm64`` per the CI strategy section, or
+  drop a TODO comment naming it as a known gap to close at
+  activation time.
+
+Done when
+---------
+
+* ``podman build --target=test -t drizzle:test .`` followed by
+  ``podman run --rm drizzle:test`` runs tests and exits 0; no
+  ``podman run`` invocation in the spec, ``AGENTS.md``, or
+  ``tools/regress.sh`` uses host networking.
+* ``make distcheck`` passes.
+* amd64 and arm64 builds reuse nothing from each other's cache.
+* ``grep -niE 'docker|dockerfile' README.rst`` returns empty.
+* No gravestone comments remain at the three sites listed under
+  Foundational principles.
+
+Risks
+-----
+
+* The reconfigure-behavior verification may find that automake's
+  self-regen doesn't fire reliably across the cache mount, in
+  which case we add the stamp-based cache-bust noted above.
+  Dropping the ``[ ! -f Makefile ]`` guard outright is *not* the
+  fix — it makes the cache useless.
+* The ``rabbitmq-server`` profile move must land *after* the test
+  image actually installs the ``test`` bindep profile; reordering
+  breaks DTR.
+
+
+.. _spec-revival-lts-template:
+
+Phases 4–10 — LTS bump template
+===============================
+
+Each LTS bump follows the same shape. Sub-phases per LTS are listed
+afterward.
+
+Template tasks
+--------------
+
+1. Bump the ``FROM`` line of the ``Containerfile`` ``base`` stage.
+   Base images are pulled from quay.io rather than docker.io so that
+   Zuul never trips docker.io's pull rate limits:
+
+   - Through Ubuntu 20.04, use
+     ``quay.io/inaugust/unsafe-old-distro-danger:X.04`` — mirrors of
+     the EOL Ubuntu LTS images, with ``/etc/apt/sources.list``
+     already repointed at ``old-releases.ubuntu.com`` for the
+     releases that need it. This is why the ``base`` stage carries no
+     ``old-releases`` ``sed``.
+   - From Ubuntu 22.04 on, use ``quay.io/opendevmirror/ubuntu:X.04``,
+     the OpenDev infrastructure mirror of the still-supported images.
+
+   Both registries publish ``linux/amd64`` and ``linux/arm64``.
+2. Update ``bindep.txt``: replace ``[platform:ubuntu-PREVIOUS]``
+   selector lines with ``[platform:ubuntu-CURRENT]``, adjusting
+   versioned package names (boost, protobuf, etc.). One commit.
+3. Build on amd64:
+
+   .. code-block:: console
+
+      podman build --platform linux/amd64 --target=build \
+        -t drizzle:phaseN-amd64-build .
+
+   Triage compile breakage. Fix code. ``-Wno-xxx`` permitted only as
+   last resort, with a written rationale in the commit message.
+
+4. Test on amd64:
+
+   .. code-block:: console
+
+      podman build --platform linux/amd64 --target=test \
+        -t drizzle:phaseN-amd64-test .
+      podman run --rm drizzle:phaseN-amd64-test
+
+   Fix test failures.
+
+5. Build on arm64 (build-only readiness until Phase 10):
+
+   .. code-block:: console
+
+      podman build --platform linux/arm64 --target=build \
+        -t drizzle:phaseN-arm64-build .
+
+   Must succeed. Test runs on arm64 are encouraged for local
+   validation but not gating until Phase 10, so no ``--target=test``
+   build and no arm64 ``test`` tag exist for Phases 4–9.
+
+6. ``make distcheck`` must pass on amd64.
+7. The per-arch tags from steps 3–5 are the artifacts the ``promote``
+   pipeline later pushes (re-tagged with the merge SHA + phase name):
+   ``drizzle:phaseN-amd64-build``, ``drizzle:phaseN-amd64-test``,
+   ``drizzle:phaseN-arm64-build``. Phase 10 adds
+   ``drizzle:phase10-arm64-test`` to the set when arm64 becomes
+   test-gating.
+
+Phase-specific notes
+--------------------
+
+Phase 4 — Ubuntu 14.04
+~~~~~~~~~~~~~~~~~~~~~~
+
+Lightest LTS bump. Boost 1.46 → 1.54; protobuf still 2.x; OpenSSL
+still 1.0. Mostly warning-flag drift.
+
+Phase 5 — Ubuntu 16.04 (C++11 baseline)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Add ``AX_CXX_COMPILE_STDCXX([11],[noext],[mandatory])`` to
+  ``configure.ac`` — one commit.
+* Delete now-redundant C++11-capability m4 files
+  (``pandora_check_cxx_standard.m4``, ``pandora_shared_ptr.m4``,
+  ``pandora_stl_hash.m4``, ``ax_cxx_compile_stdcxx_0x.m4``,
+  ``ax_cxx_header_stdcxx_98.m4``) — one commit per file.
+* Mechanical rename ``boost::shared_ptr`` → ``std::shared_ptr``
+  across ``drizzled/``. Stack of small commits, one per directory or
+  logical unit so each stays green.
+* Mechanical rename ``boost::unordered_map`` → ``std::unordered_map``
+  similarly.
+
+Phase 6 — Ubuntu 18.04 (Boost 1.65, OpenSSL 1.1)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+First real friction phase. Sub-stacks:
+
+* Audit ``#include <boost/...>`` across ``drizzled/`` and ``plugin/``.
+  Replace ``boost/foreach.hpp`` with C++11 range-for (one commit per
+  consumer).
+* Migrate ``boost::filesystem`` v2 API to v3. Dedicate this to its
+  own contributor; it's the worst single transition of Phase 6.
+* OpenSSL 1.1 makes ``SSL_CTX`` and friends opaque. Replace direct
+  field access with accessor functions. Audit ``plugin/auth_*``,
+  ``client/``, ``drizzled/``.
+* Add ``-Wimplicit-fallthrough`` annotations or ``[[fallthrough]];``.
+
+Phase 7 — Ubuntu 20.04 (protobuf 3, C++17, PCRE2)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Hardest phase. Four sub-stacks; the order below is the recommended
+sequencing — the compiler-mode flip lands first so the C++17 sweep
+has something to compile against.
+
+* **7.0: Enable C++17 in the build.** Set
+  ``AX_CXX_COMPILE_STDCXX([17],[noext],[mandatory])`` (or the
+  equivalent that replaces ``PANDORA_CHECK_CXX_STANDARD``) and
+  confirm ``podman build --target=test`` stays green before any
+  C++17-only source change lands. Mandatory: no ad-hoc
+  ``-std=c++17`` introduction inside a later patch.
+* **7a: protobuf 2 → 3.** Regenerate ``.pb.cc`` / ``.pb.h`` at
+  configure time; stop versioning generated code. Update API uses
+  (``set_allocated_*`` semantics; ``Reflection`` API churn; arena
+  allocation).
+* **7b: libpcre1 → libpcre2.** Rewrite ``m4/pandora_have_libpcre.m4``
+  (or its replacement in ``m4/drizzle.m4``) to
+  ``PKG_CHECK_MODULES([PCRE2],[libpcre2-8])``. Audit
+  ``plugin/regex_policy/`` and any other direct PCRE callers.
+* **7c: C++17 sweep.** ``std::auto_ptr`` → ``std::unique_ptr``;
+  ``std::random_shuffle`` → ``std::shuffle`` + ``std::mt19937``;
+  ``register`` keyword removed; ``throw()`` → ``noexcept``.
+
+Bump ``BOOST_REQUIRE([1.46])`` to ``BOOST_REQUIRE([1.71])`` in
+``configure.ac``.
+
+Phase 8 — Ubuntu 22.04 (OpenSSL 3)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Switch the ``Containerfile`` ``base`` image from
+  ``quay.io/inaugust/unsafe-old-distro-danger`` to
+  ``quay.io/opendevmirror/ubuntu:22.04``. 22.04 is still supported, so
+  the OpenDev mirror carries it and its apt sources need no rewrite.
+* Migrate direct ``SHA1_*``/``MD5_*``/``HMAC_*`` calls to ``EVP_*``
+  equivalents (``plugin/md5/``, ``plugin/auth_http/``,
+  ``drizzled/sha1.cc`` if present).
+* Either fix every ``OPENSSL_NO_DEPRECATED_3_0`` warning or accept
+  ``-Wno-deprecated-declarations`` in a single compilation unit (auth
+  code), explicitly noted in commit message.
+* Bump Boost requirement to 1.74.
+
+Phase 9 — Ubuntu 24.04
+~~~~~~~~~~~~~~~~~~~~~~
+
+Mostly free. GCC 13 / Boost 1.83 ``-Werror`` casualty sweep.
+
+Phase 10 — Ubuntu 26.04 (final landing)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Drop every ``[platform:ubuntu-*]`` selector from ``bindep.txt`` — we
+  don't support those platforms anymore; the LTS bumps were one-way
+  ratchets.
+* **arm64 becomes fully gating.** ``make test-drizzle`` must pass on
+  both architectures. Extend step 5 of the LTS bump template to also
+  build ``--target=test`` on arm64 and to run the resulting
+  ``drizzle:phase10-arm64-test`` image; fix arm64-specific test
+  failures accumulated during Phases 4–9.
+* Produce a multi-arch manifest from the per-arch test images:
+
+  .. code-block:: console
+
+     podman manifest create drizzle:26.04
+     podman manifest add drizzle:26.04 drizzle:phase10-amd64-test
+     podman manifest add drizzle:26.04 drizzle:phase10-arm64-test
+
+
+.. _spec-revival-pandora-slimdown:
+
+Phase 11 — Pandora slim-down to ``m4/drizzle.m4``
+=================================================
 
 Objective
 ---------
@@ -602,65 +953,73 @@ piece of behavior it provides. End state: a single ``m4/drizzle.m4``
 (``boost.m4``, the kept-deliberately ``pandora_plugins.m4``,
 gettext machinery).
 
+This phase runs on the 26.04 toolchain rather than the 12.04 one
+because the LTS ratchet ahead of it brings modern pkg-config, Boost,
+OpenSSL, and protobuf — converting the library-presence macros to
+``PKG_CHECK_MODULES`` is cleaner against the modern stack than against
+the 12.04 readline-without-pc situation that motivated keeping
+``pandora_have_libreadline.m4`` around. Partial work landed earlier
+(``DRIZZLE_BUILD_SETUP`` skeleton; several macros folded into
+``m4/drizzle.m4``) remains; this phase resumes from that state.
+
 Tasks
 -----
 
-* Create ``m4/drizzle.m4`` consolidating the live Pandora
-  responsibilities into a single ``DRIZZLE_BUILD_SETUP`` macro.
-  Inside the macro, hardcode the Phase 1 answers: ``-pthread``, the
-  visibility settings, the sizeof defines, ``STACK_DIRECTION``,
-  ``TARGET_OS_LINUX``, and the GCC warning flags. (Compiler hardening
-  is deliberately *not* among these — see :ref:`future work
-  <spec-revival-future-work>`.)
-* As each ``pandora_*.m4`` macro is folded into ``drizzle.m4``, write
-  it afresh for GCC on amd64/arm64 — its dead Solaris/Intel/PowerPC
-  arms simply do not get carried over. This absorbs the in-place
-  dead-arm strip deferred from Phase 1: there is no throwaway
-  intermediate edit, the arms vanish when the macro is rewritten.
-* Rewrite ``configure.ac:39`` to call ``DRIZZLE_BUILD_SETUP`` in place
-  of ``PANDORA_CANONICAL_TARGET``.
-* Replace the library-presence macros with ``PKG_CHECK_MODULES``,
-  one commit each. ``libz``, ``libssl``, ``libpcre`` and
-  ``libprotobuf`` ship pkg-config files on the 12.04 base
-  (``zlib.pc``, ``libssl.pc``, ``libpcre.pc``, ``protobuf.pc`` —
-  verified). Two exceptions:
+Several build-setup macros have already folded into
+``m4/drizzle.m4`` (version, C++ standard, dtrace, platform, optimize,
+warnings, VC info) and ``DRIZZLE_BUILD_SETUP`` is in place at
+``configure.ac:38``. The remaining work:
 
-  - ``libdl`` has no pkg-config file on any release — ``dlopen`` is
-    in glibc. Replace ``PANDORA_REQUIRE_LIBDL`` with
-    ``AC_SEARCH_LIBS([dlopen],[dl])``.
-  - ``readline`` did not ship ``readline.pc`` until readline 6.3
-    (≈Ubuntu 16.04); the 12.04 readline 6.2 has none. Keep
-    ``pandora_have_libreadline.m4`` for now; convert it to
-    ``PKG_CHECK_MODULES`` at the LTS bump where ``readline.pc``
-    first appears.
-
-  Each replacement must keep the variables the ``Makefile.am`` files
-  consume — ``$(LIBZ)``, ``$(LIBSSL)``, ``$(LIBPCRE)``/``$(LTLIBPCRE)``,
-  ``$(LIBPROTOBUF)``/``$(LTLIBPROTOBUF)``, ``$(LIBDL_LIBS)`` — assigned
-  from the ``*_LIBS`` pkg-config output, plus the ``HAVE_LIB*``
-  ``config.h`` defines.
-* Strip the dead ``AC_CHECK_SIZEOF`` probes from
-  ``plugin/innobase/plugin.ac`` (the one ``plugin.ac`` carrying
-  dead-platform cruft); hardcode the LP64 sizes it measured.
-* Keep ``m4/pandora_plugins.m4`` and ``config/pandora-plugin``
-  (load-bearing plugin enumeration).
-* Delete the now-unused ``m4/pandora_*.m4`` files (one or more
-  commits).
-* Strip the dead version-control arms from the build-from-VC code in
-  ``drizzle.m4``. ``PANDORA_TEST_VC_DIR`` and ``PANDORA_BUILDING_FROM_VC``
-  probe for ``.bzr``, ``.svn``, ``.hg`` and ``.git``; the project is
-  git and bzr/svn/hg are as dead as Solaris. Keep only the git arm —
-  the ``bzr revno``/``bzr nick``/``bzr log`` extraction and the svn/hg
-  branches go.
-* Re-prefix the build macros from ``PANDORA_`` to ``DRIZZLE_``
-  (``PANDORA_MSG_ERROR`` → ``DRIZZLE_MSG_ERROR``, ``PANDORA_WARNINGS``
-  → ``DRIZZLE_WARNINGS``, and so on for every macro now living in
-  ``drizzle.m4``), updating call sites in ``configure.ac``. This
-  finishes excising the Pandora layer — once done, no ``PANDORA_``
-  name survives outside the deliberately-kept ``pandora_plugins.m4``
-  and the plugin-dependency have-lib macros (those re-prefix, or
-  retire, with the Phase 10 plugin sweep). Land it last, as a
-  mechanical rename once the macro set has settled.
+* **Library-presence macros — convert to ``PKG_CHECK_MODULES``,
+  one commit each, protobuf first.** ``pandora_have_protobuf.m4``
+  ``AC_REQUIRE``\ s ``AX_PTHREAD``, which is the last live caller of
+  the pthread probe; replacing it with ``PKG_CHECK_MODULES`` removes
+  ``AX_PTHREAD`` from the build entirely. Then ``libz``, ``libssl``,
+  ``libpcre`` (each ships a pkg-config file on the 26.04 base; pcre1
+  → pcre2 happened in Phase 7). ``libdl`` becomes
+  ``AC_SEARCH_LIBS([dlopen],[dl])`` — ``dlopen`` is in glibc and
+  there is no ``libdl.pc`` on any release. ``readline`` finally
+  converts to ``PKG_CHECK_MODULES`` as well now that ``readline.pc``
+  is universally available on the 26.04 base. Each replacement
+  preserves the variables the ``Makefile.am`` files consume —
+  ``$(LIBZ)``, ``$(LIBSSL)``, ``$(LIBPCRE)``/``$(LTLIBPCRE)``,
+  ``$(LIBPROTOBUF)``/``$(LTLIBPROTOBUF)``, ``$(LIBDL_LIBS)`` —
+  assigned from the ``*_LIBS`` pkg-config output, plus the
+  ``HAVE_LIB*`` ``config.h`` defines.
+* **bzr/svn/hg version-control arms.** Commit ``63ebbc28`` claims
+  this strip; in reality ``m4/drizzle.m4:492-593`` still defines
+  ``PANDORA_TEST_VC_DIR`` and ``PANDORA_BUILDING_FROM_VC`` with all
+  four arms and still shells out to ``bzr``. Land the actual
+  deletion: keep only the git arm; the ``bzr revno`` / ``bzr nick``
+  / ``bzr log`` extraction and the svn/hg branches go.
+* **LP64 sizes in top-level ``configure.ac``** are only partially
+  hardcoded. Add ``SIZEOF_VOIDP=8`` and ``SIZEOF_LONG=8`` next to
+  the existing ``SIZEOF_OFF_T`` / ``SIZEOF_SIZE_T`` /
+  ``SIZEOF_LONG_LONG`` ``AC_DEFINE`` lines.
+* **``PANDORA_`` → ``DRIZZLE_`` rename**, landed together with
+  ``config/pandora-plugin``'s emitted standalone-plugin template
+  update so out-of-tree plugin generation keeps working through the
+  rename. Macros now living in ``m4/drizzle.m4``
+  (``PANDORA_MSG_ERROR``, ``PANDORA_WARNINGS``, ``PANDORA_PLATFORM``,
+  ``PANDORA_VERSION``, ``PANDORA_OPTIMIZE``,
+  ``PANDORA_VC_INFO_HEADER``, etc.) all rename, with call sites in
+  ``configure.ac`` updated; the configure summary at
+  ``configure.ac:243`` still prints ``pandora-build version`` —
+  fix in the same stack. Land *after* the library-macro
+  conversion so the macro set is stable. Skip the deliberately-kept
+  ``pandora_plugins.m4`` and the plugin-dependency ``have-lib``
+  macros still called by ``plugin/*/plugin.ac``.
+* **Delete the now-unused ``m4/pandora_*.m4`` files** as each one's
+  last caller goes away. One commit per file.
+* **InnoDB is an upstream-merge surface — do not touch.** Earlier
+  drafts of this phase contemplated stripping
+  ``AC_CHECK_SIZEOF`` probes and dead-platform arms from
+  ``plugin/innobase/plugin.ac``; that strip is withdrawn. Future
+  MySQL / MariaDB cherry-picks depend on InnoDB's cross-platform
+  arms (and their attendant configure/source symbol mismatches)
+  staying mergeable. The InnoDB issues are recorded in
+  :ref:`spec-revival-cxx-debt` as known latent, deliberate
+  non-fixes.
 
 Done when
 ---------
@@ -670,16 +1029,19 @@ Done when
   ``pandora_plugins.m4`` plus the plugin-dependency ``have-lib``
   macros still called by ``plugin/*/plugin.ac`` (``libaio``,
   ``libcurl``, ``libevent``, ``libgearman``, ``libldap``,
-  ``libmemcached``, ``libv8``, flex). Those retire in Phase 10 with
-  the plugin sweep — Phase 2 does not reach the original "≤2 files"
+  ``libmemcached``, ``libv8``, flex). Those retire in Phase 13 with
+  the plugin sweep — Phase 11 does not reach the original "≤2 files"
   target, and is not meant to.
+* ``plugin/innobase/`` is intentionally untouched — its
+  cross-platform arms stay so future MySQL / MariaDB cherry-picks
+  remain mergeable.
 * ``configure.ac`` is under 250 lines.
 * ``grep -rnE 'solaris|freebsd|SUNCC|INTELCC|i386|powerpc|sparc'``
   over the first-party m4 (everything but ``boost.m4`` and the
   vendored gettext set) returns empty.
 * ``wc -l m4/*.m4`` shows a substantial drop versus the Phase 0
   baseline. The original ≥40% figure assumed the plugin have-lib
-  macros also went; with those correctly deferred to Phase 10, report
+  macros also went; with those correctly deferred to Phase 13, report
   the actual figure rather than forcing it.
 * Phase 0 tests still pass on amd64.
 * ``./configure`` succeeds on arm64.
@@ -693,20 +1055,20 @@ Risks
   after surrounding deletions.
 
 
-Phase 2.5 — Constant-fold the hardcoded defines into the source
-===============================================================
+Phase 12 — Constant-fold the hardcoded defines into the source
+==============================================================
 
 Objective
 ---------
 
 Phase 1 replaced a raft of autoconf probes with fixed ``AC_DEFINE``
-constants, and Phase 2 adds more as it moves to ``PKG_CHECK_MODULES``.
-A ``#define`` whose value can no longer vary makes every ``#ifdef``
-and ``#if`` that tests it dead-reckonable: the preprocessor branch is
-now always-taken or never-taken, and any C/C++ ``if`` written against
-the value is a constant condition.
+constants, and Phase 11 adds more as it moves to
+``PKG_CHECK_MODULES``. A ``#define`` whose value can no longer vary
+makes every ``#ifdef`` and ``#if`` that tests it dead-reckonable: the
+preprocessor branch is now always-taken or never-taken, and any C/C++
+``if`` written against the value is a constant condition.
 
-Phases 1 and 2 stop at the configure layer. Phase 2.5 follows each
+Phases 1 and 11 stop at the configure layer. Phase 12 follows each
 hardcoded symbol into the source and removes the now-pointless
 indirection — delete the dead preprocessor branch, inline the
 constant, and simplify whatever conditional logic the old variability
@@ -740,7 +1102,7 @@ Each symbol below is at least one commit. Audit every consumer
 * Endianness. ``WORDS_BIGENDIAN`` is now never defined; delete the
   big-endian arm of every ``#ifdef WORDS_BIGENDIAN`` so only the
   little-endian path remains.
-* The ``HAVE_LIB*`` symbols Phase 2's ``PKG_CHECK_MODULES`` switch
+* The ``HAVE_LIB*`` symbols Phase 11's ``PKG_CHECK_MODULES`` switch
   left as foregone conclusions, and any ``HAVE_*`` the
   ``AC_CHECK_FUNCS``/``AC_CHECK_HEADERS`` audit chose to ``AC_DEFINE``
   unconditionally rather than strip in place.
@@ -765,169 +1127,7 @@ Risks
   the value the configure layer actually hardcoded.
 
 
-.. _spec-revival-lts-template:
-
-Phases 3–9 — LTS bump template
-==============================
-
-Each LTS bump follows the same shape. Sub-phases per LTS are listed
-afterward.
-
-Template tasks
---------------
-
-1. Bump the ``FROM`` line of the ``Containerfile`` ``base`` stage.
-   Base images are pulled from quay.io rather than docker.io so that
-   Zuul never trips docker.io's pull rate limits:
-
-   - Through Ubuntu 20.04, use
-     ``quay.io/inaugust/unsafe-old-distro-danger:X.04`` — mirrors of
-     the EOL Ubuntu LTS images, with ``/etc/apt/sources.list``
-     already repointed at ``old-releases.ubuntu.com`` for the
-     releases that need it. This is why the ``base`` stage carries no
-     ``old-releases`` ``sed``.
-   - From Ubuntu 22.04 on, use ``quay.io/opendevmirror/ubuntu:X.04``,
-     the OpenDev infrastructure mirror of the still-supported images.
-
-   Both registries publish ``linux/amd64`` and ``linux/arm64``.
-2. Update ``bindep.txt``: replace ``[platform:ubuntu-PREVIOUS]``
-   selector lines with ``[platform:ubuntu-CURRENT]``, adjusting
-   versioned package names (boost, protobuf, etc.). One commit.
-3. Build on amd64:
-
-   .. code-block:: console
-
-      podman build --platform linux/amd64 --target=build .
-
-   Triage compile breakage. Fix code. ``-Wno-xxx`` permitted only as
-   last resort, with a written rationale in the commit message.
-
-4. Test on amd64:
-
-   .. code-block:: console
-
-      podman build --platform linux/amd64 --target=test .
-      podman run --rm --net=host <image>
-
-   Fix test failures.
-
-5. Build on arm64:
-
-   .. code-block:: console
-
-      podman build --platform linux/arm64 --target=build .
-
-   Must succeed. Test runs on arm64 are encouraged but not gating
-   until Phase 9.
-
-6. ``make distcheck`` must pass on amd64.
-7. Tag the resulting image per-arch:
-
-   .. code-block:: console
-
-      podman tag drizzle:test drizzle:ubuntu-X.04-phaseN-amd64
-      podman tag drizzle:test-arm64 drizzle:ubuntu-X.04-phaseN-arm64
-
-Phase-specific notes
---------------------
-
-Phase 3 — Ubuntu 14.04
-~~~~~~~~~~~~~~~~~~~~~~
-
-Lightest LTS bump. Boost 1.46 → 1.54; protobuf still 2.x; OpenSSL
-still 1.0. Mostly warning-flag drift.
-
-Phase 4 — Ubuntu 16.04 (C++11 baseline)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Add ``AX_CXX_COMPILE_STDCXX([11],[noext],[mandatory])`` to
-  ``configure.ac`` — one commit.
-* Delete now-redundant C++11-capability m4 files
-  (``pandora_check_cxx_standard.m4``, ``pandora_shared_ptr.m4``,
-  ``pandora_stl_hash.m4``, ``ax_cxx_compile_stdcxx_0x.m4``,
-  ``ax_cxx_header_stdcxx_98.m4``) — one commit per file.
-* Mechanical rename ``boost::shared_ptr`` → ``std::shared_ptr``
-  across ``drizzled/``. Stack of small commits, one per directory or
-  logical unit so each stays green.
-* Mechanical rename ``boost::unordered_map`` → ``std::unordered_map``
-  similarly.
-
-Phase 5 — Ubuntu 18.04 (Boost 1.65, OpenSSL 1.1)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-First real friction phase. Sub-stacks:
-
-* Audit ``#include <boost/...>`` across ``drizzled/`` and ``plugin/``.
-  Replace ``boost/foreach.hpp`` with C++11 range-for (one commit per
-  consumer).
-* Migrate ``boost::filesystem`` v2 API to v3. Dedicate this to its
-  own contributor; it's the worst single transition of Phase 5.
-* OpenSSL 1.1 makes ``SSL_CTX`` and friends opaque. Replace direct
-  field access with accessor functions. Audit ``plugin/auth_*``,
-  ``client/``, ``drizzled/``.
-* Add ``-Wimplicit-fallthrough`` annotations or ``[[fallthrough]];``.
-
-Phase 6 — Ubuntu 20.04 (protobuf 3, C++17, PCRE2)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Hardest phase. Three near-simultaneous breaks. Land as three
-sub-stacks; the order below is the recommended sequencing.
-
-* **6a: protobuf 2 → 3.** Regenerate ``.pb.cc`` / ``.pb.h`` at
-  configure time; stop versioning generated code. Update API uses
-  (``set_allocated_*`` semantics; ``Reflection`` API churn; arena
-  allocation).
-* **6b: libpcre1 → libpcre2.** Rewrite ``m4/pandora_have_libpcre.m4``
-  (or its replacement in ``m4/drizzle.m4``) to
-  ``PKG_CHECK_MODULES([PCRE2],[libpcre2-8])``. Audit
-  ``plugin/regex_policy/`` and any other direct PCRE callers.
-* **6c: C++17 sweep.** ``std::auto_ptr`` → ``std::unique_ptr``;
-  ``std::random_shuffle`` → ``std::shuffle`` + ``std::mt19937``;
-  ``register`` keyword removed; ``throw()`` → ``noexcept``.
-
-Bump ``BOOST_REQUIRE([1.46])`` to ``BOOST_REQUIRE([1.71])`` in
-``configure.ac``.
-
-Phase 7 — Ubuntu 22.04 (OpenSSL 3)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Switch the ``Containerfile`` ``base`` image from
-  ``quay.io/inaugust/unsafe-old-distro-danger`` to
-  ``quay.io/opendevmirror/ubuntu:22.04``. 22.04 is still supported, so
-  the OpenDev mirror carries it and its apt sources need no rewrite.
-* Migrate direct ``SHA1_*``/``MD5_*``/``HMAC_*`` calls to ``EVP_*``
-  equivalents (``plugin/md5/``, ``plugin/auth_http/``,
-  ``drizzled/sha1.cc`` if present).
-* Either fix every ``OPENSSL_NO_DEPRECATED_3_0`` warning or accept
-  ``-Wno-deprecated-declarations`` in a single compilation unit (auth
-  code), explicitly noted in commit message.
-* Bump Boost requirement to 1.74.
-
-Phase 8 — Ubuntu 24.04
-~~~~~~~~~~~~~~~~~~~~~~
-
-Mostly free. GCC 13 / Boost 1.83 ``-Werror`` casualty sweep.
-
-Phase 9 — Ubuntu 26.04 (final landing)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Drop every ``[platform:ubuntu-*]`` selector from ``bindep.txt`` — we
-  don't support those platforms anymore; the LTS bumps were one-way
-  ratchets.
-* **arm64 becomes fully gating.** ``make test-drizzle`` must pass on
-  both architectures.
-* Produce a multi-arch manifest:
-
-  .. code-block:: console
-
-     podman manifest create drizzle:26.04
-     podman manifest add drizzle:26.04 drizzle:ubuntu-26.04-phase9-amd64
-     podman manifest add drizzle:26.04 drizzle:ubuntu-26.04-phase9-arm64
-
-* Fix any arm64-specific test failures accumulated during Phases 3–8.
-
-
-Phase 10 — Plugin enable-by-default sweep
+Phase 13 — Plugin enable-by-default sweep
 =========================================
 
 Objective
@@ -941,7 +1141,7 @@ remains opt-out pending Node-based rewrite).
 Tasks
 -----
 
-* Build all 82 plugins on 26.04 with the default ``configure``
+* Build every in-tree plugin on 26.04 with the default ``configure``
   invocation. Categorize each failure:
 
   - **Easy fix** (warning flag, header path) — fix in this phase, one
@@ -976,7 +1176,7 @@ The user's stated target topology for CI:
    "A job builds a production container, then a second job runs all
    the tests against a server running from the container."
 
-If appetite exists in Phase 10, split the Containerfile into:
+If appetite exists in Phase 13, split the Containerfile into:
 
 * ``production`` stage — ``drizzled`` binary + minimal runtime deps,
   no test harness, no perl.
@@ -988,11 +1188,11 @@ drives DTR against it via ``--network=container:<prod>`` or a podman
 pod. This gives us the property that **the image we ship is the image
 we test**.
 
-Not gating for Phase 10 completion; tracked under
+Not gating for Phase 13 completion; tracked under
 :ref:`spec-revival-future-work`.
 
 
-Phase 11 — Sphinx-only docs
+Phase 14 — Sphinx-only docs
 ===========================
 
 Objective
@@ -1014,12 +1214,33 @@ Tasks
   comments into RST under ``docs/contributing/`` (or a new
   ``docs/internals/``).
 * Drop the Doxygen entry from ``bindep.txt`` if present.
+* Sweep the installing/contributor docs for stale install paths
+  (distro packages, PPAs, source-install,  ``./bootstrap``) and
+  reroute to the container-first
+  ``Containerfile`` / ``bindep.txt`` / ``tools/regress.sh`` flow.
+  Phase 3 fixes the README front matter; this finishes the rest.
 
 
 .. _spec-revival-ci:
 
 CI strategy — Zuul on OpenDev
 =============================
+
+Activation status
+-----------------
+
+The Zuul pipeline files described in this section live under
+``future-zuul.d/`` and are not currently active — they are inert
+scaffolding waiting on OpenDev Zuul tenant registration and the
+referenced playbooks. When activated, the files move to ``zuul.d/``
+and the same definitions take effect.
+
+Until then: amd64 build+test gating once activated; arm64 build-only
+readiness until Phase 10, at which point arm64 becomes test-gating
+too. ``future-zuul.d/projects.yaml`` currently schedules only
+``drizzle-build-image`` (amd64); ``drizzle-build-image-arm64`` is a
+known gap to close at activation time and is tracked in
+:ref:`Phase 3 <spec-revival-container-hygiene>`.
 
 Pipeline model
 --------------
@@ -1088,7 +1309,7 @@ Per-phase image promotion
 
 After each phase merges, the ``promote`` pipeline tags the image with
 the phase name (e.g. ``drizzle:phase1-strip``,
-``drizzle:phase3-ubuntu1404``) in addition to the SHA. This gives us a
+``drizzle:phase4-ubuntu1404``) in addition to the SHA. This gives us a
 permanent regression archive: any future change can
 ``podman run drizzle:phaseN make test-drizzle`` to verify it doesn't
 regress prior phases.
@@ -1100,19 +1321,159 @@ Appendix — Multi-arch hazards
 =============================
 
 A running list, populated during Phase 1's architecture audit and
-extended through Phases 3–8. Each entry describes an x86-specific
-construct in the source and a sketch of the aarch64 fix.
+extended through Phases 4–9. Each entry describes an x86-specific or
+endianness-sensitive construct in the source and a sketch of the
+aarch64 fix.
 
-**Phase 1 audit (amd64 source sweep).** The first-party source
-(``drizzled/``, ``client/``, ``libdrizzle*``) was grepped for x86-only
-intrinsics (``__builtin_ia32_*``, ``_mm_*``, the SSE/AVX
-``*intrin.h`` headers), inline assembly (``__asm``, ``asm volatile``),
-and architecture-pinned constructs (``rdtsc``, ``cpuid``, byte-swap
-intrinsics). **No hazards found** — the server carries no hand-written
-x86 codegen. Atomics already go through GCC's portable ``__sync``/
-``__atomic`` builtins (see ``m4/pandora_have_gcc_atomics.m4``), which
-lower correctly on aarch64. The list below therefore stays empty until
-an LTS bump introduces something.
+**Phase 1 audit scope (honest restatement).** The original audit
+grepped only ``drizzled/``, ``client/``, and ``libdrizzle*`` for the
+narrow construct set ``__builtin_ia32_*`` / ``_mm_*`` / SSE-AVX
+``*intrin.h`` / ``__asm`` / ``asm volatile`` / ``rdtsc`` / ``cpuid``
+and reported "no hazards found." That result was correct *for that
+scope*; it was not a sweep of all multi-arch hazards in the tree. The
+grep did not cover ``plugin/``, did not check for ``__i386__`` /
+``WORDS_BIGENDIAN`` / pthread-yield / ``SIZEOF_*`` conditionals, and
+did not look at unaligned-access fast paths or release-store
+correctness. Items below were surfaced by a broader pass.
+
+``plugin/innobase/`` is **out of scope** for this appendix per
+:ref:`spec-revival-cxx-debt` — InnoDB is treated as an upstream-merge
+surface, so its existing cross-platform arms stay untouched and
+its arm64 behavior travels with the upstream code we cherry-pick.
+
+Hazards to address (each gets a triage during a Phase that
+naturally touches the file, or earlier if a contributor wants
+to land it standalone):
+
+* ``drizzled/korr.h:31-58`` — ``__i386__``-gated unaligned-access
+  fast path. aarch64 silently drops into the portable byte-by-byte
+  branch, which works but loses the optimization. Decision: convert
+  to ``__attribute__((aligned(1)))`` / ``__builtin_memcpy``-based
+  unaligned load that the compiler emits well on both arches, or
+  delete the fast path and rely on the portable branch.
+* ``drizzled/korr.h:88-93``, ``plugin/myisam/myisampack.h:28-41``,
+  ``libdrizzle-1.0/constants.h:512-523`` — signed byte-unpack
+  macros left-shift signed bytes into high bits, which is C++
+  undefined behavior. See :ref:`spec-revival-cxx-debt` for the
+  rewrite plan; the arm64 angle is that newer compilers on the
+  ratchet can optimize around the UB and produce a different
+  result per arch.
+* ``drizzled/atomics.h`` plus ``drizzled/atomic/gcc_traits.h:81-85``
+  — ``store_with_release`` is implemented as a plain assignment
+  through a ``volatile`` pointer, which does not provide release
+  ordering on aarch64. See :ref:`spec-revival-cxx-debt`.
+* ``drizzled/session.h:512`` and ``drizzled/drizzled.cc:231-233``
+  — cross-thread kill/shutdown state uses ``volatile`` instead of
+  atomics. Often masked on x86; not on arm64. See
+  :ref:`spec-revival-cxx-debt`.
+* ``drizzled/field/*``, ``libdrizzle/sha1.cc``,
+  ``plugin/myisam/*`` — broader pass owed. Grep for
+  ``WORDS_BIGENDIAN``, ``__i386__``, ``__x86_64__``, ``SIZEOF_*``
+  conditionals, pthread-yield wrappers, byte-swap intrinsics.
+  Populate this list as the audit lands.
+
+
+.. _spec-revival-cxx-debt:
+
+Appendix — C++ and threading correctness debt
+=============================================
+
+Items a broader review surfaced that are real but better caught and
+fixed when the LTS-bump compiler ratchets (Phases 6, 7, 9) raise
+them as warnings or errors. This appendix is the discovery trail,
+not a parallel work plan to execute now. A contributor with
+appetite can land any of them as a standalone commit; otherwise the
+natural ratchet delivers them in context.
+
+* **Signed byte-unpack shift UB** — ``drizzled/korr.h:88-93``,
+  ``plugin/myisam/myisampack.h:28-41``,
+  ``libdrizzle-1.0/constants.h:512-523``. The unpackers left-shift
+  signed (or signed-promoted) byte values into high bits, which is
+  C++ undefined behavior. Rewrite as unsigned accumulation with an
+  explicit final cast for the signed-result variants; add unit
+  coverage for high-bit 2-, 3-, and 4-byte signed and unsigned
+  decoders.
+* **Cross-thread ``volatile`` state** — ``drizzled/session.h:512``
+  (kill state), ``drizzled/drizzled.cc:231-233`` (select-loop and
+  shutdown globals). ``volatile`` is not synchronization in C++;
+  these are data races that x86 has masked in practice. Convert to
+  real atomics or to existing mutex-protected state; add stress
+  coverage for concurrent ``KILL`` and shutdown paths.
+* **``atomic<T>::operator=`` is not a release store** —
+  ``drizzled/atomic/gcc_traits.h:81-85``. ``store_with_release`` is
+  implemented as plain assignment through a ``volatile`` pointer,
+  which provides no release ordering on aarch64 and races readers
+  that expect the wrapper to provide atomic semantics. Use
+  ``__atomic_store_n(..., __ATOMIC_RELEASE)`` (with a documented
+  fallback for the 12.04 compiler if needed); extend
+  ``unittests/atomics_test.cc`` beyond single-thread arithmetic.
+* **``Join`` cloned with ``memcpy``** —
+  ``drizzled/join.cc:1289-1292``. ``Join`` is noncopyable and owns
+  non-trivial members, so the raw ``sizeof(Join)`` copy is
+  object-lifetime UB and will trip ``-Wclass-memaccess`` on a
+  modern compiler. Replace with an explicit snapshot/restore
+  object, or save and restore only the fields needed for
+  temporary-table state.
+* **``COM_PROCESS_KILL`` payload byte order** — see
+  :ref:`spec-revival-investigation`; tracked there because it needs
+  a behaviour test before any patch.
+* **json_server lifecycle regression test owed** —
+  ``plugin/json_server/json_server.cc:697-704``. The pushed fix
+  signals once and joins every worker; the design is plausible but
+  has no DTR test pinning the behavior. Add a plugin-level test
+  that starts ``json_server`` with ``max_threads > 1`` and
+  exercises clean shutdown or plugin unload.
+
+InnoDB-related entries below are **deliberate non-fixes** per the
+upstream-merge policy (see :ref:`spec-revival-container-hygiene` and
+Phase 11 Done-when). They are listed so future contributors recognise
+them as known and intentional, not oversights:
+
+* **InnoDB configure/source symbol mismatch.**
+  ``plugin/innobase/plugin.ac:91-93`` defines
+  ``HAVE_ATOMIC_PTHREAD_T``, but ``plugin/innobase/include/os0sync.h``
+  checks ``HAVE_IB_ATOMIC_PTHREAD_T_GCC`` and
+  ``HAVE_IB_ATOMIC_PTHREAD_T_SOLARIS``. Similarly,
+  ``plugin/innobase/plugin.ac:164-166`` defines
+  ``IB_HAVE_PAUSE_INSTRUCTION`` while
+  ``plugin/innobase/include/ut0ut.h`` checks
+  ``HAVE_PAUSE_INSTRUCTION`` / ``HAVE_FAKE_PAUSE_INSTRUCTION``. The
+  configure probes have been silently dead for ~15 years; the
+  source already falls through to the portable branch. Do not fix
+  in-tree — the cross-platform arms are MySQL-shaped and the right
+  fix arrives via the next InnoDB cherry-pick from upstream.
+
+
+.. _spec-revival-investigation:
+
+Appendix — Investigation backlog
+================================
+
+Items that are *probably* bugs but need a test or a protocol-spec
+read before any patch is justified. Drive each one to a yes/no
+answer; convert to a normal Phase task or close with a note.
+
+* **``COM_PROCESS_KILL`` payload byte order.**
+  ``plugin/mysql_protocol/mysql_protocol.cc:243-245`` maps MySQL
+  command ``12`` to the internal ``COM_KILL`` without translating
+  the payload. ``drizzled/sql_parse.cc:246-258`` reads the internal
+  payload as a four-byte value and converts it with ``ntohl``,
+  while ``libdrizzle/conn.cc:730-732`` sends native kill ids with
+  ``htonl``. MySQL protocol integer payloads are documented as
+  little-endian. Native Drizzle clients and MySQL-protocol clients
+  therefore appear to disagree about byte order for the same
+  internal command. Tasks:
+
+  - Confirm the MySQL protocol spec's payload byte order for
+    command ``12``.
+  - Write a raw-protocol DTR test that sends ``COM_PROCESS_KILL``
+    with a known thread id over the MySQL-protocol port and
+    asserts the right thread dies.
+  - If the test fails, fix the payload translation in
+    ``plugin/mysql_protocol/mysql_protocol.cc:243-245`` (or split
+    native vs MySQL kill parsing).
+  - If the test passes, write a short explanatory note here and
+    close the item.
 
 
 .. _spec-revival-future-work:
@@ -1127,8 +1488,7 @@ them up:
   current plugin source stays in tree as a placeholder with
   ``build_conditional=false``.
 * **Production/test-client Containerfile split.** Described under
-  :ref:`Phase 10 <spec-revival>`. The image we ship is the image we
-  test.
+  Phase 13. The image we ship is the image we test.
 * **kewpie revival** (Python 3 port) if/when interest arises. Skipped
   from the test-target list in Phase 0.
 * **Symbol visibility.** The build compiles ``drizzled`` and the
