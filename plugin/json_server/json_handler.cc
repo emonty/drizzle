@@ -62,7 +62,7 @@ namespace json_server
     bool retval = reader.parse(_input_query,_json_in);
     if(retval!=true)
     {
-      _json_error_area.set_error(JsonErrorArea::ER_JSON,drizzled::EE_OK,reader.getFormatedErrorMessages().c_str()); 
+      _json_error_area.set_error(JsonErrorArea::ER_JSON,drizzled::EE_OK,reader.getFormattedErrorMessages().c_str()); 
     }
   }
 

@@ -97,13 +97,19 @@ namespace json_server
     if (retval != true) 
     {
      _json_out["error_type"]="json error";
-     _json_out["error_message"]= reader.getFormatedErrorMessages();
+     _json_out["error_message"]= reader.getFormattedErrorMessages();
     }
     
     // If _id was given as a URI parameter, copy the value to query object now.
-    if ( !_json_in["query"]["_id"].asBool() )
+    // jsoncpp 1.7+ throws Json::LogicError from Value::asBool() when the value
+    // is a non-empty string; the older 0.6 release silently treated it as a
+    // falsy value.  Decide "no usable _id from the body" with type-safe
+    // predicates instead.
     {
-      if( _id ) 
+      const Json::Value& body_id= _json_in["query"]["_id"];
+      bool body_id_missing= body_id.isNull() ||
+                            (body_id.isString() && body_id.asString().empty());
+      if (body_id_missing && _id)
       {
         _json_in["query"]["_id"] = (Json::Value::UInt) atol(_id);
       }

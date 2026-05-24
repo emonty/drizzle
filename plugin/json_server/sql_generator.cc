@@ -74,14 +74,15 @@ namespace
     _sql.append(_schema);
     _sql.append("`.`");
     _sql.append(_table);
-    _sql.append("`"); 
-    if ( _json_in["_id"].asBool() )
+    _sql.append("`");
+    const Json::Value& id_val= _json_in["_id"];
+    if (!id_val.isNull() && !(id_val.isString() && id_val.asString().empty()))
     {
   	  _sql.append(" WHERE _id = ");
-	    _sql.append(jsonScalarToString(_json_in["_id"]));
+	    _sql.append(jsonScalarToString(id_val));
     }
     _sql.append(";");
-  
+
   }
  
   void SQLGenerator::generateCreateTableSql()
@@ -165,7 +166,8 @@ namespace
 
   void SQLGenerator::generateDeleteSql()
   {
-    if ( _json_in["_id"].asBool() )
+    const Json::Value& id_val= _json_in["_id"];
+    if (!id_val.isNull() && !(id_val.isString() && id_val.asString().empty()))
     {
       _sql= "DELETE FROM `";
       _sql.append(_schema);
@@ -173,7 +175,7 @@ namespace
       _sql.append(_table);
       _sql.append("`");
       _sql.append(" WHERE _id = ");
-      _sql.append(jsonScalarToString(_json_in["_id"]));
+      _sql.append(jsonScalarToString(id_val));
       _sql.append(";");
     }
     else
