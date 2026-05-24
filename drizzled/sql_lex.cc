@@ -18,6 +18,9 @@
 
 #include <config.h>
 
+#ifndef DRIZZLE_SERVER
+#define DRIZZLE_SERVER
+#endif
 #define DRIZZLE_LEX 1
 
 #include <drizzled/sql_reserved_words.h>
