@@ -79,6 +79,7 @@
 #include "client/thread_context.h"
 #include "client/conclusions.h"
 #include "client/wakeup.h"
+#include "client/get_password.h"
 
 #include <signal.h>
 #include <stdarg.h>
@@ -433,7 +434,7 @@ end:
  */
 int main(int argc, char **argv)
 {
-  char *password= NULL;
+  string password;
   try
   {
     po::options_description commandline_options("Options used only in command line");
@@ -535,7 +536,7 @@ int main(int argc, char **argv)
     po::options_description client_options("Options specific to the client");
     client_options.add_options()
       ("host,h",po::value<string>(&host)->default_value("localhost"),"Connect to the host")
-      ("password,P",po::value<char *>(&password),
+      ("password,P",po::value<string>(&password)->default_value(PASSWORD_SENTINEL),
        "Password to use when connecting to server. If password is not given it's asked from the tty")
       ("port,p",po::value<uint32_t>(), "Port number to use for connection")
       ("protocol",po::value<string>(&opt_protocol)->default_value("mysql"),
