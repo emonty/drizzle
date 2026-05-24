@@ -5729,12 +5729,12 @@ void free_replace()
 
 
 typedef struct st_replace {
-  bool found;
+  int found;
   struct st_replace *next[256];
 } REPLACE;
 
 typedef struct st_replace_found {
-  bool found;
+  int found;
   char *replace_string;
   uint32_t to_offset;
   int from_offset;
