@@ -19,32 +19,36 @@ RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b com
 FROM base AS build
 ARG TARGETPLATFORM
 
-# Build in a cache mount so artifacts persist across `podman build` runs.
-# Source is bind-mounted read-only; cp -au only copies changed files into the
-# cache, so make sees only the files that actually changed.
-# Final cp -au lifts the build tree into the image layer so downstream stages
-# (and `podman run`) can use it without re-mounting the cache.
+# Build in a per-arch cache mount for incremental rebuilds, then cp the
+# tree out of the cache into the image layer so the test and perf stages
+# — and `podman run drizzle:test` — work against a self-contained tree.
 RUN --mount=type=bind,source=.,target=/host-src,readonly,Z \
     --mount=type=cache,target=/build,id=drizzle-build-${TARGETPLATFORM},sharing=locked \
     cp -au --no-preserve=context /host-src/. /build/ && \
     cd /build && \
-    if [ ! -f Makefile ] ; then autoreconf -i && ./configure ; fi && make -j"$(nproc)"
+    if [ ! -f Makefile ] ; then autoreconf -i && ./configure ; fi && \
+    make -j"$(nproc)" && \
+    mkdir -p /opt/drizzle-build && \
+    cp -au /build/. /opt/drizzle-build/
+
+# libtool bakes -Wl,-rpath=/build/... into the test binaries at link
+# time; alias /build to the image-layer copy so the dynamic linker
+# resolves at runtime without requiring `make install`.
+RUN ln -s /opt/drizzle-build /build
+
+WORKDIR /opt/drizzle-build
 
 FROM build AS test
-ARG TARGETPLATFORM
 
 # Test-time deps (DTR is Perl; `make unit` is boost.test, already built).
 RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b test) \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /build
-RUN --mount=type=cache,target=/build,id=drizzle-build-${TARGETPLATFORM},sharing=locked \
-    tools/run-tests.sh
+CMD ["tools/run-tests.sh"]
 
 FROM build AS perf
-ARG TARGETPLATFORM
 
-# Phase 1.5 performance harness. valgrind (callgrind/massif) plus the
+# Phase 2 performance harness. valgrind (callgrind/massif) plus the
 # Perl DBI stack used to build DBD::drizzle and drive sql-bench.
 RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b perf) \
     && rm -rf /var/lib/apt/lists/*
@@ -56,6 +60,4 @@ ADD --checksum=sha256:ab0513eb4429a56ba07a1f76528577cb3caf70ae42149441d6041c204b
     https://cpan.metacpan.org/authors/id/C/CA/CAPTTOFU/DBD-drizzle-0.304.tar.gz \
     /opt/DBD-drizzle-0.304.tar.gz
 
-WORKDIR /build
-RUN --mount=type=cache,target=/build,id=drizzle-build-${TARGETPLATFORM},sharing=locked \
-    tools/perf.sh
+RUN tools/perf.sh
