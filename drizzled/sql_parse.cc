@@ -73,7 +73,7 @@ using namespace std;
 namespace drizzled {
 
 /* Prototypes */
-bool my_yyoverflow(short **a, ParserType **b, ulong *yystacksize);
+bool my_yyoverflow(short **a, YYSTYPE **b, ulong *yystacksize);
 void parse(Session&, str_ref);
 
 /**
@@ -591,7 +591,7 @@ bool execute_sqlcom_select(Session *session, TableList *all_tables)
 #define MY_YACC_INIT 1000			// Start with big alloc
 #define MY_YACC_MAX  32000			// Because of 'short'
 
-bool my_yyoverflow(short **yyss, ParserType **yyvs, ulong *yystacksize)
+bool my_yyoverflow(short **yyss, YYSTYPE **yyvs, ulong *yystacksize)
 {
   LEX	*lex= &current_session->lex();
   ulong old_info=0;
@@ -616,7 +616,7 @@ bool my_yyoverflow(short **yyss, ParserType **yyvs, ulong *yystacksize)
     memcpy(lex->yacc_yyvs, *yyvs, old_info*sizeof(**yyvs));
   }
   *yyss=(short*) lex->yacc_yyss;
-  *yyvs=(ParserType*) lex->yacc_yyvs;
+  *yyvs=(YYSTYPE*) lex->yacc_yyvs;
   return 0;
 }
 
