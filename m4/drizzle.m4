@@ -32,11 +32,9 @@ AC_DEFUN([PANDORA_BLOCK_BAD_OPTIONS],[
   ])
 ])
 
-dnl The single build-setup macro for Drizzle. It replaces the Pandora
-dnl PANDORA_CANONICAL_TARGET orchestration: the build targets one OS
-dnl (Linux) and one compiler (GCC), so the argument parsing that used to
-dnl select require-cxx / version-from-vc / visibility behaviour is gone
-dnl and those answers are fixed here.
+dnl The single build-setup macro for Drizzle. The build targets one OS
+dnl (Linux) and one compiler (GCC), so this macro takes no arguments:
+dnl every setup choice for the target is hard-coded in the body below.
 AC_DEFUN([DRIZZLE_BUILD_SETUP],[
   PANDORA_BLOCK_BAD_OPTIONS
 
