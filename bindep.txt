@@ -31,7 +31,7 @@ libv8-dev            [compile platform:ubuntu-precise]
 # Additional helpers (DBI, subunit) get added when an actual test needs them.
 perl                 [test platform:dpkg]
 curl                 [test platform:dpkg]
-rabbitmq-server      [compile platform:dpkg]
+rabbitmq-server      [test platform:dpkg]
 
 # Performance-harness dependencies (Phase 1.5; tools/perf.sh).
 # valgrind provides callgrind + massif; libdbi-perl carries DBI and
