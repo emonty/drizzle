@@ -18,19 +18,22 @@ of it. Read it before opening a PR.
 
 - Branch model: `drizzle-7.2` is the stable / default branch. Active
   revival work happens on `main`.
-- Revival phase: Phases 0, 1, and 1.5 are landed (tests in container,
-  dead-platform strip, performance baseline harness). **Phase 2**
-  (Pandora slim-down to `m4/drizzle.m4`) is next. See the spec's Phase
-  Map.
+- Revival phase: Phases 0, 1, and 2 are landed (tests in container,
+  dead-platform strip, performance baseline harness). **Phase 3**
+  (container hygiene and Phase 0 follow-ups) is next; Phases 4–10
+  are the LTS-bump ratchet that follows. Phase 11 (Pandora slim-down
+  to `m4/drizzle.m4`) is paused — partially folded, deliberately
+  deferred until after the LTS ratchet reaches 26.04. See the spec's
+  Status preamble and Phase Map.
 - Build target: Ubuntu 12.04 (Precise). We will ratchet LTS-by-LTS to
-  26.04 as Phases 3–9 land.
+  26.04 as Phases 4–10 land.
 - Base image: pulled from quay.io, never docker.io, so Zuul CI does
   not hit docker.io's pull rate limits. EOL releases use
   `quay.io/inaugust/unsafe-old-distro-danger:X.04` (apt sources
   pre-pointed at old-releases); Ubuntu 22.04 onward switches to
   `quay.io/opendevmirror/ubuntu`. See the spec's LTS-bump template.
 - Architectures: `linux/amd64` and `linux/arm64`. amd64 is gating now;
-  arm64 becomes gating in Phase 9.
+  arm64 becomes gating in Phase 10.
 
 ## How to build and test
 
@@ -40,11 +43,16 @@ Inner loop — fast iteration, build only:
 podman build --platform linux/amd64 --target=build -t drizzle:build .
 ```
 
-Verification — build + tests:
+Verification — build + tests. The `test` stage carries the built tree
+in the image layer and sets a default `CMD` that runs the test
+entrypoint, so `podman run drizzle:test` runs tests against the
+just-built tree at runtime. DTR's server and client both live inside
+the container's netns, so default networking is sufficient — no
+`--net=host`:
 
 ```console
 podman build --platform linux/amd64 --target=test -t drizzle:test .
-podman run --rm --net=host drizzle:test
+podman run --rm drizzle:test
 ```
 
 arm64 readiness check (configure + compile, no tests yet):
@@ -64,7 +72,7 @@ Containerfile). Use `[compile platform:dpkg]` for build-time deps,
 `[test platform:dpkg]` for DTR/test deps, and `[perf platform:dpkg]`
 for the performance harness.
 
-Performance baseline (Phase 1.5):
+Performance baseline (Phase 2):
 
 ```console
 podman build --platform linux/amd64 --target=perf .
@@ -78,14 +86,15 @@ under callgrind and massif, diffed against `perf/baseline.json`. See
 
 - `Containerfile` — named stages: `base` (apt + bindep), `build`
   (autoreconf/configure/make), `test` (DTR runtime + entrypoint),
-  `perf` (Phase 1.5 performance harness).
+  `perf` (Phase 2 performance harness).
 - `bindep.txt` — build/test/perf/runtime package list.
 - `configure.ac` + `m4/` — autotools build. **Stay autotools.** Pandora
-  macro layer is being slimmed in Phase 2; do not add new Pandora
+  macro layer is being slimmed into `m4/drizzle.m4` in Phase 11
+  (paused until the LTS ratchet reaches 26.04); do not add new Pandora
   files.
 - `drizzled/` — server source.
-- `plugin/` — 82 plugins, each with a `plugin.ini`. Per-plugin
-  `build_conditional` lines are being deleted in Phase 10; do not add
+- `plugin/` — the in-tree plugins, each with a `plugin.ini`. Per-plugin
+  `build_conditional` lines are being deleted in Phase 13; do not add
   new ones.
 - `tests/` — DTR (`test-run.pl`) harness and suites.
 - `unittests/` — boost.test unit tests. `make unit` runs them.
@@ -104,7 +113,7 @@ under callgrind and massif, diffed against `perf/baseline.json`. See
 
 ### Strip the check, hardcode the answer
 
-When excising an autoconf probe (Phases 1 and 2), preserve the flag /
+When excising an autoconf probe (Phases 1 and 11), preserve the flag /
 define / behavior the probe would have set on amd64/arm64 Linux. The
 goal is a `configure.ac` that does almost no probing but produces the
 same `config.h` as the old one would have on our target. See the spec
