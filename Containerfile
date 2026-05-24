@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b com
     && rm -rf /var/lib/apt/lists/*
 
 FROM base AS build
+ARG TARGETPLATFORM
 
 # Build in a cache mount so artifacts persist across `podman build` runs.
 # Source is bind-mounted read-only; cp -au only copies changed files into the
@@ -24,22 +25,24 @@ FROM base AS build
 # Final cp -au lifts the build tree into the image layer so downstream stages
 # (and `podman run`) can use it without re-mounting the cache.
 RUN --mount=type=bind,source=.,target=/host-src,readonly,Z \
-    --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
+    --mount=type=cache,target=/build,id=drizzle-build-${TARGETPLATFORM},sharing=locked \
     cp -au --no-preserve=context /host-src/. /build/ && \
     cd /build && \
     if [ ! -f Makefile ] ; then autoreconf -i && ./configure ; fi && make -j"$(nproc)"
 
 FROM build AS test
+ARG TARGETPLATFORM
 
 # Test-time deps (DTR is Perl; `make unit` is boost.test, already built).
 RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b test) \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
-RUN --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
+RUN --mount=type=cache,target=/build,id=drizzle-build-${TARGETPLATFORM},sharing=locked \
     tools/run-tests.sh
 
 FROM build AS perf
+ARG TARGETPLATFORM
 
 # Phase 1.5 performance harness. valgrind (callgrind/massif) plus the
 # Perl DBI stack used to build DBD::drizzle and drive sql-bench.
@@ -52,5 +55,5 @@ ADD https://cpan.metacpan.org/authors/id/C/CA/CAPTTOFU/DBD-drizzle-0.304.tar.gz 
     /opt/DBD-drizzle-0.304.tar.gz
 
 WORKDIR /build
-RUN --mount=type=cache,target=/build,id=drizzle-build,sharing=locked \
+RUN --mount=type=cache,target=/build,id=drizzle-build-${TARGETPLATFORM},sharing=locked \
     tools/perf.sh
