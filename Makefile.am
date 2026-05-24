@@ -82,6 +82,7 @@ EXTRA_DIST= \
 	    config/pandora_vc_revinfo \
 	    config/pre_hook.sh \
 	    po/Makefile.in.in \
+	    ${top_srcdir}/m4/drizzle.m4 \
 	    ${top_srcdir}/m4/pandora*m4
 
 EXTRA_DIST+= po/Makevars
