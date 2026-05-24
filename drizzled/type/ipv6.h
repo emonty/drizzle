@@ -167,7 +167,7 @@ class IPv6 {
     //Function to retain the IPv4 address from IPv6 Data Structure
     char * ipv4_inet_ntop(char *destination)
     {
-	memset(destination, 0, sizeof(destination));
+	memset(destination, 0, IPV6_BUFFER_LENGTH);
 
 	snprintf(destination, IPV6_BUFFER_LENGTH, "%03x:%03x:%03x:%03x:%03x:%03x:%03d.%03d.%03d.%03d" ,
 	str.ip6[0],str.ip6[1],str.ip6[2],str.ip6[3],str.ip6[4],str.ip6[5],
