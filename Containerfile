@@ -51,7 +51,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends $(bindep -b per
 
 # DBD::drizzle (the libdrizzle Perl DBI driver) is not packaged. Fetch
 # the pinned CPAN release; tools/perf.sh builds it against libdrizzle.
-ADD https://cpan.metacpan.org/authors/id/C/CA/CAPTTOFU/DBD-drizzle-0.304.tar.gz \
+# Checksum pins the artifact so a silent upstream re-tag would fail loud.
+ADD --checksum=sha256:ab0513eb4429a56ba07a1f76528577cb3caf70ae42149441d6041c204b0e8929 \
+    https://cpan.metacpan.org/authors/id/C/CA/CAPTTOFU/DBD-drizzle-0.304.tar.gz \
     /opt/DBD-drizzle-0.304.tar.gz
 
 WORKDIR /build
