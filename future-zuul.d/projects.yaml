@@ -1,4 +1,8 @@
 ---
+# TODO(ci-activation): before flipping CI on, add a
+# drizzle-build-image-arm64 entry to vouched and gate for build-only
+# readiness on arm64. amd64 is gating today; arm64 becomes fully
+# gating in Phase 10. See the spec's CI section.
 - project:
     check:
       jobs:
