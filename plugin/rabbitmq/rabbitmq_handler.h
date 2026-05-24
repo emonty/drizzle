@@ -28,6 +28,7 @@
 #include <string>
 #include <amqp.h>
 #include <amqp_framing.h>
+#include <amqp_tcp_socket.h>
 #include <netinet/in.h>
 
 namespace drizzle_plugin {
@@ -58,9 +59,7 @@ public:
 class RabbitMQHandler
 {
 private:
-  amqp_connection_state_t rabbitmqConnection; 
-  int sockfd; ///< the socket file desc to the rabbitmq server, 
-              ///< need this to be able to close() it.
+  amqp_connection_state_t rabbitmqConnection;
   const std::string &hostname;
   const in_port_t port;
   const std::string &username;

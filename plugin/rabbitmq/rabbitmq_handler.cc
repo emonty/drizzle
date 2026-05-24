@@ -114,20 +114,23 @@ void RabbitMQHandler::disconnect() throw(rabbitmq_handler_exception)
 		    "close connection");
     amqp_destroy_connection(rabbitmqConnection);
   }
-  catch(exception& e) {} // do not throw in destructorn 
-  close(sockfd);
+  catch(exception& e) {} // do not throw in destructorn
 }
 
 void RabbitMQHandler::connect() throw(rabbitmq_handler_exception) {
-  sockfd = amqp_open_socket(hostname.c_str(), port);
-  if(sockfd < 0) 
+  amqp_socket_t *socket= amqp_tcp_socket_new(rabbitmqConnection);
+  if (socket == NULL)
+  {
+    rabbitmq_connection_established= false;
+    return;
+  }
+  if (amqp_socket_open(socket, hostname.c_str(), port) != AMQP_STATUS_OK)
   {
     rabbitmq_connection_established= false;
     return;
   }
   try
   {
-    amqp_set_sockfd(rabbitmqConnection, sockfd);
     /* login to rabbitmq, handleAMQPError throws exception if there is a problem */
     handleAMQPError(amqp_login(rabbitmqConnection, 
                                virtualhost.c_str(), 
