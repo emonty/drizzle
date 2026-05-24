@@ -3,7 +3,7 @@
 # run, against the local working tree.
 #
 # Default: amd64 only. Pass --arm64 to also do an arm64 configure+compile
-# check (no tests on arm64 until Phase 9).
+# check (no tests on arm64 until Phase 10).
 #
 # Pass --no-dtr to skip the DTR suite (keep `make unit` and the build).
 
