@@ -44,9 +44,9 @@ LT_INIT
 LT_LANG([C++])
 
 
-dnl GCC supports symbol visibility; gl_VISIBILITY used to probe for it.
-dnl CFLAG_VISIBILITY is applied per-target (the libdrizzle libraries);
-dnl see the spec's future-work note on a build-wide visibility pass.
+dnl Symbol visibility is fixed on: GCC on the target always supports it.
+dnl CFLAG_VISIBILITY is applied per-target — only the libdrizzle libraries
+dnl opt in today — pending a build-wide visibility pass (see the spec).
 HAVE_VISIBILITY=1
 CFLAG_VISIBILITY="-fvisibility=hidden"
 AC_SUBST([CFLAG_VISIBILITY])
