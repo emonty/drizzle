@@ -364,9 +364,6 @@ AC_DEFUN([PANDORA_WARNINGS],[
 
   SPHINX_WARNINGS="-W"
 
-  dnl The warning set GCC accepts on the target. Previously each flag was
-  dnl gated behind an AC_COMPILE_IFELSE probe; on a single supported
-  dnl compiler the outcome of every probe is fixed.
   CC_WARNINGS="-Werror -pedantic -Wall -Wundef -Wshadow -fdiagnostics-show-option -fno-strict-aliasing -Wno-strict-aliasing -Wextra -Wformat -Wno-format-nonliteral -Wno-format-security -Wstrict-prototypes -Wmissing-prototypes -Wredundant-decls -Wmissing-declarations -Wcast-align -Wlogical-op"
   CXX_WARNINGS="-Werror -pedantic -Wall -Wundef -Wshadow -fdiagnostics-show-option -fno-strict-aliasing -Wno-strict-aliasing -Wextra -Wformat -Wno-format-nonliteral -Wno-format-security -Woverloaded-virtual -Wnon-virtual-dtor -Wctor-dtor-privacy -Wno-long-long -Wmissing-declarations -Wframe-larger-than=32768 -Wno-redundant-decls"
 
