@@ -74,7 +74,7 @@ public:
   result_type operator() (argument_type engine)
   {
     schema_proto= engine->doGetSchemaDefinition(identifier);
-    return schema_proto;
+    return bool(schema_proto);
   }
 };
 
@@ -107,7 +107,7 @@ bool StorageEngine::doesSchemaExist(const identifier::Schema &identifier)
 {
   message::schema::shared_ptr proto;
 
-  return StorageEngine::getSchemaDefinition(identifier);
+  return bool(StorageEngine::getSchemaDefinition(identifier));
 }
 
 
