@@ -21,6 +21,7 @@
 #include <config.h>
 #include <plugin/user_locks/module.h>
 
+#include <boost/make_shared.hpp>
 #include <boost/thread/locks.hpp>
 
 #include <string>
@@ -31,13 +32,13 @@ namespace barriers {
 bool Barriers::create(const user_locks::Key &arg, drizzled::session_id_t owner)
 {
   boost::unique_lock<boost::mutex> scope(mutex);
-  return barrier_map.insert(std::make_pair(arg, new Barrier(owner))).second;
+  return barrier_map.insert(std::make_pair(arg, boost::make_shared<Barrier>(owner))).second;
 }
 
 bool Barriers::create(const user_locks::Key &arg, drizzled::session_id_t owner, int64_t wait_count)
 {
   boost::unique_lock<boost::mutex> scope(mutex);
-  return barrier_map.insert(std::make_pair(arg, new Barrier(owner, wait_count))).second;
+  return barrier_map.insert(std::make_pair(arg, boost::make_shared<Barrier>(owner, wait_count))).second;
 }
 
 /*
