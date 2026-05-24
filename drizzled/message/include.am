@@ -157,9 +157,16 @@ SUFFIXES += .proto .pb.cc .pb.h
 
 MESSAGE_PROTO_PATH=${top_builddir}/${MESSAGE_DIR}:${top_srcdir}/${MESSAGE_DIR}
 
+# Each `.proto` produces `.pb.cc` + `.pb.h`; we tag the header as a
+# system header so consumers can keep building with -Werror -Wshadow
+# (protoc emits setter parameter names that shadow getter methods).
 .proto.pb.cc:
 	$(PROTOC) --proto_path=${MESSAGE_PROTO_PATH} \
 		--cpp_out=${top_builddir}/${MESSAGE_DIR} $<
+	grep -q '^#pragma GCC system_header' $*.pb.h \
+		|| sed -i '1i #pragma GCC system_header' $*.pb.h
 .proto.pb.h:
 	$(PROTOC) --proto_path=${MESSAGE_PROTO_PATH} \
 		--cpp_out=${top_builddir}/drizzled/message $<
+	grep -q '^#pragma GCC system_header' $@ \
+		|| sed -i '1i #pragma GCC system_header' $@
