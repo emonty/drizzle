@@ -65,17 +65,7 @@ public:
 
   inline value_type fetch(const volatile value_type *value) const volatile
   {
-    /*
-     * This is necessary to ensure memory barriers are respected when
-     * simply returning the value pointed at.  However, this does not
-     * compile on ICC.
-     *
-     * @todo
-     *
-     * Look at how to rewrite the below to something that ICC feels is
-     * OK and yet respects memory barriers.
-     */
-    return __sync_fetch_and_add(const_cast<value_type *>(value), 0);
+    return __atomic_load_n(value, __ATOMIC_SEQ_CST);
   }
 
   inline value_type store_with_release(volatile value_type *value,
