@@ -16,7 +16,7 @@ AC_DEFUN([_PANDORA_SEARCH_LIBSSL],[
     #include <openssl/ssl.h>
   ],[
     SSL_CTX *ctx;
-    ctx= SSL_CTX_new(TLSv1_client_method());
+    ctx= SSL_CTX_new(TLS_client_method());
   ])
 
   AM_CONDITIONAL(HAVE_LIBSSL, [test "x${ac_cv_libssl}" = "xyes"])

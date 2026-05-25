@@ -39,7 +39,7 @@
 
 drizzle_return_t drizzle_set_ssl(drizzle_con_st *con, const char *key, const char *cert, const char *ca, const char *capath, const char *cipher)
 {
-  con->ssl_context= SSL_CTX_new(TLSv1_client_method());
+  con->ssl_context= SSL_CTX_new(TLS_client_method());
 
   if (cipher)
   {

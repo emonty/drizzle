@@ -69,7 +69,7 @@ static const char *_verbose_name[DRIZZLE_VERBOSE_MAX]=
 
 void drizzle_library_init(void)
 {
-  SSL_library_init();
+  OPENSSL_init_ssl(0, NULL);
 }
 
 const char *drizzle_version(void)

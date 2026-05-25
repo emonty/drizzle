@@ -30,6 +30,7 @@
 #include <drizzled/optimizer/position.h>
 #include <drizzled/sql_select.h>
 #include <drizzled/tmp_table_param.h>
+#include <algorithm>
 #include <bitset>
 
 #include <boost/noncopyable.hpp>
@@ -309,8 +310,7 @@ public:
    */
   void copyPartialPlanIntoOptimalPlan(uint32_t size)
   {
-    memcpy(best_positions, positions, 
-           sizeof(optimizer::Position) * size);
+    std::copy(positions, positions + size, best_positions);
   }
 
   void cache_const_exprs();

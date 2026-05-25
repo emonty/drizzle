@@ -355,11 +355,11 @@ plugin_innobase_libpars_la_SOURCES= \
 
 plugin_innobase_libinnobase_la_LIBADD=	plugin/innobase/libpars.la
 
-plugin/innobase/pars/pars0grm.cc: plugin/innobase/pars/pars0grm.y
+plugin/innobase/pars/pars0grm.cc: plugin/innobase/pars/pars0grm.y plugin/innobase/plugin.am
 	$(AM_V_GEN) $(YACC) -d $< -o plugin/innobase/pars/pars0grm.tab.cc
 	@mkdir -p plugin/innobase/include
 	@mv plugin/innobase/pars/pars0grm.tab.hh plugin/innobase/include/pars0grm.hh
-	@sed -e 's/pars0grm.tab.cc/pars0grm.cc/; s/^\(\(YYSTYPE\|int\) yy\(char\|nerrs\)\)/static \1/; s/\(\(YYSTYPE\|int\) yy\(lval\|parse\)\)/UNIV_INTERN \1/;' < plugin/innobase/pars/pars0grm.tab.cc > plugin/innobase/pars/pars0grm.cc
+	@sed -e 's/pars0grm.tab.cc/pars0grm.cc/; s/pars0grm.tab.hh/pars0grm.hh/; s/^\(\(YYSTYPE\|int\) yy\(char\|nerrs\)\)/static \1/; s/\(\(YYSTYPE\|int\) yy\(lval\|parse\)\)/UNIV_INTERN \1/;' < plugin/innobase/pars/pars0grm.tab.cc > plugin/innobase/pars/pars0grm.cc
 	@rm plugin/innobase/pars/pars0grm.tab.cc
 
 plugin/innobase/include/pars0grm.hh: plugin/innobase/pars/pars0grm.cc
@@ -400,4 +400,3 @@ EXTRA_DIST+= \
              plugin/innobase/CMakeLists.txt \
              plugin/innobase/pars/pars0grm.y \
              plugin/innobase/pars/pars0lex.l
-

@@ -94,7 +94,7 @@ bool ZeroMQLog::setEndpoint(std::string new_endpoint)
 plugin::ReplicationReturnCode
 ZeroMQLog::apply(Session &, const message::Transaction &to_apply)
 {
-  size_t message_byte_length= to_apply.ByteSize();
+  size_t message_byte_length= to_apply.ByteSizeLong();
   uint8_t* buffer= new uint8_t[message_byte_length];
   if(buffer == NULL)
   {
@@ -108,7 +108,7 @@ ZeroMQLog::apply(Session &, const message::Transaction &to_apply)
   int rc= zmq_msg_init_size(&schemamsg, schema.length());
   memcpy(zmq_msg_data(&schemamsg), schema.c_str(), schema.length());
 
-  to_apply.SerializeWithCachedSizesToArray(buffer);
+  to_apply.SerializeToArray(buffer, static_cast<int>(message_byte_length));
   zmq_msg_t msg;
   rc= zmq_msg_init_size(&msg, message_byte_length);
   assert (rc == 0);

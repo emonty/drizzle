@@ -1034,9 +1034,10 @@ session_to_trx(
 plugin::ReplicationReturnCode ReplicationLog::apply(Session &session,
                                                     const message::Transaction &message)
 {
-  char *data= new char[message.ByteSize()];
+  size_t message_byte_length= message.ByteSizeLong();
+  char *data= new char[message_byte_length];
 
-  message.SerializeToArray(data, message.ByteSize());
+  message.SerializeToArray(data, static_cast<int>(message_byte_length));
 
   trx_t *trx= session_to_trx(&session);
 
@@ -1051,7 +1052,7 @@ plugin::ReplicationReturnCode ReplicationLog::apply(Session &session,
   uint64_t originating_commit_id= session.getOriginatingCommitID();
   bool use_originating_server_uuid= session.isOriginatingServerUUIDSet();
 
-  ulint error= insert_replication_message(data, message.ByteSize(), trx, trx_id,
+  ulint error= insert_replication_message(data, message_byte_length, trx, trx_id,
                end_timestamp, is_end_segment, seg_id, server_uuid.c_str(),
                use_originating_server_uuid, originating_server_uuid.c_str(),
                originating_commit_id);

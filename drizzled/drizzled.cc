@@ -1406,6 +1406,8 @@ bool init_variables_before_daemonizing(int argc, char **argv)
 
 // Return failure if we can't pass this, drizzled_abort() will then be called
 // by the caller.
+void usage();
+
 bool init_variables_after_daemonizing(module::Registry &plugins)
 {
   int style = po::command_line_style::default_style & ~po::command_line_style::allow_guessing;
@@ -1425,7 +1427,6 @@ bool init_variables_after_daemonizing(module::Registry &plugins)
 
   if ( was_help_requested())
   {
-	  bool usage();
 	  usage();
   }
 
@@ -1532,8 +1533,6 @@ bool was_help_requested()
 {
   return bool(vm.count("help"));
 }
-
-void usage();
 
 void init_server_components(module::Registry &plugins)
 {
@@ -2260,4 +2259,3 @@ static void fix_paths()
 }
 
 } /* namespace drizzled */
-

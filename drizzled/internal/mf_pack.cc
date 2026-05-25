@@ -290,7 +290,13 @@ size_t unpack_filename(char * to, const char *from)
 
 static size_t system_filename(char * to, const char *from)
 {
-  return strlen(strncpy(to,from,FN_REFLEN-1));
+  size_t length= strlen(from);
+  if (length >= FN_REFLEN)
+    length= FN_REFLEN - 1;
+
+  memmove(to, from, length);
+  to[length]= '\0';
+  return length;
 } /* system_filename */
 
 

@@ -45,6 +45,7 @@ unittests_unittests_SOURCES = \
 			      unittests/date_time_test.cc \
 			      unittests/global_buffer_test.cc \
 			      unittests/libdrizzle_test.cc \
+			      unittests/message_proto_test.cc \
 			      unittests/micro_timestamp_test.cc \
 			      unittests/nano_timestamp_test.cc \
 			      unittests/option_context.cc \

@@ -703,7 +703,6 @@ bool Item_singlerow_subselect::val_bool()
 Item_exists_subselect::Item_exists_subselect(Select_Lex *select_lex):
   Item_subselect()
 {
-  bool val_bool();
   init(select_lex, new select_exists_subselect(this));
   max_columns= UINT_MAX;
   null_value= 0; //can't be NULL

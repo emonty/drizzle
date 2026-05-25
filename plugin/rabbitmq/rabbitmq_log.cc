@@ -82,7 +82,7 @@ RabbitMQLog::apply(Session &, const message::Transaction &to_apply)
   if(not sysvar_logging_enable)
     return plugin::SUCCESS;
 
-  size_t message_byte_length= to_apply.ByteSize();
+  size_t message_byte_length= to_apply.ByteSizeLong();
   uint8_t* buffer= new uint8_t[message_byte_length];
   if(buffer == NULL)
   {
@@ -91,7 +91,7 @@ RabbitMQLog::apply(Session &, const message::Transaction &to_apply)
     return plugin::UNKNOWN_ERROR;
   }
 
-  to_apply.SerializeWithCachedSizesToArray(buffer);
+  to_apply.SerializeToArray(buffer, static_cast<int>(message_byte_length));
   short tries = 3;
   bool sent = false;
   while (!sent && tries > 0) {
