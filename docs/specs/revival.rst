@@ -21,25 +21,31 @@ cold. Read this block first; the rest of the spec is the roadmap.
   ``perf/``), Phase 3 (container hygiene and Phase 0 follow-ups),
   Phase 4 (LTS bump 12.04 → 14.04), Phase 5 (LTS bump 14.04 → 16.04;
   C++11 baseline; ``boost::shared_ptr`` / ``boost::unordered_map``
-  swept to ``std::``), and Phase 6 (LTS bump 16.04 → 18.04; Boost
+  swept to ``std::``), Phase 6 (LTS bump 16.04 → 18.04; Boost
   1.65 link-graph fix-ups; GCC 7 ``-Wimplicit-fallthrough`` /
   ``-Wmemset-elt-size`` / ``-Wbool-compare`` / ``-Wmisleading-
   indentation`` sweep; ``readdir_r`` → ``readdir`` and
   ``__sync_fetch_and_add`` → ``__atomic_load_n``; C++03 dynamic-
   exception-spec sweep; ``drizzle_result_st`` constructor was missing
   two pointer initialisers — Bionic's stricter heap layout exposed
-  the bug as a ``free(): invalid pointer`` in DTR's auth path).
+  the bug as a ``free(): invalid pointer`` in DTR's auth path), and
+  Phase 7 (LTS bump 18.04 → 20.04; C++17 build mode, protobuf 3,
+  PCRE2, Boost 1.71, Focal perf numbers, native-AIO perf comparison,
+  and the C++17 mechanical source sweep).
   Each landed phase's commits are tagged in commit messages, *under
   their old numbers* for Phases 0–2 — what this spec now calls Phase
   2 appears in older commits as Phase 1.5. See the Renumber note
   below for the full map.
-* **In progress.** Phase 7 has its first local layers: C++17 build
-  mode is enabled, the base image and bindep selectors are on Ubuntu
-  20.04, protobuf 3 / Boost 1.71 / GCC 9 fallout is green on amd64,
-  Focal perf numbers are recorded in ``perf/20.04.json``, a native-AIO
-  comparison is captured in ``perf/20.04-aio.json``, and the direct PCRE
-  users have migrated to PCRE2 with build/test/``make check`` green.
-  The C++17 mechanical sweep currently audits clean.
+* **In progress.** Phase 8 has its first local layers: the base image
+  and bindep selectors are on Ubuntu 22.04, Boost is raised to 1.74,
+  OpenSSL 3 deprecated client-method/init calls are gone, protobuf
+  ``ByteSize()`` / cached-size serialization call sites use the modern
+  APIs, and the GCC 11 / Bison fallout is clean. The tree builds on
+  Jammy; ``podman run drizzle:phase8-amd64-test`` passes ``make unit``
+  and DTR; ``make check`` passes the 7 libdrizzle-1.0 tests and its
+  DTR pass. The message proto files remain proto2 under ``protoc`` 3;
+  a focused unit test now covers required-field presence,
+  recursive ``IsInitialized()``, and normal-vs-partial parse behavior.
 * **In flight, then paused.** Phase 11 (Pandora slim-down to
   ``m4/drizzle.m4``) — what older commit messages call Phase 2. A
   number of build-setup macros have folded into ``m4/drizzle.m4``
@@ -49,9 +55,9 @@ cold. Read this block first; the rest of the spec is the roadmap.
   finishing the bzr/svn/hg strip, the ``PANDORA_`` → ``DRIZZLE_``
   rename) is open but **deliberately deferred** until after the LTS
   ratchet reaches 26.04.
-* **Next.** Land any final Phase 7 C++17-source cleanup that the static
-  audit missed; if that changes source, re-run the Focal build/test/perf
-  checks. The Pandora slim-down (Phase 11) is still held back because
+* **Next.** Split the Phase 8 WIP into LTS-bump layers, re-verify the
+  Focal-safe prep layer on Focal, then record the Jammy perf numbers.
+  The Pandora slim-down (Phase 11) is still held back because
   the existing Pandora layer still works, and the LTS ratchet brings in
   modern pkg-config / Boost / OpenSSL / protobuf that make the macro
   conversion cleaner than fighting the 12.04 toolchain. After the

@@ -58,10 +58,7 @@ int yylex(union ParserType *yylval, drizzled::Session *session);
   {                                           \
     unsigned long val= *(F);                          \
     if (drizzled::my_yyoverflow((B), (D), &val)) \
-    {                                         \
-      yyerror(NULL, (A));                   \
-      return 2;                               \
-    }                                         \
+      YYNOMEM;                                \
     else                                      \
     {                                         \
       *(F)= (YYSIZE_T)val;                    \

@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1.4
-ARG UBUNTU=20.04
+ARG UBUNTU=22.04
 
 FROM quay.io/inaugust/bindep-rs AS bindep_rs
 
-FROM quay.io/inaugust/unsafe-old-distro-danger:${UBUNTU} AS base
+FROM quay.io/opendevmirror/ubuntu:${UBUNTU} AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
