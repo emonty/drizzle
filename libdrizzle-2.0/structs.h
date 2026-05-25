@@ -347,7 +347,10 @@ public:
     field_total(0),
     field_offset(0),
     field_size(0),
+    field(NULL),
+    field_buffer(NULL),
     row_list_size(0),
+    row(NULL),
     row_list(NULL),
     field_sizes(NULL),
     field_sizes_list(NULL)
