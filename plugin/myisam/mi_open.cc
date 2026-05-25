@@ -88,7 +88,7 @@ MI_INFO *mi_open(const drizzled::identifier::Table &identifier, int mode, uint32
   char *rp_buff = NULL;
   unsigned char *disk_cache= NULL;
   unsigned char *disk_pos, *end_pos;
-  MI_INFO info,*m_info,*old_info;
+  MI_INFO info= MI_INFO(), *m_info, *old_info;
   boost::scoped_ptr<MYISAM_SHARE> share_buff_ap(new MYISAM_SHARE);
   MYISAM_SHARE &share_buff= *share_buff_ap.get();
   MYISAM_SHARE *share;
@@ -101,7 +101,6 @@ MI_INFO *mi_open(const drizzled::identifier::Table &identifier, int mode, uint32
   lock_error=1;
   errpos=0;
   head_length=sizeof(share_buff.state.header);
-  memset(&info, 0, sizeof(info));
 
   (void)internal::fn_format(org_name,
                             identifier.getPath().c_str(), 
@@ -1158,4 +1157,3 @@ int mi_indexes_are_disabled(MI_INFO *info)
   */
   return 2;
 }
-

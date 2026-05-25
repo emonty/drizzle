@@ -30,6 +30,8 @@
 
 #include <drizzled/visibility.h>
 
+#include <boost/noncopyable.hpp>
+
 namespace drizzled {
 
 /*
@@ -918,4 +920,3 @@ Field *create_tmp_field(Session *session,
                         uint32_t convert_blob_length);
 
 } /* namespace drizzled */
-

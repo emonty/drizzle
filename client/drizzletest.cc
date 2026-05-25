@@ -2691,7 +2691,7 @@ static void do_change_user(st_command *)
 
 static void do_perl(st_command* command)
 {
-  char buf[FN_REFLEN];
+  char buf[FN_REFLEN + sizeof("perl ")];
   char temp_file_path[FN_REFLEN];
   string ds_script;
   string ds_delimiter;
@@ -5643,11 +5643,6 @@ public:
   ~POINTER_ARRAY();
   int insert(char* name);
 
-  POINTER_ARRAY()
-  {
-    memset(this, 0, sizeof(*this));
-  }
-
   TYPELIB typelib;        /* Pointer to strings */
   unsigned char *str;          /* Strings is here */
   uint8_t* flag;          /* Flag about each var. */
@@ -5655,6 +5650,17 @@ public:
   uint32_t max_count;
   uint32_t length;
   uint32_t max_length;
+
+  POINTER_ARRAY() :
+    typelib(),
+    str(NULL),
+    flag(NULL),
+    array_allocs(0),
+    max_count(0),
+    length(0),
+    max_length(0)
+  {
+  }
 };
 
 struct st_replace;
@@ -6046,13 +6052,13 @@ int reg_replace(char** buf_p, int* buf_len_p, char *pattern,
     char* new_buf= (char*)malloc(*buf_len_p+1);
 
     memset(new_buf, 0, *buf_len_p+1);
-    strncpy(new_buf, in_string, substring_to_replace-in_string);
-    strncpy(new_buf+(substring_to_replace-in_string), replace, strlen(replace));
-    strncpy(new_buf+(substring_to_replace-in_string)+strlen(replace),
-            substring_to_replace + substring_length,
-            strlen(in_string)
-              - substring_length
-              - (substring_to_replace-in_string));
+    memcpy(new_buf, in_string, substring_to_replace-in_string);
+    memcpy(new_buf+(substring_to_replace-in_string), replace, strlen(replace));
+    memcpy(new_buf+(substring_to_replace-in_string)+strlen(replace),
+           substring_to_replace + substring_length,
+           strlen(in_string)
+             - substring_length
+             - (substring_to_replace-in_string));
     *buf_p= new_buf;
 
     pcre_free(re);
@@ -6083,8 +6089,8 @@ int reg_replace(char** buf_p, int* buf_len_p, char *pattern,
     }
 
     char* new_buf = (char*) malloc(subject.length() + 1);
-    memset(new_buf, 0, subject.length() + 1);
-    strncpy(new_buf, subject.c_str(), subject.length());
+    memcpy(new_buf, subject.c_str(), subject.length());
+    new_buf[subject.length()]= 0;
     *buf_len_p= subject.length() + 1;
     *buf_p= new_buf;
           

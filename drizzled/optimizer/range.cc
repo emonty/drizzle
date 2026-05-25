@@ -361,7 +361,9 @@ optimizer::SqlSelect *optimizer::make_select(Table *head,
 
   if (head->sort.io_cache)
   {
-    memcpy(select->file, head->sort.io_cache, sizeof(internal::io_cache_st));
+    memcpy(static_cast<void *>(select->file),
+           static_cast<const void *>(head->sort.io_cache),
+           sizeof(internal::io_cache_st));
     select->records=(ha_rows) (select->file->end_of_file/
 			       head->cursor->ref_length);
     delete head->sort.io_cache;
@@ -2818,7 +2820,7 @@ get_mm_leaf(optimizer::RangeParameter *param,
     }
     else
     {
-      if (unlikely(length < field_length))
+      if (DRIZZLE_UNLIKELY(length < field_length))
       {
         /*
           This can only happen in a table created with UNIREG where one key

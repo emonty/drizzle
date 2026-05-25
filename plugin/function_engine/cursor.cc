@@ -215,7 +215,7 @@ int FunctionCursor::rnd_pos(unsigned char *buf, unsigned char *pos)
 
 int FunctionCursor::info(uint32_t flag)
 {
-  memset(&stats, 0, sizeof(stats));
+  stats= drizzled::ha_statistics();
 
   if (flag & HA_STATUS_AUTO)
     stats.auto_increment_value= 1;

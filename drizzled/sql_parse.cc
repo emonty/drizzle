@@ -206,7 +206,7 @@ bool dispatch_command(enum_server_command command, Session& session, str_ref pac
   /* @todo set session.lex().sql_command to SQLCOM_END here */
 
   plugin::Logging::preDo(&session);
-  if (unlikely(plugin::EventObserver::beforeStatement(session)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeStatement(session)))
   {
     // We should do something about an error...
   }
@@ -338,7 +338,7 @@ bool dispatch_command(enum_server_command command, Session& session, str_ref pac
   session.close_thread_tables();
 
   plugin::Logging::postDo(&session);
-  if (unlikely(plugin::EventObserver::afterStatement(session)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterStatement(session)))
   {
     // We should do something about an error...
   }

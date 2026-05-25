@@ -1344,7 +1344,6 @@ int MyisamEngine::doCreateTable(Session &session,
   uint32_t options= share->db_options_in_use;
   if ((error= table2myisam(&table_arg, &keydef, &recinfo, &create_records)))
     return(error);
-  memset(&create_info, 0, sizeof(create_info));
   create_info.max_rows= create_proto.options().max_rows();
   create_info.reloc_rows= create_proto.options().min_rows();
   create_info.with_auto_increment= share->next_number_key_offset == 0;

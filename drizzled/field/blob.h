@@ -22,6 +22,7 @@
 
 #include <drizzled/field/str.h>
 #include <drizzled/charset.h>
+#include <new>
 #include <string>
 #include <drizzled/visibility.h>
 
@@ -105,7 +106,11 @@ public:
     return (uint32_t) (((uint64_t) 1 << 32) -1);
   }
   int reset(void) { memset(ptr, 0, sizeof(uint32_t)+sizeof(unsigned char*)); return 0; }
-  void reset_fields() { memset(&value, 0, sizeof(value)); }
+  void reset_fields()
+  {
+    /* Field::new_field() creates a raw memdup clone; do not free the clone. */
+    ::new (static_cast<void *>(&value)) String();
+  }
 #ifndef WORDS_BIGENDIAN
   static
 #endif
@@ -173,5 +178,3 @@ public:
 };
 
 } /* namespace drizzled */
-
-

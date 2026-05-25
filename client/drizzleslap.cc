@@ -2239,7 +2239,7 @@ void print_conclusions(Conclusions &con)
 
 void print_conclusions_csv(Conclusions &con)
 {
-  char buffer[HUGE_STRING_LENGTH];
+  char buffer[HUGE_STRING_LENGTH * 2];
   char label_buffer[HUGE_STRING_LENGTH];
   size_t string_len;
   const char *temp_label= opt_label.c_str();
@@ -2275,7 +2275,7 @@ void print_conclusions_csv(Conclusions &con)
     snprintf(label_buffer, HUGE_STRING_LENGTH, "query");
   }
 
-  snprintf(buffer, HUGE_STRING_LENGTH,
+  snprintf(buffer, sizeof(buffer),
            "%s,%s,%ld.%03ld,%ld.%03ld,%ld.%03ld,%ld.%03ld,%ld.%03ld,"
            "%u,%u,%u,%" PRIu64 "\n",
            con.getEngine() ? con.getEngine() : "", /* Storage engine we ran against */

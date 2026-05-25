@@ -700,7 +700,7 @@ void Session::unlink(const Session::shared_ptr& session)
 
   boost::mutex::scoped_lock scopedLock(session::Cache::mutex());
 
-  if (unlikely(plugin::EventObserver::disconnectSession(*session)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::disconnectSession(*session)))
   {
     // We should do something about an error...
   }

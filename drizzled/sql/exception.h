@@ -67,7 +67,7 @@ public:
     _sql_state= "00000";
   }
 
-  ~Exception () throw ()
+  ~Exception() noexcept
   { }
 
   drizzled::error_t getErrorCode() const
@@ -117,4 +117,3 @@ std::ostream& operator<<(std::ostream& output, const Exception &arg);
 
 } // namespace sql 
 } // namespace drizzled
-

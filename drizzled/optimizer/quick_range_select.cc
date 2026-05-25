@@ -75,7 +75,7 @@ optimizer::QuickRangeSelect::QuickRangeSelect(Session *session,
   }
   else
   {
-    memset(&alloc, 0, sizeof(alloc));
+    alloc= memory::Root();
   }
 
   cursor= head->cursor;

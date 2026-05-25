@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #endif
 
 #include <config.h>
+#include <algorithm>
 #include <string>
 #include <drizzled/internal/my_sys.h>
 #include <drizzled/charset.h>
@@ -107,6 +108,14 @@ typedef drizzled::charset_info_st CHARSET_INFO;
 
 using namespace drizzled;
 namespace po=boost::program_options;
+
+static void xb_copy_padded(char* to, size_t to_size, const char* from)
+{
+	size_t copy_size = std::min(strlen(from), to_size);
+
+	memset(to, 0, to_size);
+	memcpy(to, from, copy_size);
+}
 
 namespace drizzled {
   bool errmsg_printf (error::priority_t, char const *format, ...);
@@ -1656,8 +1665,10 @@ xtrabackup_copy_datafile(fil_node_t* node, uint thread_n)
 {
 	os_file_t	src_file = -1;
 	os_file_t	dst_file = -1;
-	char		dst_path[FN_REFLEN];
-	char		meta_path[FN_REFLEN];
+	char		dst_path[OS_FILE_MAX_PATH + sizeof(".delta") +
+				 sizeof(XB_DELTA_INFO_SUFFIX)];
+	char		meta_path[OS_FILE_MAX_PATH + sizeof(".delta") +
+				  sizeof(XB_DELTA_INFO_SUFFIX)];
 	ibool		success;
 	byte*		page;
 	byte*		buf2 = NULL;
@@ -1808,9 +1819,16 @@ skip_filter:
 	}
 
 	if (xtrabackup_incremental) {
-		snprintf(meta_path, sizeof(meta_path),
-			 "%s%s", dst_path, XB_DELTA_INFO_SUFFIX);
-		strcat(dst_path, ".delta");
+		size_t dst_path_len = strlen(dst_path);
+		if (dst_path_len + sizeof(XB_DELTA_INFO_SUFFIX)
+		    > sizeof(meta_path)
+		    || dst_path_len + sizeof(".delta") > sizeof(dst_path)) {
+			goto error;
+		}
+		memcpy(meta_path, dst_path, dst_path_len);
+		memcpy(meta_path + dst_path_len, XB_DELTA_INFO_SUFFIX,
+		       sizeof(XB_DELTA_INFO_SUFFIX));
+		memcpy(dst_path + dst_path_len, ".delta", sizeof(".delta"));
 
 		/* clear buffer */
 		bzero(incremental_buffer, (page_size/4) * page_size);
@@ -3904,9 +3922,13 @@ xtrabackup_apply_delta(
 {
 	os_file_t	src_file = -1;
 	os_file_t	dst_file = -1;
-	char	src_path[FN_REFLEN];
-	char	dst_path[FN_REFLEN];
-	char	meta_path[FN_REFLEN];
+	const size_t path_buffer_size = OS_FILE_MAX_PATH * 3 + 3;
+	boost::scoped_array<char> src_path_buf(new char[path_buffer_size]);
+	boost::scoped_array<char> dst_path_buf(new char[path_buffer_size]);
+	boost::scoped_array<char> meta_path_buf(new char[path_buffer_size]);
+	char* src_path = src_path_buf.get();
+	char* dst_path = dst_path_buf.get();
+	char* meta_path = meta_path_buf.get();
 	ibool	success;
 
 	ibool	last_buffer = FALSE;
@@ -3920,14 +3942,14 @@ xtrabackup_apply_delta(
 	ut_a(xtrabackup_incremental);
 
 	if (dbname) {
-		snprintf(src_path, sizeof(src_path), "%s/%s/%s",
+		snprintf(src_path, path_buffer_size, "%s/%s/%s",
 			 dirname, dbname, filename);
-		snprintf(dst_path, sizeof(dst_path), "%s/%s/%s",
+		snprintf(dst_path, path_buffer_size, "%s/%s/%s",
 			 xtrabackup_real_target_dir, dbname, filename);
 	} else {
-		snprintf(src_path, sizeof(src_path), "%s/%s",
+		snprintf(src_path, path_buffer_size, "%s/%s",
 			 dirname, filename);
-		snprintf(dst_path, sizeof(dst_path), "%s/%s",
+		snprintf(dst_path, path_buffer_size, "%s/%s",
 			 xtrabackup_real_target_dir, filename);
 	}
 	dst_path[strlen(dst_path) - 6] = '\0';
@@ -4096,7 +4118,7 @@ static void
 xtrabackup_apply_deltas(bool check_newer)
 {
 	int		ret;
-	char		dbpath[FN_REFLEN];
+	char		dbpath[OS_FILE_MAX_PATH * 2 + 2];
 	os_file_dir_t	dir;
 	os_file_dir_t	dbdir;
 	os_file_stat_t	dbinfo;
@@ -4154,8 +4176,8 @@ next_file_item_1:
 		        goto next_datadir_item;
 		}
 
-		sprintf(dbpath, "%s/%s", xtrabackup_incremental_dir,
-								dbinfo.name);
+		snprintf(dbpath, sizeof(dbpath), "%s/%s",
+			 xtrabackup_incremental_dir, dbinfo.name);
 		srv_normalize_path_for_win(dbpath);
 
 		dbdir = os_file_opendir(dbpath, FALSE);
@@ -4511,7 +4533,9 @@ skip_check:
 					ulint		n_index;
 
 					/* node exist == file exist, here */
-					strncpy(info_file_path, node->name, FN_REFLEN);
+					snprintf(info_file_path,
+						 sizeof(info_file_path), "%s",
+						 node->name);
 					len = strlen(info_file_path);
 					info_file_path[len - 3] = 'e';
 					info_file_path[len - 2] = 'x';
@@ -4525,7 +4549,8 @@ skip_check:
 						p = next + 1;
 					}
 					info_file_path[len - 4] = 0;
-					strncpy(table_name, prev, FN_REFLEN);
+					snprintf(table_name, sizeof(table_name),
+						 "%s", prev);
 
 					info_file_path[len - 4] = '.';
 
@@ -4551,7 +4576,8 @@ skip_check:
 					mach_write_to_4(page    , 0x78706f72UL);
 					mach_write_to_4(page + 4, 0x74696e66UL);/*"xportinf"*/
 					mach_write_to_4(page + 8, n_index);
-					strncpy((char*)page + 12, table_name, 500);
+					xb_copy_padded((char*)page + 12, 500,
+						       table_name);
 
 					printf(
 "xtrabackup: export metadata of table '%s' to file `%s` (%lu indexes)\n",
@@ -4563,7 +4589,8 @@ skip_check:
 						mach_write_to_4(page + n_index * 512 + 8,
 								index->page);
 
-						strncpy((char*)page + n_index * 512 + 12, index->name, 500);
+						xb_copy_padded((char*)page + n_index * 512 + 12,
+							       500, index->name);
 
 						printf(
 "xtrabackup:     name=%s, id.low=%lu, page=%lu\n",

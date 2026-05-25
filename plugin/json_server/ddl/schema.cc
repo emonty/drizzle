@@ -65,14 +65,14 @@
       bool res =false;
       std::string path = schema_identifier.getSQLPath();
          
-        if (unlikely(plugin::EventObserver::beforeCreateDatabase(session(), path)))
+        if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeCreateDatabase(session(), path)))
         {
           my_error(ER_EVENT_OBSERVER_PLUGIN, MYF(0), path.c_str());
         }
         else
         {
           res= schema::create(session(), schema_message, false);
-          if (unlikely(plugin::EventObserver::afterCreateDatabase(session(), path, res)))
+          if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterCreateDatabase(session(), path, res)))
           {
             my_error(ER_EVENT_OBSERVER_PLUGIN, schema_identifier);
             res = false;
@@ -105,14 +105,14 @@
 
       bool res = true;
       std::string path = schema_identifier.getSQLPath();
-      if (unlikely(plugin::EventObserver::beforeDropDatabase(session(), path)))
+      if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeDropDatabase(session(), path)))
       {
         my_error(ER_EVENT_OBSERVER_PLUGIN, schema_identifier);      
       }
       else
       {
         res= schema::drop(session(), schema_identifier, false);
-        if (unlikely(plugin::EventObserver::afterDropDatabase(session(), path, res)))
+        if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterDropDatabase(session(), path, res)))
         {
           my_error(ER_EVENT_OBSERVER_PLUGIN, MYF(0), path.c_str());
           res = false;

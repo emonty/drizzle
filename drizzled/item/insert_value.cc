@@ -70,7 +70,9 @@ bool Item_insert_value::fix_fields(Session *session, Item **)
   if (field_arg->field->getTable()->insert_values.size())
   {
     Field *def_field= (Field*) memory::sql_alloc(field_arg->field->size_of());
-    memcpy(def_field, field_arg->field, field_arg->field->size_of());
+    memcpy(static_cast<void *>(def_field),
+           static_cast<const void *>(field_arg->field),
+           field_arg->field->size_of());
     def_field->move_field_offset((ptrdiff_t)
                                  (&def_field->getTable()->insert_values[0] - def_field->getTable()->record[0]));
     set_field(def_field);

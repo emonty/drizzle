@@ -342,7 +342,7 @@ void Cursor::adjust_next_insert_id_after_explicit_value(uint64_t nr)
 inline uint64_t
 prev_insert_id(uint64_t nr, drizzle_system_variables *variables)
 {
-  if (unlikely(nr < variables->auto_increment_offset))
+  if (DRIZZLE_UNLIKELY(nr < variables->auto_increment_offset))
   {
     /*
       There's nothing good we can do here. That is a pathological case, where
@@ -518,7 +518,7 @@ int Cursor::update_auto_increment()
     }
   }
 
-  if (unlikely(getTable()->next_number_field->store((int64_t) nr, true)))
+  if (DRIZZLE_UNLIKELY(getTable()->next_number_field->store((int64_t) nr, true)))
   {
     /*
       first test if the query was aborted due to strict mode constraints
@@ -535,7 +535,7 @@ int Cursor::update_auto_increment()
       interval will cause a duplicate key).
     */
     nr= prev_insert_id(getTable()->next_number_field->val_int(), variables);
-    if (unlikely(getTable()->next_number_field->store((int64_t) nr, true)))
+    if (DRIZZLE_UNLIKELY(getTable()->next_number_field->store((int64_t) nr, true)))
       nr= getTable()->next_number_field->val_int();
   }
   if (append)
@@ -1408,14 +1408,14 @@ int Cursor::insertRecord(unsigned char *buf)
   DRIZZLE_INSERT_ROW_START(getTable()->getShare()->getSchemaName(), getTable()->getShare()->getTableName());
   setTransactionReadWrite();
   
-  if (unlikely(plugin::EventObserver::beforeInsertRecord(*getTable(), buf)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeInsertRecord(*getTable(), buf)))
   {
     error= ER_EVENT_OBSERVER_PLUGIN;
   }
   else
   {
     error= doInsertRecord(buf);
-    if (unlikely(plugin::EventObserver::afterInsertRecord(*getTable(), buf, error))) 
+    if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterInsertRecord(*getTable(), buf, error)))
     {
       error= ER_EVENT_OBSERVER_PLUGIN;
     }
@@ -1425,12 +1425,12 @@ int Cursor::insertRecord(unsigned char *buf)
 
   DRIZZLE_INSERT_ROW_DONE(error);
 
-  if (unlikely(error))
+  if (DRIZZLE_UNLIKELY(error))
   {
     return error;
   }
 
-  if (unlikely(log_row_for_replication(getTable(), NULL, buf)))
+  if (DRIZZLE_UNLIKELY(log_row_for_replication(getTable(), NULL, buf)))
     return HA_ERR_LOG_ROW_FOR_REPLICATION_FAILED;
 
   return 0;
@@ -1449,7 +1449,7 @@ int Cursor::updateRecord(const unsigned char *old_data, unsigned char *new_data)
 
   DRIZZLE_UPDATE_ROW_START(getTable()->getShare()->getSchemaName(), getTable()->getShare()->getTableName());
   setTransactionReadWrite();
-  if (unlikely(plugin::EventObserver::beforeUpdateRecord(*getTable(), old_data, new_data)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeUpdateRecord(*getTable(), old_data, new_data)))
   {
     error= ER_EVENT_OBSERVER_PLUGIN;
   }
@@ -1461,7 +1461,7 @@ int Cursor::updateRecord(const unsigned char *old_data, unsigned char *new_data)
     }
 
     error= doUpdateRecord(old_data, new_data);
-    if (unlikely(plugin::EventObserver::afterUpdateRecord(*getTable(), old_data, new_data, error)))
+    if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterUpdateRecord(*getTable(), old_data, new_data, error)))
     {
       error= ER_EVENT_OBSERVER_PLUGIN;
     }
@@ -1471,12 +1471,12 @@ int Cursor::updateRecord(const unsigned char *old_data, unsigned char *new_data)
 
   DRIZZLE_UPDATE_ROW_DONE(error);
 
-  if (unlikely(error))
+  if (DRIZZLE_UNLIKELY(error))
   {
     return error;
   }
 
-  if (unlikely(log_row_for_replication(getTable(), old_data, new_data)))
+  if (DRIZZLE_UNLIKELY(log_row_for_replication(getTable(), old_data, new_data)))
     return HA_ERR_LOG_ROW_FOR_REPLICATION_FAILED;
 
   return 0;
@@ -1492,14 +1492,14 @@ int Cursor::deleteRecord(const unsigned char *buf)
 
   DRIZZLE_DELETE_ROW_START(getTable()->getShare()->getSchemaName(), getTable()->getShare()->getTableName());
   setTransactionReadWrite();
-  if (unlikely(plugin::EventObserver::beforeDeleteRecord(*getTable(), buf)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeDeleteRecord(*getTable(), buf)))
   {
     error= ER_EVENT_OBSERVER_PLUGIN;
   }
   else
   {
     error= doDeleteRecord(buf);
-    if (unlikely(plugin::EventObserver::afterDeleteRecord(*getTable(), buf, error)))
+    if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterDeleteRecord(*getTable(), buf, error)))
     {
       error= ER_EVENT_OBSERVER_PLUGIN;
     }
@@ -1509,10 +1509,10 @@ int Cursor::deleteRecord(const unsigned char *buf)
 
   DRIZZLE_DELETE_ROW_DONE(error);
 
-  if (unlikely(error))
+  if (DRIZZLE_UNLIKELY(error))
     return error;
 
-  if (unlikely(log_row_for_replication(getTable(), buf, NULL)))
+  if (DRIZZLE_UNLIKELY(log_row_for_replication(getTable(), buf, NULL)))
     return HA_ERR_LOG_ROW_FOR_REPLICATION_FAILED;
 
   return 0;

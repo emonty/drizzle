@@ -765,6 +765,12 @@ static int keys_free(unsigned char *key, TREE_FREE mode, bulk_insert_param *para
   return -1;
 }
 
+static void keys_free_wrapper(void *key, TREE_FREE mode, void *param)
+{
+  keys_free(static_cast<unsigned char *>(key), mode,
+            static_cast<bulk_insert_param *>(param));
+}
+
 
 int mi_init_bulk_insert(MI_INFO *info, uint32_t cache_size, ha_rows rows)
 {
@@ -815,7 +821,7 @@ int mi_init_bulk_insert(MI_INFO *info, uint32_t cache_size, ha_rows rows)
       info->bulk_insert[i].init_tree(cache_size * key[i].maxlength,
                 cache_size * key[i].maxlength, 0,
 		(qsort_cmp2)keys_compare, false,
-		(tree_element_free) keys_free, (void *)params++);
+		keys_free_wrapper, (void *)params++);
     }
     else
      info->bulk_insert[i].setRoot(0);

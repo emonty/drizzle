@@ -62,6 +62,10 @@ public:
     m_val(in_value)
   { }
 
+  constrained_value<T>(const constrained_value<T>& rhs) :
+    m_val(rhs.m_val)
+  { }
+
   virtual ~constrained_value<T>()
   {}
 
@@ -220,5 +224,4 @@ void validate(boost::any& v,
   val= boost::lexical_cast<T>(s);
   v= boost::any(val);
 }
-
 

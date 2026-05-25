@@ -588,7 +588,7 @@ bool Session::schedule(const shared_ptr& arg)
 
   session::Cache::insert(arg);
 
-  if (unlikely(plugin::EventObserver::connectSession(*arg)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::connectSession(*arg)))
   {
     // We should do something about an error...
   }

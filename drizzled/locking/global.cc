@@ -1027,7 +1027,7 @@ bool Session::wait_if_global_read_lock(bool abort_on_refresh, bool is_not_commit
     The following is only true in case of a global read locks (which is rare)
     and if old_message is set
   */
-  if (unlikely(need_exit_cond))
+  if (DRIZZLE_UNLIKELY(need_exit_cond))
   {
     exit_cond(old_message); // this unlocks LOCK_global_read_lock
   }
@@ -1042,7 +1042,7 @@ bool Session::wait_if_global_read_lock(bool abort_on_refresh, bool is_not_commit
 
 void Session::startWaitingGlobalReadLock()
 {
-  if (unlikely(isGlobalReadLock()))
+  if (DRIZZLE_UNLIKELY(isGlobalReadLock()))
     return;
 
   LOCK_global_read_lock.lock();

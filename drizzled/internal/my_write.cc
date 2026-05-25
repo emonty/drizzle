@@ -33,7 +33,7 @@ size_t my_write(int Filedes, const unsigned char *Buffer, size_t Count, myf MyFl
   written=0;
 
   /* The behavior of write(fd, buf, 0) is not portable */
-  if (unlikely(!Count))
+  if (DRIZZLE_UNLIKELY(!Count))
     return 0;
 
   for (;;)

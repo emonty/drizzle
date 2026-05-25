@@ -93,7 +93,6 @@ int mi_create(const char *name,uint32_t keys,MI_KEYDEF *keydefs,
 
   if (!ci)
   {
-    memset(&tmp_create_info, 0, sizeof(tmp_create_info));
     ci=&tmp_create_info;
   }
 

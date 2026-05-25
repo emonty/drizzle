@@ -29,6 +29,7 @@
 
 #include <string>
 #include <boost/filesystem.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace drizzled {
 namespace module {

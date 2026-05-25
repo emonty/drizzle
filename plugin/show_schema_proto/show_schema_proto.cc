@@ -93,7 +93,7 @@ String *ShowSchemaProtoFunction::val_str(String *str)
   str->alloc(proto_as_text.length());
   str->length(proto_as_text.length());
 
-  strncpy(str->ptr(),proto_as_text.c_str(), proto_as_text.length());
+  memcpy(str->ptr(), proto_as_text.c_str(), proto_as_text.length());
 
   return str;
 }

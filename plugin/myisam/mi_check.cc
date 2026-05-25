@@ -56,6 +56,7 @@
 #include <drizzled/error.h>
 
 #include <algorithm>
+#include <new>
 
 using namespace std;
 using namespace drizzled;
@@ -94,7 +95,7 @@ static void set_data_file_type(SORT_INFO *sort_info, MYISAM_SHARE *share);
 
 void myisamchk_init(MI_CHECK *param)
 {
-  memset(param, 0, sizeof(*param));
+  new (param) MI_CHECK();
   param->opt_follow_links=1;
   param->keys_in_use= ~(uint64_t) 0;
   param->search_after_block=HA_OFFSET_ERROR;
@@ -1368,10 +1369,9 @@ int mi_repair(MI_CHECK *param, MI_INFO *info,
   MYISAM_SHARE *share=info->s;
   char llbuff[22],llbuff2[22];
   SORT_INFO sort_info;
-  MI_SORT_PARAM sort_param;
+  MI_SORT_PARAM sort_param= MI_SORT_PARAM();
 
   memset(&sort_info, 0, sizeof(sort_info));
-  memset(&sort_param, 0, sizeof(sort_param));
   start_records=info->state->records;
   new_header_length=(param->testflag & T_UNPACK) ? 0L :
     share->pack.header_length;
@@ -1394,7 +1394,7 @@ int mi_repair(MI_CHECK *param, MI_INFO *info,
 
   if (param->read_cache.init_io_cache(info->dfile, (uint) param->read_buffer_length, READ_CACHE,share->pack.header_length,1,MYF(MY_WME)))
   {
-    memset(&info->rec_cache, 0, sizeof(info->rec_cache));
+    info->rec_cache= drizzled::internal::io_cache_st();
     goto err;
   }
   if (not rep_quick)
@@ -1955,7 +1955,7 @@ int mi_repair_by_sort(MI_CHECK *param, MI_INFO *info,
   ha_rows start_records;
   my_off_t new_header_length,del;
   int new_file;
-  MI_SORT_PARAM sort_param;
+  MI_SORT_PARAM sort_param= MI_SORT_PARAM();
   MYISAM_SHARE *share=info->s;
   HA_KEYSEG *keyseg;
   ulong   *rec_per_key_part;
@@ -1979,7 +1979,6 @@ int mi_repair_by_sort(MI_CHECK *param, MI_INFO *info,
     param->testflag|=T_CALC_CHECKSUM;
 
   memset(&sort_info, 0, sizeof(sort_info));
-  memset(&sort_param, 0, sizeof(sort_param));
   if (!(sort_info.key_block=
         alloc_key_blocks(param, (uint) param->sort_key_blocks, share->base.max_key_block_length))
       || param->read_cache.init_io_cache(info->dfile, (uint) param->read_buffer_length, READ_CACHE,share->pack.header_length,1,MYF(MY_WME))

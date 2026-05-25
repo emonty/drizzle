@@ -86,7 +86,6 @@ St, Fifth Floor, Boston, MA 02110-1301 USA
 
 namespace po= boost::program_options;
 namespace fs=boost::filesystem;
-using namespace std;
 
 /** @file ha_innodb.cc */
 
@@ -142,7 +141,7 @@ using namespace std;
 
 #include <boost/thread/mutex.hpp>
 
-using namespace std;
+using std::string;
 using namespace drizzled;
 
 /** to protect innobase_open_files */

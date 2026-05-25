@@ -945,7 +945,7 @@ message::Transaction *TransactionServices::getActiveTransactionMessage(Session& 
 {
   message::Transaction *transaction= session.getTransactionMessage();
 
-  if (unlikely(transaction == NULL))
+  if (DRIZZLE_UNLIKELY(transaction == NULL))
   {
     /* 
      * Allocate and initialize a new transaction message 
@@ -1085,7 +1085,7 @@ void TransactionServices::rollbackTransactionMessage(Session& session)
    *    ROLLBACK to indicate to replicators that previously-transmitted
    *    messages must be un-applied.
    */
-  if (unlikely(message::transactionContainsBulkSegment(*transaction)))
+  if (DRIZZLE_UNLIKELY(message::transactionContainsBulkSegment(*transaction)))
   {
     /* Remember the transaction ID so we can re-use it */
     uint64_t trx_id= transaction->transaction_context().transaction_id();

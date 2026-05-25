@@ -361,7 +361,7 @@ database name and table name. In addition, 14 bytes is added for:
 */
 
 /* Note that inside MySQL 'byte' is defined as char on Linux! */
-#define byte			unsigned char
+typedef unsigned char	byte;
 
 /* Define an unsigned integer type that is exactly 32 bits. */
 

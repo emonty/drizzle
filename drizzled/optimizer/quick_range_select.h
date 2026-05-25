@@ -215,7 +215,8 @@ private:
   /* Used only by QuickSelectDescending */
   QuickRangeSelect(const QuickRangeSelect& org) : QuickSelectInterface()
   {
-    memmove(this, &org, sizeof(*this));
+    memmove(static_cast<void *>(this), static_cast<const void *>(&org),
+            sizeof(*this));
     /*
       Use default MRR implementation for reverse scans. No table engine
       currently can do an MRR scan with output in reverse index order.
@@ -307,4 +308,3 @@ private:
 } /* namespace optimizer */
 
 } /* namespace drizzled */
-

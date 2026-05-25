@@ -59,14 +59,14 @@ bool statement::DropSchema::execute()
   
   bool res = true;
   std::string path = schema_identifier.getSQLPath();
-  if (unlikely(plugin::EventObserver::beforeDropDatabase(session(), path))) 
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeDropDatabase(session(), path)))
   {
     my_error(ER_EVENT_OBSERVER_PLUGIN, schema_identifier);
   }
   else
   {
     res= schema::drop(session(), schema_identifier, drop_if_exists);
-    if (unlikely(plugin::EventObserver::afterDropDatabase(session(), path, res)))
+    if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterDropDatabase(session(), path, res)))
     {
       my_error(ER_EVENT_OBSERVER_PLUGIN, MYF(0), path.c_str());
       res = false;

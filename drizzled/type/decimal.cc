@@ -395,9 +395,9 @@ static const dec1 frac_max[DIG_PER_DEC1-1]={
 
 inline static void fix_intg_frac_error(const int len, int &intg1, int &frac1, int &error)
 {
-  if (unlikely(intg1+frac1 > len))
+  if (DRIZZLE_UNLIKELY(intg1+frac1 > len))
   {
-    if (unlikely(intg1 > len))
+    if (DRIZZLE_UNLIKELY(intg1 > len))
     {
       intg1=(len);
       frac1=0;
@@ -428,7 +428,7 @@ inline static void add2(dec1 &to, const dec1 &from1, const dec1 &from2, dec1 &ca
   dec2 a=dec2(from1)+from2+carry;
   if ((carry= (a >= DIG_BASE)))
     a-=DIG_BASE;
-  if (unlikely(a >= DIG_BASE))
+  if (DRIZZLE_UNLIKELY(a >= DIG_BASE))
   {
     a-=DIG_BASE;
     carry++;
@@ -451,7 +451,7 @@ inline static void sub2(dec1 &to, const dec1 &from1, const dec1 &from2, dec1 &ca
   dec1 a=from1-from2-carry;
   if ((carry= (a < 0)))
     a+=DIG_BASE;
-  if (unlikely(a < 0))
+  if (DRIZZLE_UNLIKELY(a < 0))
   {
     a+=DIG_BASE;
     carry++;
@@ -583,7 +583,7 @@ int decimal2string(const decimal_t *from, char *to, int *to_len,
 
   /* removing leading zeroes */
   buf0= remove_leading_zeroes(from, &intg);
-  if (unlikely(intg+frac==0))
+  if (DRIZZLE_UNLIKELY(intg+frac==0))
   {
     intg=1;
     tmp=0;
@@ -607,7 +607,7 @@ int decimal2string(const decimal_t *from, char *to, int *to_len,
       intg= fixed_intg;
     }
   }
-  else if (unlikely(len > --*to_len)) /* reserve one byte for \0 */
+  else if (DRIZZLE_UNLIKELY(len > --*to_len)) /* reserve one byte for \0 */
   {
     int j= len-*to_len;
     error= (frac && j <= frac + 1) ? E_DEC_TRUNCATED : E_DEC_OVERFLOW;
@@ -1086,7 +1086,7 @@ internal_str2dec(char *from, decimal_t *to, char **end, bool fixed)
     intg1=round_up(intg);
     frac1=round_up(frac);
     fix_intg_frac_error(to->len, intg1, frac1, error);
-    if (unlikely(error))
+    if (DRIZZLE_UNLIKELY(error))
     {
       frac=frac1*DIG_PER_DEC1;
       if (error == E_DEC_OVERFLOW)
@@ -1104,7 +1104,7 @@ internal_str2dec(char *from, decimal_t *to, char **end, bool fixed)
   {
     x+= (*--s - '0')*powers10[i];
 
-    if (unlikely(++i == DIG_PER_DEC1))
+    if (DRIZZLE_UNLIKELY(++i == DIG_PER_DEC1))
     {
       *--buf=x;
       x=0;
@@ -1119,7 +1119,7 @@ internal_str2dec(char *from, decimal_t *to, char **end, bool fixed)
   {
     x= (*++s1 - '0') + x*10;
 
-    if (unlikely(++i == DIG_PER_DEC1))
+    if (DRIZZLE_UNLIKELY(++i == DIG_PER_DEC1))
     {
       *buf++=x;
       x=0;
@@ -1218,7 +1218,7 @@ static int ull2dec(uint64_t from, decimal_t *to)
   sanity(to);
 
   for (intg1=1; from >= DIG_BASE; intg1++, from/=DIG_BASE) {};
-  if (unlikely(intg1 > to->len))
+  if (DRIZZLE_UNLIKELY(intg1 > to->len))
   {
     intg1=to->len;
     error=E_DEC_OVERFLOW;
@@ -1264,14 +1264,14 @@ int decimal2uint64_t(const decimal_t *from, uint64_t *to)
   {
     uint64_t y=x;
     x=x*DIG_BASE + *buf++;
-    if (unlikely(y > ((uint64_t) UINT64_MAX/DIG_BASE) || x < y))
+    if (DRIZZLE_UNLIKELY(y > ((uint64_t) UINT64_MAX/DIG_BASE) || x < y))
     {
       *to=UINT64_MAX;
       return E_DEC_OVERFLOW;
     }
   }
   *to=x;
-  for (frac=from->frac; unlikely(frac > 0); frac-=DIG_PER_DEC1)
+  for (frac=from->frac; DRIZZLE_UNLIKELY(frac > 0); frac-=DIG_PER_DEC1)
     if (*buf++)
       return E_DEC_TRUNCATED;
   return E_DEC_OK;
@@ -1293,7 +1293,7 @@ int decimal2int64_t(const decimal_t *from, int64_t *to)
       so we can convert -9223372036854775808 correctly
     */
     x=x*DIG_BASE - *buf++;
-    if (unlikely(y < (INT64_MIN/DIG_BASE) || x > y))
+    if (DRIZZLE_UNLIKELY(y < (INT64_MIN/DIG_BASE) || x > y))
     {
       /*
         the decimal is bigger than any possible integer
@@ -1304,14 +1304,14 @@ int decimal2int64_t(const decimal_t *from, int64_t *to)
     }
   }
   /* boundary case: 9223372036854775808 */
-  if (unlikely(from->sign==0 && x == INT64_MIN))
+  if (DRIZZLE_UNLIKELY(from->sign==0 && x == INT64_MIN))
   {
     *to= INT64_MAX;
     return E_DEC_OVERFLOW;
   }
 
   *to=from->sign ? x : -x;
-  for (frac=from->frac; unlikely(frac > 0); frac-=DIG_PER_DEC1)
+  for (frac=from->frac; DRIZZLE_UNLIKELY(frac > 0); frac-=DIG_PER_DEC1)
     if (*buf++)
       return E_DEC_TRUNCATED;
   return E_DEC_OK;
@@ -1416,7 +1416,7 @@ int decimal2bin(const decimal_t *from, unsigned char *to, int precision, int fra
 
   buf1= remove_leading_zeroes(from, &from_intg);
 
-  if (unlikely(from_intg+fsize1==0))
+  if (DRIZZLE_UNLIKELY(from_intg+fsize1==0))
   {
     mask=0; /* just in case */
     intg=1;
@@ -1547,7 +1547,7 @@ int bin2decimal(const unsigned char *from, decimal_t *to, int precision, int sca
   from= d_copy;
 
   fix_intg_frac_error(to->len, intg1, frac1, error);
-  if (unlikely(error))
+  if (DRIZZLE_UNLIKELY(error))
   {
     if (intg1 < intg0+(intg0x>0))
     {
@@ -1685,7 +1685,7 @@ decimal_round(const decimal_t *from, decimal_t *to, int scale,
   default: assert(0);
   }
 
-  if (unlikely(frac0+intg0 > len))
+  if (DRIZZLE_UNLIKELY(frac0+intg0 > len))
   {
     frac0=len-intg0;
     scale=frac0*DIG_PER_DEC1;
@@ -1705,7 +1705,7 @@ decimal_round(const decimal_t *from, decimal_t *to, int scale,
 
     while (buf0 < p0)
       *(--p1) = *(--p0);
-    if (unlikely(intg1 > intg0))
+    if (DRIZZLE_UNLIKELY(intg1 > intg0))
       to->buf[0]= 0;
 
     intg0= intg1;
@@ -1805,7 +1805,7 @@ decimal_round(const decimal_t *from, decimal_t *to, int scale,
     *buf1-=DIG_BASE;
     while (carry && --buf1 >= to->buf)
       add(*buf1, *buf1, 0, carry);
-    if (unlikely(carry))
+    if (DRIZZLE_UNLIKELY(carry))
     {
       /* shifting the number to create space for new digit */
       if (frac0+intg0 >= len)
@@ -1826,7 +1826,7 @@ decimal_round(const decimal_t *from, decimal_t *to, int scale,
   {
     for (;;)
     {
-      if (likely(*buf1))
+      if (DRIZZLE_LIKELY(*buf1))
         break;
       if (buf1-- == to->buf)
       {
@@ -1868,14 +1868,14 @@ static int do_add(const decimal_t *from1, const decimal_t *from2, decimal_t *to)
   x=intg1 > intg2 ? from1->buf[0] :
     intg2 > intg1 ? from2->buf[0] :
     from1->buf[0] + from2->buf[0] ;
-  if (unlikely(x > DIG_MAX-1)) /* yes, there is */
+  if (DRIZZLE_UNLIKELY(x > DIG_MAX-1)) /* yes, there is */
   {
     intg0++;
     to->buf[0]=0; /* safety */
   }
 
   fix_intg_frac_error(to->len, intg0, frac0, error);
-  if (unlikely(error == E_DEC_OVERFLOW))
+  if (DRIZZLE_UNLIKELY(error == E_DEC_OVERFLOW))
   {
     max_decimal(to->len * DIG_PER_DEC1, 0, to);
     return error;
@@ -1886,7 +1886,7 @@ static int do_add(const decimal_t *from1, const decimal_t *from2, decimal_t *to)
   to->sign=from1->sign;
   to->frac=max(from1->frac, from2->frac);
   to->intg=intg0*DIG_PER_DEC1;
-  if (unlikely(error))
+  if (DRIZZLE_UNLIKELY(error))
   {
     set_if_smaller(to->frac, frac0*DIG_PER_DEC1);
     set_if_smaller(frac1, frac0);
@@ -1928,7 +1928,7 @@ static int do_add(const decimal_t *from1, const decimal_t *from2, decimal_t *to)
     add(*--buf0, *--buf1, 0, carry);
   }
 
-  if (unlikely(carry))
+  if (DRIZZLE_UNLIKELY(carry))
     *--buf0=1;
   assert(buf0 == to->buf || buf0 == to->buf+1);
 
@@ -1947,14 +1947,14 @@ static int do_sub(const decimal_t *from1, const decimal_t *from2, decimal_t *to)
   /* let carry:=1 if from2 > from1 */
   start1=buf1=from1->buf; stop1=buf1+intg1;
   start2=buf2=from2->buf; stop2=buf2+intg2;
-  if (unlikely(*buf1 == 0))
+  if (DRIZZLE_UNLIKELY(*buf1 == 0))
   {
     while (buf1 < stop1 && *buf1 == 0)
       buf1++;
     start1=buf1;
     intg1= (int) (stop1-buf1);
   }
-  if (unlikely(*buf2 == 0))
+  if (DRIZZLE_UNLIKELY(*buf2 == 0))
   {
     while (buf2 < stop2 && *buf2 == 0)
       buf2++;
@@ -1967,9 +1967,9 @@ static int do_sub(const decimal_t *from1, const decimal_t *from2, decimal_t *to)
   {
     dec1 *end1= stop1 + (frac1 - 1);
     dec1 *end2= stop2 + (frac2 - 1);
-    while (unlikely((buf1 <= end1) && (*end1 == 0)))
+    while (DRIZZLE_UNLIKELY((buf1 <= end1) && (*end1 == 0)))
       end1--;
-    while (unlikely((buf2 <= end2) && (*end2 == 0)))
+    while (DRIZZLE_UNLIKELY((buf2 <= end2) && (*end2 == 0)))
       end2--;
     frac1= (int) (end1 - stop1) + 1;
     frac2= (int) (end2 - stop2) + 1;
@@ -2020,7 +2020,7 @@ static int do_sub(const decimal_t *from1, const decimal_t *from2, decimal_t *to)
 
   to->frac=max(from1->frac, from2->frac);
   to->intg=intg1*DIG_PER_DEC1;
-  if (unlikely(error))
+  if (DRIZZLE_UNLIKELY(error))
   {
     set_if_smaller(to->frac, frac0*DIG_PER_DEC1);
     set_if_smaller(frac1, frac0);
@@ -2083,21 +2083,21 @@ int decimal_intg(const decimal_t *from)
 
 int decimal_add(const decimal_t *from1, const decimal_t *from2, decimal_t *to)
 {
-  if (likely(from1->sign == from2->sign))
+  if (DRIZZLE_LIKELY(from1->sign == from2->sign))
     return do_add(from1, from2, to);
   return do_sub(from1, from2, to);
 }
 
 int decimal_sub(const decimal_t *from1, const decimal_t *from2, decimal_t *to)
 {
-  if (likely(from1->sign == from2->sign))
+  if (DRIZZLE_LIKELY(from1->sign == from2->sign))
     return do_sub(from1, from2, to);
   return do_add(from1, from2, to);
 }
 
 int decimal_cmp(const decimal_t *from1, const decimal_t *from2)
 {
-  if (likely(from1->sign == from2->sign))
+  if (DRIZZLE_LIKELY(from1->sign == from2->sign))
     return do_sub(from1, from2, 0);
   return from1->sign > from2->sign ? -1 : 1;
 }
@@ -2156,11 +2156,11 @@ int decimal_mul(const decimal_t *from1, const decimal_t *from2, decimal_t *to)
   to->frac=from1->frac+from2->frac;
   to->intg=intg0*DIG_PER_DEC1;
 
-  if (unlikely(error))
+  if (DRIZZLE_UNLIKELY(error))
   {
     set_if_smaller(to->frac, frac0*DIG_PER_DEC1);
     set_if_smaller(to->intg, intg0*DIG_PER_DEC1);
-    if (unlikely(i > intg0))
+    if (DRIZZLE_UNLIKELY(i > intg0))
     {
       i-=intg0;
       j=i >> 1;
@@ -2341,7 +2341,7 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
   }
   buf0=to->buf;
   stop0=buf0+intg0+frac0;
-  if (likely(div_mod))
+  if (DRIZZLE_LIKELY(div_mod))
     while (dintg++ < 0)
       *buf0++=0;
 
@@ -2372,7 +2372,7 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
   */
   norm_factor=DIG_BASE/(*start2+1);
   norm2=(dec1)(norm_factor*start2[0]);
-  if (likely(len2>0))
+  if (DRIZZLE_LIKELY(len2>0))
     norm2+=(dec1)(norm_factor*start2[1]/DIG_BASE);
 
   if (*start1 < *start2)
@@ -2384,7 +2384,7 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
   for (; buf0 < stop0; buf0++)
   {
     /* short-circuit, if possible */
-    if (unlikely(dcarry == 0 && *start1 < *start2))
+    if (DRIZZLE_UNLIKELY(dcarry == 0 && *start1 < *start2))
       guess=0;
     else
     {
@@ -2392,14 +2392,14 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
       x=start1[0]+((dec2)dcarry)*DIG_BASE;
       y=start1[1];
       guess=(norm_factor*x+norm_factor*y/DIG_BASE)/norm2;
-      if (unlikely(guess >= DIG_BASE))
+      if (DRIZZLE_UNLIKELY(guess >= DIG_BASE))
         guess=DIG_BASE-1;
-      if (likely(len2>0))
+      if (DRIZZLE_LIKELY(len2>0))
       {
         /* hmm, this is a suspicious trick - I removed normalization here */
         if (start2[1]*guess > (x-guess*start2[0])*DIG_BASE+y)
           guess--;
-        if (unlikely(start2[1]*guess > (x-guess*start2[0])*DIG_BASE+y))
+        if (DRIZZLE_UNLIKELY(start2[1]*guess > (x-guess*start2[0])*DIG_BASE+y))
           guess--;
         assert(start2[1]*guess <= (x-guess*start2[0])*DIG_BASE+y);
       }
@@ -2420,7 +2420,7 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
       carry= dcarry < carry;
 
       /* D5: check the remainder */
-      if (unlikely(carry))
+      if (DRIZZLE_UNLIKELY(carry))
       {
         /* D6: correct the guess */
         guess--;
@@ -2432,7 +2432,7 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
         }
       }
     }
-    if (likely(div_mod))
+    if (DRIZZLE_LIKELY(div_mod))
       *buf0=(dec1)guess;
     dcarry= *start1;
     start1++;
@@ -2450,14 +2450,14 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
     intg0=(int) (round_up(prec1-frac1)-(start1-tmp1));
     frac0=round_up(to->frac);
     error=E_DEC_OK;
-    if (unlikely(frac0==0 && intg0==0))
+    if (DRIZZLE_UNLIKELY(frac0==0 && intg0==0))
     {
       to->set_zero();
       goto done;
     }
     if (intg0<=0)
     {
-      if (unlikely(-intg0 >= to->len))
+      if (DRIZZLE_UNLIKELY(-intg0 >= to->len))
       {
         to->set_zero();
         error=E_DEC_TRUNCATED;
@@ -2471,7 +2471,7 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
     }
     else
     {
-      if (unlikely(intg0 > to->len))
+      if (DRIZZLE_UNLIKELY(intg0 > to->len))
       {
         frac0=0;
         intg0=to->len;
@@ -2482,7 +2482,7 @@ static int do_div_mod(const decimal_t *from1, const decimal_t *from2,
       stop1=start1+frac0+intg0;
       to->intg=min(intg0*DIG_PER_DEC1, from2->intg);
     }
-    if (unlikely(intg0+frac0 > to->len))
+    if (DRIZZLE_UNLIKELY(intg0+frac0 > to->len))
     {
       stop1-=frac0+intg0-to->len;
       frac0=to->len-intg0;

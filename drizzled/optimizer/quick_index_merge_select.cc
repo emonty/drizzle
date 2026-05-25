@@ -49,7 +49,7 @@ optimizer::QuickIndexMergeSelect::QuickIndexMergeSelect(Session *session_param,
 {
   index= MAX_KEY;
   head= table;
-  memset(&read_record, 0, sizeof(read_record));
+  read_record= ReadRecord();
   alloc.init(session->variables.range_alloc_block_size);
 }
 

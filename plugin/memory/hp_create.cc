@@ -112,7 +112,7 @@ int heap_create(const char *name, uint32_t keys, HP_KEYDEF *keydef,
 
     for (i= key_segs= max_length= 0, keyinfo= keydef; i < keys; i++, keyinfo++)
     {
-      memset(&keyinfo->block, 0, sizeof(keyinfo->block));
+      keyinfo->block= HP_BLOCK();
       for (uint32_t j= length= 0; j < keyinfo->keysegs; j++)
       {
 	length+= keyinfo->seg[j].length;

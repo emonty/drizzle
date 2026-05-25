@@ -60,14 +60,14 @@ bool statement::CreateSchema::execute()
   bool res = false;
   std::string path = schema_identifier.getSQLPath();
 
-  if (unlikely(plugin::EventObserver::beforeCreateDatabase(session(), path)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeCreateDatabase(session(), path)))
   {
     my_error(ER_EVENT_OBSERVER_PLUGIN, MYF(0), path.c_str());
   }
   else
   {
     res= schema::create(session(), schema_message, lex().exists());
-    if (unlikely(plugin::EventObserver::afterCreateDatabase(session(), path, res)))
+    if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterCreateDatabase(session(), path, res)))
     {
       my_error(ER_EVENT_OBSERVER_PLUGIN, schema_identifier);
       res = false;

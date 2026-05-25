@@ -32,6 +32,8 @@
 #include <drizzled/tmp_table_param.h>
 #include <bitset>
 
+#include <boost/noncopyable.hpp>
+
 namespace drizzled {
 
 class Join : public memory::SqlAlloc, boost::noncopyable
@@ -371,4 +373,3 @@ enum_nested_loop_state end_update(Join *join, JoinTable *join_tab, bool end_of_r
 enum_nested_loop_state end_unique_update(Join *join, JoinTable *join_tab, bool end_of_records);
 
 } /* namespace drizzled */
-

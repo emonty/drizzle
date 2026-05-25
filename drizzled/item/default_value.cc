@@ -61,7 +61,9 @@ bool Item_default_value::fix_fields(Session *session, Item **)
     return true;
   }
   Field* def_field= (Field*) memory::sql_alloc(field_arg->field->size_of());
-  memcpy(def_field, field_arg->field, field_arg->field->size_of());
+  memcpy(static_cast<void *>(def_field),
+         static_cast<const void *>(field_arg->field),
+         field_arg->field->size_of());
   def_field->move_field_offset((ptrdiff_t)(def_field->getTable()->getDefaultValues() - def_field->getTable()->record[0]));
   set_field(def_field);
   return false;

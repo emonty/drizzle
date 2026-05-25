@@ -101,10 +101,10 @@ void StorageEngine::setTransactionReadWrite(Session& session)
 int StorageEngine::renameTable(Session &session, const identifier::Table &from, const identifier::Table &to)
 {
   setTransactionReadWrite(session);
-  if (unlikely(plugin::EventObserver::beforeRenameTable(session, from, to)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeRenameTable(session, from, to)))
     return ER_EVENT_OBSERVER_PLUGIN;
   int error= doRenameTable(session, from, to);
-  if (unlikely(plugin::EventObserver::afterRenameTable(session, from, to, error)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterRenameTable(session, from, to, error)))
     error= ER_EVENT_OBSERVER_PLUGIN;
   return error;
 }
@@ -389,7 +389,7 @@ bool StorageEngine::dropTable(Session& session,
 
   assert(identifier.isTmp());
   
-  if (unlikely(plugin::EventObserver::beforeDropTable(session, identifier)))
+  if (DRIZZLE_UNLIKELY(plugin::EventObserver::beforeDropTable(session, identifier)))
   {
     error= ER_EVENT_OBSERVER_PLUGIN;
   }
@@ -397,7 +397,7 @@ bool StorageEngine::dropTable(Session& session,
   {
     error= static_cast<drizzled::error_t>(engine.doDropTable(session, identifier));
 
-    if (unlikely(plugin::EventObserver::afterDropTable(session, identifier, error)))
+    if (DRIZZLE_UNLIKELY(plugin::EventObserver::afterDropTable(session, identifier, error)))
     {
       error= ER_EVENT_OBSERVER_PLUGIN;
     }
@@ -977,6 +977,9 @@ bool StorageEngine::readTableFile(const std::string &path, message::Table &table
       {
         return true;
       }
+      my_error(ER_CORRUPT_TABLE_DEFINITION, MYF(0),
+               table_message.name().empty() ? path.c_str() : table_message.name().c_str(),
+               table_message.InitializationErrorString().empty() ? "": table_message.InitializationErrorString().c_str());
     }
     catch (...)
     {

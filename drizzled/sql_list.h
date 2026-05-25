@@ -131,6 +131,13 @@ public:
     first= tmp.first;
     last= elements ? tmp.last : &first;
   }
+  base_list& operator=(const base_list &tmp)
+  {
+    elements= tmp.elements;
+    first= tmp.first;
+    last= elements ? tmp.last : &first;
+    return *this;
+  }
   base_list(bool) { }
   void push_back(void *info)
   {
@@ -330,6 +337,11 @@ public:
 
   List() {}
   List(const List<T> &tmp) : base_list(tmp) {}
+  List<T>& operator=(const List<T> &tmp)
+  {
+    base_list::operator=(tmp);
+    return *this;
+  }
   List(const List<T> &tmp, memory::Root *mem_root) : base_list(tmp, mem_root) {}
   T& front() {return *static_cast<T*>(first->info); }
   T* pop()  {return static_cast<T*>(base_list::pop()); }
@@ -385,4 +397,3 @@ public:
 };
 
 } /* namespace drizzled */
-

@@ -244,7 +244,7 @@ bool Cache::removeTable(Session& session, const identifier::Table &identifier, u
       if (not (flags & RTFC_CHECK_KILLED_FLAG) || not session.getKilled())
       {
         dropping_tables++;
-        if (likely(signalled))
+        if (DRIZZLE_LIKELY(signalled))
         {
           boost::mutex::scoped_lock scoped(table::Cache::mutex(), boost::adopt_lock_t());
           COND_refresh.wait(scoped);

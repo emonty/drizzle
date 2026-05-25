@@ -218,7 +218,7 @@ Join::Join(Session *session_arg,
   select_distinct= test(select_options & SELECT_DISTINCT);
   if (&fields_list != &fields_arg) /* only copy if not same*/
     fields_list= fields_arg;
-  memset(&keyuse, 0, sizeof(keyuse));
+  keyuse= DYNAMIC_ARRAY();
   tmp_table_param.init();
   tmp_table_param.end_write_records= HA_POS_ERROR;
   rollup.setState(Rollup::STATE_NONE);
@@ -307,7 +307,7 @@ void Join::reset(Session *session_arg,
   select_distinct= test(select_options & SELECT_DISTINCT);
   if (&fields_list != &fields_arg) /* only copy if not same*/
     fields_list= fields_arg;
-  memset(&keyuse, 0, sizeof(keyuse));
+  keyuse= DYNAMIC_ARRAY();
   tmp_table_param.init();
   tmp_table_param.end_write_records= HA_POS_ERROR;
   rollup.setState(Rollup::STATE_NONE);
@@ -1288,7 +1288,8 @@ setup_subq_exit:
 */
 void Join::restore_tmp()
 {
-  memcpy(tmp_join, this, (size_t) sizeof(Join));
+  memcpy(static_cast<void *>(tmp_join), static_cast<const void *>(this),
+         sizeof(Join));
 }
 
 int Join::reinit()
@@ -1317,7 +1318,9 @@ int Join::reinit()
     set_items_ref_array(items0);
 
   if (join_tab_save)
-    memcpy(join_tab, join_tab_save, sizeof(JoinTable) * tables);
+    memcpy(static_cast<void *>(join_tab),
+           static_cast<const void *>(join_tab_save),
+           sizeof(JoinTable) * tables);
 
   if (tmp_join)
     restore_tmp();

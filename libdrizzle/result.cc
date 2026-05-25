@@ -67,7 +67,7 @@ drizzle_result_st *drizzle_result_create(drizzle_con_st *con,
   }
   else
   {
-    memset(result, 0, sizeof(drizzle_result_st));
+    *result= drizzle_result_st();
   }
 
   result->con= con;

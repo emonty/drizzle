@@ -22,6 +22,8 @@
 
 #include <plugin/myisam/myisam.h>
 
+#include <boost/noncopyable.hpp>
+
 namespace drizzled {
 
 /*
@@ -104,4 +106,3 @@ public:
 };
 
 } /* namespace drizzled */
-

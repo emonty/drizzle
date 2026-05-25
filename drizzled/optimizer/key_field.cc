@@ -581,7 +581,7 @@ void optimizer::add_key_fields(Join *join,
         ! (cond_func->used_tables() & OUTER_REF_TABLE_BIT))
     {
       Item *tmp= new Item_null;
-      if (unlikely(! tmp))                       // Should never be true
+      if (DRIZZLE_UNLIKELY(! tmp))                       // Should never be true
         return;
       add_key_equal_fields(key_fields, *and_level, cond_func,
                            (Item_field*) (cond_func->arguments()[0])->real_item(),

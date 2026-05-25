@@ -377,7 +377,7 @@ void TableProtoTesterCursor::position(const unsigned char *)
 
 int TableProtoTesterCursor::info(uint32_t flag)
 {
-  memset(&stats, 0, sizeof(stats));
+  stats= drizzled::ha_statistics();
   if (flag & HA_STATUS_AUTO)
     stats.auto_increment_value= 1;
   return(0);

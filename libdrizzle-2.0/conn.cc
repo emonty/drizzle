@@ -246,8 +246,7 @@ void drizzle_con_set_tcp(drizzle_con_st *con, const char *host, in_port_t port)
   else
   {
     con->socket.tcp.host= con->socket.tcp.host_buffer;
-    strncpy(con->socket.tcp.host, host, NI_MAXHOST);
-    con->socket.tcp.host[NI_MAXHOST - 1]= 0;
+    snprintf(con->socket.tcp.host, NI_MAXHOST, "%s", host);
   }
 
   con->socket.tcp.port= port;

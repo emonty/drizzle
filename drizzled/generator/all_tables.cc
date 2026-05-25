@@ -22,6 +22,9 @@
 
 #include <drizzled/generator.h>
 
+#include <algorithm>
+#include <random>
+
 using namespace std;
 
 namespace drizzled
@@ -41,7 +44,9 @@ bool AllTables::table_setup()
   table_names.clear();
   plugin::StorageEngine::getIdentifiers(session, *schema_ptr, table_names);
 #if defined(DEBUG)
-  random_shuffle(table_names.begin(), table_names.end());
+  std::random_device random_device;
+  std::mt19937 generator(random_device());
+  std::shuffle(table_names.begin(), table_names.end(), generator);
 #endif
   table_iterator= table_names.begin();
 

@@ -30,6 +30,8 @@
 #include <drizzled/identifier.h>
 #include <drizzled/visibility.h>
 
+#include <boost/noncopyable.hpp>
+
 namespace std {
 template<>
 struct hash<drizzled::error_t>
@@ -108,4 +110,3 @@ void my_printf_error(error_t my_err, const char *format,
                      __attribute__((format(printf, 2, 4)));
 
 } /* namespace drizzled */
-

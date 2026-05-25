@@ -191,7 +191,7 @@ SHA1Final(uint8_t digest[SHA1_DIGEST_LENGTH], SHA1_CTX *context)
 			digest[i] = (uint8_t)
 			   ((context->state[i>>2] >> ((3-(i & 3)) * 8) ) & 255);
 		}
-		memset(context, 0, sizeof(*context));
+		*context= SHA1_CTX();
 	}
 }
 

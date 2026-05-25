@@ -28,6 +28,8 @@
 #include <drizzled/visibility.h>
 #include <drizzled/common_fwd.h>
 
+#include <boost/noncopyable.hpp>
+
 namespace drizzled {
 namespace plugin {
 
@@ -104,4 +106,3 @@ public:
 };
 } /* end namespace plugin */
 } /* end namespace drizzled */
-

@@ -26,6 +26,7 @@
 #include <iosfwd>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <drizzled/gettext.h>

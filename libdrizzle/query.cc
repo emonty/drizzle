@@ -124,7 +124,7 @@ drizzle_query_st *drizzle_query_create(drizzle_st *drizzle,
   }
   else
   {
-    memset(query, 0, sizeof(drizzle_query_st));
+    *query= drizzle_query_st();
   }
 
   query->drizzle= drizzle;

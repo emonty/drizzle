@@ -93,7 +93,7 @@ QuickGroupMinMaxSelect::QuickGroupMinMaxSelect(Table *table,
     join->session->mem_root= &alloc;
   }
   else
-    memset(&alloc, 0, sizeof(memory::Root));  // ensure that it's not used
+    alloc= memory::Root();
 }
 
 

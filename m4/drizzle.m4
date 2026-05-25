@@ -373,7 +373,7 @@ AC_DEFUN([PANDORA_WARNINGS],[
   PROTOSKIP_WARNINGS="-Wno-effc++ -Wno-shadow -Wno-missing-braces"
   PERMISSIVE_WARNINGS="-Wno-error -Wno-unused-function -fpermissive"
   PERMISSIVE_C_WARNINGS="-Wno-error -Wno-redundant-decls"
-  INNOBASE_SKIP_WARNINGS="-Wno-error=literal-suffix -Wno-error=shift-negative-value -Wno-error=implicit-fallthrough -Wno-error=format-overflow"
+  INNOBASE_SKIP_WARNINGS="-Wno-error=literal-suffix -Wno-error=shift-negative-value -Wno-error=implicit-fallthrough -Wno-error=format-overflow -Wno-error=unused-variable"
 
   AC_SUBST(NO_CONVERSION)
   AC_SUBST(NO_REDUNDANT_DECLS)

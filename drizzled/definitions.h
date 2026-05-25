@@ -559,8 +559,8 @@ static const uint32_t RECORD_CACHE_SIZE= 64*1024;
 #define __builtin_expect(x, expected_value) (x)
 #endif
 
-#define likely(x)  __builtin_expect((x),1)
-#define unlikely(x)  __builtin_expect((x),0)
+#define DRIZZLE_LIKELY(x)  __builtin_expect((x),1)
+#define DRIZZLE_UNLIKELY(x)  __builtin_expect((x),0)
 
 
 /*

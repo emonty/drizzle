@@ -157,7 +157,7 @@ bool handle_select(Session *session, LEX *lex, select_result *result,
   }
   res|= session->is_error();
 
-  if (unlikely(res))
+  if (DRIZZLE_UNLIKELY(res))
   {
     result->abort();
   }
@@ -663,7 +663,6 @@ void update_ref_and_keys(Session *session,
     internal::my_qsort(keyuse->buffer,keyuse->size(),sizeof(optimizer::KeyUse),
                        (qsort_cmp) sort_keyuse);
 
-    memset(&key_end, 0, sizeof(key_end)); /* Add for easy testing */
     keyuse->push_back(&key_end);
 
     use= save_pos= (optimizer::KeyUse*)keyuse->buffer;

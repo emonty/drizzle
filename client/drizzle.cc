@@ -3935,7 +3935,7 @@ static int com_source(string *, const char *line)
 
   /* Save old status */
   old_status=status;
-  memset(&status, 0, sizeof(status));
+  status= Status();
 
   // Run in batch mode
   status.setBatch(old_status.getBatch());

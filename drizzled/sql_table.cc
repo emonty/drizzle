@@ -562,10 +562,8 @@ static int prepare_create_table(Session *session,
         !(sql_field->charset= get_charset_by_csname(sql_field->charset->csname, MY_CS_BINSORT)))
     {
       char tmp[64];
-      char *tmp_pos= tmp;
-      strncpy(tmp_pos, save_cs->csname, sizeof(tmp)-4);
-      tmp_pos+= strlen(tmp);
-      strncpy(tmp_pos, STRING_WITH_LEN("_bin"));
+      snprintf(tmp, sizeof(tmp), "%.*s_bin", (int)sizeof(tmp)-5,
+               save_cs->csname);
       my_error(ER_UNKNOWN_COLLATION, MYF(0), tmp);
       return true;
     }

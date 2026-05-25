@@ -421,7 +421,8 @@ int update_query(Session *session, TableList *table_list,
       if (tempfile.reinit_io_cache(internal::READ_CACHE,0L,0,0))
 	error=1;
       // Read row ptrs from this cursor
-      memcpy(select->file, &tempfile, sizeof(tempfile));
+      memcpy(static_cast<void *>(select->file),
+             static_cast<const void *>(&tempfile), sizeof(tempfile));
       if (error >= 0)
 	goto err;
     }

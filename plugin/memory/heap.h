@@ -119,6 +119,7 @@ typedef struct st_heap_block
 
   st_heap_block() :
     root(NULL),
+    level_info(),
     levels(0),
     records_in_block(0),
     recbuffer(0),

@@ -168,7 +168,7 @@ public:
 
   bool append(Discrete_interval *new_interval)
   {
-    if (unlikely(new_interval == NULL))
+    if (DRIZZLE_UNLIKELY(new_interval == NULL))
       return 1;
     if (head == NULL)
       head= current= new_interval;

@@ -322,7 +322,7 @@ static int write_dynamic_record(MI_INFO *info, const unsigned char *record,
     less in the most of the cases.
   */
 
-  if (unlikely(info->s->base.max_data_file_length -
+  if (DRIZZLE_UNLIKELY(info->s->base.max_data_file_length -
                info->state->data_file_length <
                reclength + MI_MAX_DYN_BLOCK_HEADER))
   {
@@ -774,7 +774,7 @@ static int update_dynamic_record(MI_INFO *info, internal::my_off_t filepos, unsi
     compare with just the reclength as we're going
     to get some space from the old replaced record
   */
-  if (unlikely(info->s->base.max_data_file_length -
+  if (DRIZZLE_UNLIKELY(info->s->base.max_data_file_length -
         info->state->data_file_length < reclength))
   {
     /*

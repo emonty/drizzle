@@ -53,7 +53,7 @@ optimizer::QuickRorIntersectSelect::QuickRorIntersectSelect(Session *session_par
   }
   else
   {
-    memset(&alloc, 0, sizeof(memory::Root));
+    alloc= memory::Root();
   }
 
   last_rowid= parent_alloc

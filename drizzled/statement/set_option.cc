@@ -34,7 +34,7 @@ SetOption::SetOption(Session *in_session) :
     set_command(SQLCOM_SET_OPTION);
     init_select(&lex());
     lex().option_type= OPT_SESSION;
-    lex().var_list.empty();
+    lex().var_list.clear();
   }
 } // namespace statement
 

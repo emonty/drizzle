@@ -613,7 +613,7 @@ try
           exitcode= error;
     db_disconnect(current_host, con);
   }
-  opt_password.empty();
+  opt_password.clear();
 }
   catch(exception &err)
   {

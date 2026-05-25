@@ -320,7 +320,6 @@ int load(Session *session,file_exchange *ex,TableList *table_list,
     return true;
   }
   CopyInfo info;
-  memset(&info, 0, sizeof(info));
   info.ignore= ignore;
   info.handle_duplicates=handle_duplicates;
   info.escape_char=escaped->length() ? (*escaped)[0] : INT_MAX;

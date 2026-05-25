@@ -23,6 +23,9 @@
 #include <drizzled/generator.h>
 #include <drizzled/session.h>
 
+#include <algorithm>
+#include <random>
+
 using namespace std;
 
 namespace drizzled
@@ -35,7 +38,9 @@ Schema::Schema(Session &arg) :
   {
     plugin::StorageEngine::getIdentifiers(session, schema_names);
 #if defined(DEBUG)
-    random_shuffle(schema_names.begin(), schema_names.end());
+    std::random_device random_device;
+    std::mt19937 generator(random_device());
+    std::shuffle(schema_names.begin(), schema_names.end(), generator);
 #endif
     schema_iterator= schema_names.begin();
   }

@@ -166,7 +166,7 @@ drizzleclient_net_write(NET* net, const void* packet0, size_t len)
 {
   const unsigned char* packet= reinterpret_cast<const unsigned char*>(packet0);
   unsigned char buff[NET_HEADER_SIZE];
-  if (unlikely(!net->vio)) /* nowhere to write */
+  if (DRIZZLE_UNLIKELY(!net->vio)) /* nowhere to write */
     return 0;
   /*
     Big packets are handled by splitting them in packets of MAX_PACKET_LENGTH

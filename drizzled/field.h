@@ -40,6 +40,8 @@
 
 #include <drizzled/visibility.h>
 
+#include <boost/noncopyable.hpp>
+
 namespace drizzled {
 
 #define DATETIME_DEC                     6
@@ -820,4 +822,3 @@ bool test_if_important_data(const charset_info_st * const cs,
                             const char *strend);
 
 } /* namespace drizzled */
-

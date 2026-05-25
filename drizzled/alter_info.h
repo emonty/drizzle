@@ -33,6 +33,8 @@
 #include <bitset>
 #include <list>
 
+#include <boost/noncopyable.hpp>
+
 namespace drizzled {
 
 enum enum_alter_info_flags
@@ -83,4 +85,3 @@ public:
 };
 
 } /* namespace drizzled */
-

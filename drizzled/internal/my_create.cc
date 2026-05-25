@@ -62,7 +62,7 @@ int my_create(const char *FileName, int CreateFlags, int access_flags,
     callers assume the file to not exist if my_create() fails, so they don't
     do any cleanups.
   */
-  if (unlikely(fd >= 0 && rc < 0))
+  if (DRIZZLE_UNLIKELY(fd >= 0 && rc < 0))
   {
     int tmp= errno;
     my_delete(FileName, MyFlags);

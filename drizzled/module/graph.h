@@ -21,6 +21,7 @@
 
 #include <drizzled/module/vertex.h>
 
+#include <boost/noncopyable.hpp>
 
 namespace drizzled {
 namespace module {
