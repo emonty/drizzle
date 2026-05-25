@@ -28,7 +28,7 @@ struct MyConfig
   MyConfig()
   {
     boost::unit_test::unit_test_log.set_threshold_level(boost::unit_test::log_nothing);
-    boost::unit_test::unit_test_log.set_format(boost::unit_test::CLF);
+    boost::unit_test::unit_test_log.set_format(boost::unit_test::OF_CLF);
   }
 
   ~MyConfig()
@@ -36,7 +36,7 @@ struct MyConfig
   }
 };
 
-BOOST_GLOBAL_FIXTURE( MyConfig )
+BOOST_GLOBAL_FIXTURE( MyConfig );
 
 BOOST_AUTO_TEST_CASE(MainInit)
 {
