@@ -21,7 +21,7 @@ plugin, but there are some notable differences:
 
   * The on disk formats are slightly incompatible (to allow for the same
     index length for the four byte UTF-8 that Drizzle supports)
-  * The table definitions (.from for MySQL, .dfe for Drizzle) are completely
+  * The table definitions (.frm for MySQL, .dfe for Drizzle) are completely
     different. This means that you cannot directly share InnoDB tablespaces
     between MySQL and Drizzle. Use the drizzledump tool to migrate data from
     MySQL to Drizzle.
