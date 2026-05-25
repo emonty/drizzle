@@ -425,7 +425,7 @@ int thr_write_keys(MI_SORT_PARAM *sort_param)
 
         /* Write all keys in memory to file for later merge */
 
-static int  write_keys(MI_SORT_PARAM *info, register unsigned char **sort_keys,
+static int  write_keys(MI_SORT_PARAM *info, unsigned char **sort_keys,
                              uint32_t count, BUFFPEK *buffpek, internal::io_cache_st *tempfile)
 {
   unsigned char **end;
@@ -463,7 +463,7 @@ my_var_write(MI_SORT_PARAM *info, internal::io_cache_st *to_file, unsigned char 
 
 
 static int  write_keys_varlen(MI_SORT_PARAM *info,
-				    register unsigned char **sort_keys,
+				    unsigned char **sort_keys,
                                     uint32_t count, BUFFPEK *buffpek,
 				    internal::io_cache_st *tempfile)
 {
@@ -502,8 +502,8 @@ static int  write_key(MI_SORT_PARAM *info, unsigned char *key,
 
 /* Write index */
 
-static int  write_index(MI_SORT_PARAM *info, register unsigned char **sort_keys,
-                              register uint32_t count)
+static int  write_index(MI_SORT_PARAM *info, unsigned char **sort_keys,
+                              uint32_t count)
 {
   internal::my_qsort2((unsigned char*) sort_keys,(size_t) count,sizeof(unsigned char*),
            (qsort2_cmp) info->key_cmp,info);
@@ -576,7 +576,7 @@ cleanup:
 static uint32_t  read_to_buffer(internal::io_cache_st *fromfile, BUFFPEK *buffpek,
                                   uint32_t sort_length)
 {
-  register uint32_t count;
+  uint32_t count;
   uint32_t length;
 
   if ((count=(uint) min((ha_rows) buffpek->max_keys,buffpek->count)))
@@ -595,7 +595,7 @@ static uint32_t  read_to_buffer(internal::io_cache_st *fromfile, BUFFPEK *buffpe
 static uint32_t  read_to_buffer_varlen(internal::io_cache_st *fromfile, BUFFPEK *buffpek,
                                          uint32_t sort_length)
 {
-  register uint32_t count;
+  uint32_t count;
   uint16_t length_of_key = 0;
   uint32_t idx;
   unsigned char *buffp;
@@ -763,7 +763,7 @@ merge_buffers(MI_SORT_PARAM *info, uint32_t keys, internal::io_cache_st *from_fi
     }
     else
     {
-      register unsigned char *end;
+      unsigned char *end;
       strpos= buffpek->key;
       for (end=strpos+buffpek->mem_count*sort_length;
            strpos != end ;

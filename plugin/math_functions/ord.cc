@@ -40,8 +40,8 @@ int64_t Item_func_ord::val_int()
   if (!res->length()) return 0;
   if (use_mb(res->charset()))
   {
-    register const char *str=res->ptr();
-    register uint32_t n=0, l=my_ismbchar(res->charset(),str,str+res->length());
+    const char *str=res->ptr();
+    uint32_t n=0, l=my_ismbchar(res->charset(),str,str+res->length());
     if (!l)
       return (int64_t)((unsigned char) *str);
     while (l--)

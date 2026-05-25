@@ -70,7 +70,7 @@ err:
     other  Error code
 */
 
-int hp_delete_key(HP_INFO *info, register HP_KEYDEF *keyinfo,
+int hp_delete_key(HP_INFO *info, HP_KEYDEF *keyinfo,
 		  const unsigned char *record, unsigned char *recpos, int flag)
 {
   uint32_t blength,pos2,pos_hashnr,lastpos_hashnr;

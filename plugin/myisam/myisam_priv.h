@@ -353,7 +353,7 @@ typedef struct st_mi_sort_param
   int (*key_read)(struct st_mi_sort_param *,void *);
   int (*key_write)(struct st_mi_sort_param *, const void *);
   void (*lock_in_memory)(MI_CHECK *);
-  int (*write_keys)(struct st_mi_sort_param *, register unsigned char **,
+  int (*write_keys)(struct st_mi_sort_param *, unsigned char **,
                      uint32_t , struct st_buffpek *, drizzled::internal::io_cache_st *);
   unsigned int (*read_to_buffer)(drizzled::internal::io_cache_st *,struct st_buffpek *, uint);
   int (*write_key)(struct st_mi_sort_param *, drizzled::internal::io_cache_st *,unsigned char *,
@@ -583,7 +583,7 @@ extern unsigned char *_mi_get_last_key(MI_INFO *info,MI_KEYDEF *keyinfo,unsigned
 extern unsigned char *_mi_get_key(MI_INFO *info, MI_KEYDEF *keyinfo, unsigned char *page,
 			  unsigned char *key, unsigned char *keypos, uint32_t *return_key_length);
 extern uint32_t _mi_keylength(MI_KEYDEF *keyinfo,unsigned char *key);
-extern uint32_t _mi_keylength_part(MI_KEYDEF *keyinfo, register unsigned char *key,
+extern uint32_t _mi_keylength_part(MI_KEYDEF *keyinfo, unsigned char *key,
 			       HA_KEYSEG *end);
 extern unsigned char *_mi_move_key(MI_KEYDEF *keyinfo,unsigned char *to,unsigned char *from);
 extern int _mi_search_next(MI_INFO *info,MI_KEYDEF *keyinfo,unsigned char *key,
@@ -599,7 +599,7 @@ extern int _mi_dispose(MI_INFO *info,MI_KEYDEF *keyinfo,drizzled::internal::my_o
 extern drizzled::internal::my_off_t _mi_new(MI_INFO *info,MI_KEYDEF *keyinfo,int level);
 extern uint32_t _mi_make_key(MI_INFO *info,uint32_t keynr,unsigned char *key,
 			 const unsigned char *record,drizzled::internal::my_off_t filepos);
-extern uint32_t _mi_pack_key(register MI_INFO *info, uint32_t keynr, unsigned char *key,
+extern uint32_t _mi_pack_key(MI_INFO *info, uint32_t keynr, unsigned char *key,
                          unsigned char *old, drizzled::key_part_map keypart_map,
                          HA_KEYSEG **last_used_keyseg);
 extern int _mi_read_key_record(MI_INFO *info,drizzled::internal::my_off_t filepos,unsigned char *buf);
@@ -719,11 +719,11 @@ extern MI_INFO *test_if_reopen(char *filename);
 bool check_table_is_closed(const char *name, const char *where);
 int mi_open_datafile(MI_INFO *info, MYISAM_SHARE *share, int file_to_dup);
 int mi_open_keyfile(MYISAM_SHARE *share);
-void mi_setup_functions(register MYISAM_SHARE *share);
+void mi_setup_functions(MYISAM_SHARE *share);
 bool mi_dynmap_file(MI_INFO *info, drizzled::internal::my_off_t size);
 void mi_remap_file(MI_INFO *info, drizzled::internal::my_off_t size);
 
-int mi_check_index_cond(register MI_INFO *info, uint32_t keynr, unsigned char *record);
+int mi_check_index_cond(MI_INFO *info, uint32_t keynr, unsigned char *record);
 
     /* Functions needed by mi_check */
 volatile int *killed_ptr(MI_CHECK *param);

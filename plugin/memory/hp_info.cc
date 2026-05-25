@@ -25,7 +25,7 @@ unsigned char *heap_position(HP_INFO *info)
 /* Note that heap_info does NOT return information about the
    current position anymore;  Use heap_position instead */
 
-int heap_info(register HP_INFO *info, register HEAPINFO *x, int flag )
+int heap_info(HP_INFO *info, HEAPINFO *x, int flag )
 {
   x->records         = info->getShare()->records;
   x->deleted         = info->getShare()->recordspace.del_chunk_count;

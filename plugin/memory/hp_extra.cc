@@ -22,13 +22,13 @@
 
 using namespace drizzled;
 
-static void heap_extra_keyflag(register HP_INFO *info,
+static void heap_extra_keyflag(HP_INFO *info,
                                enum ha_extra_function function);
 
 
 	/* set extra flags for database */
 
-int heap_extra(register HP_INFO *info, enum ha_extra_function function)
+int heap_extra(HP_INFO *info, enum ha_extra_function function)
 {
   switch (function) {
   case HA_EXTRA_RESET_STATE:
@@ -65,7 +65,7 @@ int heap_reset(HP_INFO *info)
 /*
     Start/Stop Inserting Duplicates Into a Table, WL#1648.
  */
-static void heap_extra_keyflag(register HP_INFO *info,
+static void heap_extra_keyflag(HP_INFO *info,
                                enum ha_extra_function function)
 {
   for (uint32_t idx= 0; idx< info->getShare()->keys; idx++)

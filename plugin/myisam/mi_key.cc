@@ -52,12 +52,12 @@ static int _mi_put_key_in_record(MI_INFO *info,uint32_t keynr,unsigned char *rec
     Length of key
 */
 
-uint32_t _mi_make_key(register MI_INFO *info, uint32_t keynr, unsigned char *key,
+uint32_t _mi_make_key(MI_INFO *info, uint32_t keynr, unsigned char *key,
                       const unsigned char *record, drizzled::internal::my_off_t filepos)
 {
   unsigned char *pos;
   unsigned char *start;
-  register HA_KEYSEG *keyseg;
+  HA_KEYSEG *keyseg;
 
   start=key;
   for (keyseg=info->s->keyinfo[keynr].seg ; keyseg->type ;keyseg++)
@@ -165,7 +165,7 @@ uint32_t _mi_make_key(register MI_INFO *info, uint32_t keynr, unsigned char *key
      last_use_keyseg    Store pointer to the keyseg after the last used one
 */
 
-uint32_t _mi_pack_key(register MI_INFO *info, uint32_t keynr, unsigned char *key, unsigned char *old,
+uint32_t _mi_pack_key(MI_INFO *info, uint32_t keynr, unsigned char *key, unsigned char *old,
                       drizzled::key_part_map keypart_map, HA_KEYSEG **last_used_keyseg)
 {
   unsigned char *start_key=key;
@@ -263,12 +263,12 @@ uint32_t _mi_pack_key(register MI_INFO *info, uint32_t keynr, unsigned char *key
    1   error
 */
 
-static int _mi_put_key_in_record(register MI_INFO *info, uint32_t keynr,
+static int _mi_put_key_in_record(MI_INFO *info, uint32_t keynr,
 				 unsigned char *record)
 {
-  register unsigned char *key;
+  unsigned char *key;
   unsigned char *pos,*key_end;
-  register HA_KEYSEG *keyseg;
+  HA_KEYSEG *keyseg;
   unsigned char *blob_ptr;
 
   blob_ptr= (unsigned char*) info->lastkey2;             /* Place to put blob parts */
@@ -414,7 +414,7 @@ int _mi_read_key_record(MI_INFO *info, drizzled::internal::my_off_t filepos, uns
     2   Index condition is not satisfied, end the scan.
 */
 
-int mi_check_index_cond(register MI_INFO *info, uint32_t keynr, unsigned char *record)
+int mi_check_index_cond(MI_INFO *info, uint32_t keynr, unsigned char *record)
 {
   if (_mi_put_key_in_record(info, keynr, record))
   {

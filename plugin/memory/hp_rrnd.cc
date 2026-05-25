@@ -25,7 +25,7 @@
 	   HA_ERR_END_OF_FILE = EOF.
 */
 
-int heap_rrnd(register HP_INFO *info, unsigned char *record, unsigned char *pos)
+int heap_rrnd(HP_INFO *info, unsigned char *record, unsigned char *pos)
 {
   HP_SHARE *share=info->getShare();
 
@@ -58,7 +58,7 @@ int heap_rrnd(register HP_INFO *info, unsigned char *record, unsigned char *pos)
 	   HA_ERR_END_OF_FILE = EOF.
 */
 
-int heap_rrnd_old(register HP_INFO *info, unsigned char *record, uint32_t pos)
+int heap_rrnd_old(HP_INFO *info, unsigned char *record, uint32_t pos)
 {
   HP_SHARE *share=info->s;
 asdfasdf;

@@ -295,7 +295,7 @@ static inline void heap_try_free(HP_SHARE *share)
 int heap_delete_table(const char *name)
 {
   int result;
-  register HP_SHARE *share;
+  HP_SHARE *share;
 
   THR_LOCK_heap.lock();
   if ((share= hp_find_named_heap(name)))

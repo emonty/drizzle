@@ -82,7 +82,7 @@ int sort_key_write(MI_SORT_PARAM *sort_param, const void *a);
 my_off_t get_record_for_key(MI_INFO *info,MI_KEYDEF *keyinfo,
                             unsigned char *key);
 int sort_insert_key(MI_SORT_PARAM  *sort_param,
-                    register SORT_KEY_BLOCKS *key_block,
+                    SORT_KEY_BLOCKS *key_block,
                     unsigned char *key, my_off_t prev_block);
 int sort_delete_record(MI_SORT_PARAM *sort_param);
 
@@ -114,7 +114,7 @@ void myisamchk_init(MI_CHECK *param)
 
 	/* Check the status flags for the table */
 
-int chk_status(MI_CHECK *param, register MI_INFO *info)
+int chk_status(MI_CHECK *param, MI_INFO *info)
 {
   MYISAM_SHARE *share=info->s;
 
@@ -142,7 +142,7 @@ int chk_status(MI_CHECK *param, register MI_INFO *info)
 
 	/* Check delete links */
 
-int chk_del(MI_CHECK *param, register MI_INFO *info, uint32_t test_flag)
+int chk_del(MI_CHECK *param, MI_INFO *info, uint32_t test_flag)
 {
   uint32_t delete_link_length;
   my_off_t empty, next_link, old_link= 0;
@@ -244,7 +244,7 @@ wrong:
 
 	/* Check delete links in index file */
 
-static int check_k_link(MI_CHECK *param, register MI_INFO *info, uint32_t nr)
+static int check_k_link(MI_CHECK *param, MI_INFO *info, uint32_t nr)
 {
   my_off_t next_link;
   uint32_t block_size=(nr+1)*MI_MIN_KEY_BLOCK_LENGTH;
@@ -312,10 +312,10 @@ static int check_k_link(MI_CHECK *param, register MI_INFO *info, uint32_t nr)
 
 	/* Check sizes of files */
 
-int chk_size(MI_CHECK *param, register MI_INFO *info)
+int chk_size(MI_CHECK *param, MI_INFO *info)
 {
   int error=0;
-  register my_off_t skr,size;
+  my_off_t skr,size;
   char buff[22],buff2[22];
 
   if (!(param->testflag & T_SILENT)) puts("- check file-size");
@@ -383,7 +383,7 @@ int chk_size(MI_CHECK *param, register MI_INFO *info)
 
 	/* Check keys */
 
-int chk_key(MI_CHECK *param, register MI_INFO *info)
+int chk_key(MI_CHECK *param, MI_INFO *info)
 {
   uint32_t key,found_keys=0,full_text_keys=0,result=0;
   ha_rows keys;
@@ -844,7 +844,7 @@ static ha_checksum calc_checksum(ha_rows count)
 
 	/* Calc length of key in normal isam */
 
-static uint32_t isam_key_length(MI_INFO *info, register MI_KEYDEF *keyinfo)
+static uint32_t isam_key_length(MI_INFO *info, MI_KEYDEF *keyinfo)
 {
   uint32_t length;
   HA_KEYSEG *keyseg;
@@ -1358,7 +1358,7 @@ static void mi_drop_all_indexes(MI_CHECK *param, MI_INFO *info, bool force)
 	/* Recover old table by reading each record and writing all keys */
 	/* Save new datafile-name in temp_filename */
 
-int mi_repair(MI_CHECK *param, register MI_INFO *info,
+int mi_repair(MI_CHECK *param, MI_INFO *info,
 	      char * name, int rep_quick)
 {
   int error,got_error;
@@ -1615,7 +1615,7 @@ err:
 
 static int writekeys(MI_SORT_PARAM *sort_param)
 {
-  register uint32_t i;
+  uint32_t i;
   unsigned char    *key;
   MI_INFO  *info=   sort_param->sort_info->info;
   unsigned char    *buff=   sort_param->record;
@@ -1660,10 +1660,10 @@ static int writekeys(MI_SORT_PARAM *sort_param)
 
 	/* Change all key-pointers that points to a records */
 
-int movepoint(register MI_INFO *info, unsigned char *record, my_off_t oldpos,
+int movepoint(MI_INFO *info, unsigned char *record, my_off_t oldpos,
 	      my_off_t newpos, uint32_t prot_key)
 {
-  register uint32_t i;
+  uint32_t i;
   unsigned char *key;
   uint32_t key_length;
 
@@ -1712,10 +1712,10 @@ void lock_memory(MI_CHECK *)
 
 /* Sort index for more efficent reads */
 
-int mi_sort_index(MI_CHECK *param, register MI_INFO *info, char * name)
+int mi_sort_index(MI_CHECK *param, MI_INFO *info, char * name)
 {
-  register uint32_t key;
-  register MI_KEYDEF *keyinfo;
+  uint32_t key;
+  MI_KEYDEF *keyinfo;
   int new_file;
   my_off_t index_pos[HA_MAX_POSSIBLE_KEY];
   uint32_t r_locks,w_locks;
@@ -1946,7 +1946,7 @@ err:
     <>0	Error
 */
 
-int mi_repair_by_sort(MI_CHECK *param, register MI_INFO *info,
+int mi_repair_by_sort(MI_CHECK *param, MI_INFO *info,
 		      const char * name, int rep_quick)
 {
   int got_error;
@@ -2871,7 +2871,7 @@ my_off_t get_record_for_key(MI_INFO *info, MI_KEYDEF *keyinfo,
 	/* Insert a key in sort-key-blocks */
 
 int sort_insert_key(MI_SORT_PARAM *sort_param,
-                    register SORT_KEY_BLOCKS *key_block, unsigned char *key,
+                    SORT_KEY_BLOCKS *key_block, unsigned char *key,
                     my_off_t prev_block)
 {
   uint32_t a_length,t_length,nod_flag;
@@ -3052,7 +3052,7 @@ int flush_pending_blocks(MI_SORT_PARAM *sort_param)
 static SORT_KEY_BLOCKS *alloc_key_blocks(MI_CHECK *param, uint32_t blocks,
                                          uint32_t buffer_length)
 {
-  register uint32_t i;
+  uint32_t i;
   SORT_KEY_BLOCKS *block;
 
   if (!(block=(SORT_KEY_BLOCKS*) malloc((sizeof(SORT_KEY_BLOCKS)+

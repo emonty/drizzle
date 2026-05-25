@@ -28,7 +28,7 @@
 using namespace drizzled;
 using namespace std;
 
-static uint32_t hp_hashnr(register HP_KEYDEF *keydef, register const unsigned char *key);
+static uint32_t hp_hashnr(HP_KEYDEF *keydef, const unsigned char *key);
 static int hp_key_cmp(HP_KEYDEF *keydef, const unsigned char *rec, const unsigned char *key);
 
 
@@ -39,7 +39,7 @@ static int hp_key_cmp(HP_KEYDEF *keydef, const unsigned char *rec, const unsigne
 unsigned char *hp_search(HP_INFO *info, HP_KEYDEF *keyinfo, const unsigned char *key,
                 uint32_t nextflag)
 {
-  register HASH_INFO *pos,*prev_ptr;
+  HASH_INFO *pos,*prev_ptr;
   int flag;
   uint32_t old_nextflag;
   HP_SHARE *share=info->getShare();
@@ -169,7 +169,7 @@ void hp_movelink(HASH_INFO *pos, HASH_INFO *next_link, HASH_INFO *newlink)
 
 	/* Calc hashvalue for a key */
 
-static uint32_t hp_hashnr(register HP_KEYDEF *keydef, register const unsigned char *key)
+static uint32_t hp_hashnr(HP_KEYDEF *keydef, const unsigned char *key)
 {
   /*register*/
   uint32_t nr=1, nr2=4;
@@ -234,7 +234,7 @@ static uint32_t hp_hashnr(register HP_KEYDEF *keydef, register const unsigned ch
 
 	/* Calc hashvalue for a key in a record */
 
-uint32_t hp_rec_hashnr(register HP_KEYDEF *keydef, register const unsigned char *rec)
+uint32_t hp_rec_hashnr(HP_KEYDEF *keydef, const unsigned char *rec)
 {
   uint32_t nr=1, nr2=4;
   HA_KEYSEG *seg,*endseg;

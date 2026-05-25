@@ -32,7 +32,7 @@ internal::my_off_t mi_position(MI_INFO *info)
 /* Get information about the table */
 /* if flag == 2 one get current info (no sync from database */
 
-int mi_status(MI_INFO *info, register MI_ISAMINFO *x, uint32_t flag)
+int mi_status(MI_INFO *info, MI_ISAMINFO *x, uint32_t flag)
 {
   struct stat state;
   MYISAM_SHARE *share=info->s;

@@ -147,10 +147,10 @@ static ha_rows _mi_record_pos(MI_INFO *info, const unsigned char *key,
 	/* This is a modified version of _mi_search */
 	/* Returns offset for key in indextable (decimal 0.0 <= x <= 1.0) */
 
-static double _mi_search_pos(register MI_INFO *info,
-			     register MI_KEYDEF *keyinfo,
+static double _mi_search_pos(MI_INFO *info,
+			     MI_KEYDEF *keyinfo,
 			     unsigned char *key, uint32_t key_len, uint32_t nextflag,
-			     register internal::my_off_t pos)
+			     internal::my_off_t pos)
 {
   int flag;
   uint32_t nod_flag, keynr, max_keynr= 0;
@@ -211,7 +211,7 @@ err:
 
 	/* Get keynummer of current key and max number of keys in nod */
 
-static uint32_t _mi_keynr(MI_INFO *info, register MI_KEYDEF *keyinfo, unsigned char *page,
+static uint32_t _mi_keynr(MI_INFO *info, MI_KEYDEF *keyinfo, unsigned char *page,
                       unsigned char *keypos, uint32_t *ret_max_key)
 {
   uint32_t nod_flag,keynr,max_key;

@@ -132,8 +132,8 @@ static int compare_bin(unsigned char *a, uint32_t a_length, unsigned char *b, ui
 
 #define FCMP(A,B) ((int) (A) - (int) (B))
 
-int ha_key_cmp(register HA_KEYSEG *keyseg, register unsigned char *a,
-	       register unsigned char *b, uint32_t key_length, uint32_t nextflag,
+int ha_key_cmp(HA_KEYSEG *keyseg, unsigned char *a,
+	       unsigned char *b, uint32_t key_length, uint32_t nextflag,
 	       uint32_t *diff_pos)
 {
   int flag;

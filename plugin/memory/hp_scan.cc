@@ -25,7 +25,7 @@
 	   HA_ERR_END_OF_FILE = EOF.
 */
 
-int heap_scan_init(register HP_INFO *info)
+int heap_scan_init(HP_INFO *info)
 {
   info->lastinx= -1;
   info->current_record= UINT32_MAX;		/* No current record */
@@ -34,7 +34,7 @@ int heap_scan_init(register HP_INFO *info)
   return(0);
 }
 
-int heap_scan(register HP_INFO *info, unsigned char *record)
+int heap_scan(HP_INFO *info, unsigned char *record)
 {
   HP_SHARE *share=info->getShare();
   uint32_t pos;

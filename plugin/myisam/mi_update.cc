@@ -20,10 +20,10 @@
 
 using namespace drizzled;
 
-int mi_update(register MI_INFO *info, const unsigned char *oldrec, unsigned char *newrec)
+int mi_update(MI_INFO *info, const unsigned char *oldrec, unsigned char *newrec)
 {
   int key_changed,save_errno;
-  register internal::my_off_t pos;
+  internal::my_off_t pos;
   uint32_t i;
   unsigned char old_key[MI_MAX_KEY_BUFF],*new_key;
   bool auto_key_changed=0;

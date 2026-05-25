@@ -17,7 +17,7 @@
 
 #include "myisam_priv.h"
 
-int mi_scan_init(register MI_INFO *info)
+int mi_scan_init(MI_INFO *info)
 {
   info->nextpos=info->s->pack.header_length;	/* Read first record */
   info->lastinx= -1;				/* Can't forward or backward */

@@ -915,13 +915,13 @@ err:
 
 	/* Pack a record. Return new reclength */
 
-uint32_t _mi_rec_pack(MI_INFO *info, register unsigned char *to,
-                  register const unsigned char *from)
+uint32_t _mi_rec_pack(MI_INFO *info, unsigned char *to,
+                  const unsigned char *from)
 {
   uint		length,new_length,flag,bit,i;
   unsigned char		*pos,*end,*startpos,*packpos;
   enum en_fieldtype type;
-  register MI_COLUMNDEF *rec;
+  MI_COLUMNDEF *rec;
   MI_BLOB	*blob;
 
   flag=0 ; bit=1;
@@ -1050,7 +1050,7 @@ bool _mi_rec_check(MI_INFO *info,const unsigned char *record, unsigned char *rec
   uint		length,new_length,flag,bit,i;
   unsigned char		*pos,*end,*packpos,*to;
   enum en_fieldtype type;
-  register MI_COLUMNDEF *rec;
+  MI_COLUMNDEF *rec;
 
   packpos=rec_buff; to= rec_buff+info->s->base.pack_bits;
   rec=info->s->rec;
@@ -1164,13 +1164,13 @@ err:
 	/* Returns -1 and errno =HA_ERR_RECORD_DELETED if reclength isn't */
 	/* right. Returns reclength (>0) if ok */
 
-ulong _mi_rec_unpack(register MI_INFO *info, register unsigned char *to, unsigned char *from,
+ulong _mi_rec_unpack(MI_INFO *info, unsigned char *to, unsigned char *from,
 		     ulong found_length)
 {
   uint32_t flag,bit,length,rec_length,min_pack_length;
   enum en_fieldtype type;
   unsigned char *from_end,*to_end,*packpos;
-  register MI_COLUMNDEF *rec,*end_field;
+  MI_COLUMNDEF *rec,*end_field;
 
   to_end=to + info->s->base.reclength;
   from_end=from+found_length;
@@ -1514,7 +1514,7 @@ int _mi_cmp_dynamic_unique(MI_INFO *info, MI_UNIQUEDEF *def,
 
 	/* Compare of record one disk with packed record in memory */
 
-int _mi_cmp_dynamic_record(register MI_INFO *info, register const unsigned char *record)
+int _mi_cmp_dynamic_record(MI_INFO *info, const unsigned char *record)
 {
   uint32_t flag,reclength,b_type;
   internal::my_off_t filepos;
@@ -1652,7 +1652,7 @@ err:
 */
 
 int _mi_read_rnd_dynamic_record(MI_INFO *info, unsigned char *buf,
-				register internal::my_off_t filepos,
+				internal::my_off_t filepos,
 				bool skip_deleted_blocks)
 {
   int block_of_record, info_read, save_errno;

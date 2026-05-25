@@ -42,6 +42,10 @@ Created 1/20/1994 Heikki Tuuri
 
 #include <config.h>
 
+#ifdef __cplusplus
+# include <cstddef>
+#endif
+
 #ifndef __cplusplus
 # include <stdbool.h>
 #endif

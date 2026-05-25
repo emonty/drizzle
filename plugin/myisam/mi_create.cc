@@ -68,7 +68,7 @@ int mi_create(const char *name,uint32_t keys,MI_KEYDEF *keydefs,
 	      uint32_t uniques, MI_UNIQUEDEF *uniquedefs,
 	      MI_CREATE_INFO *ci,uint32_t flags)
 {
-  register uint32_t i, j;
+  uint32_t i, j;
   int dfile= 0, file= 0;
   int errpos,save_errno, create_mode= O_RDWR | O_TRUNC;
   myf create_flag;

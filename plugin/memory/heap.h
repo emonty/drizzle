@@ -271,7 +271,7 @@ extern int heap_write(HP_INFO *info,const unsigned char *record);
 extern int heap_update(HP_INFO *info,const unsigned char *old_record,const unsigned char *new_record);
 extern int heap_rrnd(HP_INFO *info,unsigned char *buf,unsigned char *pos);
 extern int heap_scan_init(HP_INFO *info);
-extern int heap_scan(register HP_INFO *info, unsigned char *record);
+extern int heap_scan(HP_INFO *info, unsigned char *record);
 extern int heap_delete(HP_INFO *info,const unsigned char *buff);
 extern int heap_info(HP_INFO *info,HEAPINFO *x,int flag);
 extern int heap_create(const char *name, uint32_t keys, HP_KEYDEF *keydef,

@@ -57,8 +57,8 @@ int _mi_check_index(MI_INFO *info, int inx)
         **          1 if one should continue search on higher level
         */
 
-int _mi_search(register MI_INFO *info, register MI_KEYDEF *keyinfo,
-               unsigned char *key, uint32_t key_len, uint32_t nextflag, register internal::my_off_t pos)
+int _mi_search(MI_INFO *info, MI_KEYDEF *keyinfo,
+               unsigned char *key, uint32_t key_len, uint32_t nextflag, internal::my_off_t pos)
 {
   bool last_key;
   int error,flag;
@@ -169,12 +169,12 @@ err:
         /* ret_pos point to where find or bigger key starts */
         /* ARGSUSED */
 
-int _mi_bin_search(MI_INFO *info, register MI_KEYDEF *keyinfo, unsigned char *page,
+int _mi_bin_search(MI_INFO *info, MI_KEYDEF *keyinfo, unsigned char *page,
                    unsigned char *key, uint32_t key_len, uint32_t comp_flag, unsigned char **ret_pos,
                    unsigned char *buff, bool *last_key)
 {
   (void)buff;
-  register int start,mid,end,save_end;
+  int start,mid,end,save_end;
   int flag= 0;
   uint32_t totlength,nod_flag,not_used[2];
 
@@ -230,7 +230,7 @@ int _mi_bin_search(MI_INFO *info, register MI_KEYDEF *keyinfo, unsigned char *pa
     < 0         Not found.
 */
 
-int _mi_seq_search(MI_INFO *info, register MI_KEYDEF *keyinfo, unsigned char *page,
+int _mi_seq_search(MI_INFO *info, MI_KEYDEF *keyinfo, unsigned char *page,
                    unsigned char *key, uint32_t key_len, uint32_t comp_flag, unsigned char **ret_pos,
                    unsigned char *buff, bool *last_key)
 {
@@ -265,7 +265,7 @@ int _mi_seq_search(MI_INFO *info, register MI_KEYDEF *keyinfo, unsigned char *pa
 } /* _mi_seq_search */
 
 
-int _mi_prefix_search(MI_INFO *info, register MI_KEYDEF *keyinfo, unsigned char *page,
+int _mi_prefix_search(MI_INFO *info, MI_KEYDEF *keyinfo, unsigned char *page,
                       unsigned char *key, uint32_t key_len, uint32_t nextflag, unsigned char **ret_pos,
                       unsigned char *buff, bool *last_key)
 {
@@ -565,7 +565,7 @@ internal::my_off_t _mi_kpos(uint32_t nod_flag, unsigned char *after_key)
 
         /* Save pos to a key_block */
 
-void _mi_kpointer(register MI_INFO *info, register unsigned char *buff, internal::my_off_t pos)
+void _mi_kpointer(MI_INFO *info, unsigned char *buff, internal::my_off_t pos)
 {
   pos/=MI_MIN_KEY_BLOCK_LENGTH;
   switch (info->s->base.key_reflength) {
@@ -720,8 +720,8 @@ void _mi_dpointer(MI_INFO *info, unsigned char *buff, internal::my_off_t pos)
 
         /* same as _mi_get_key but used with fixed length keys */
 
-uint32_t _mi_get_static_key(register MI_KEYDEF *keyinfo, uint32_t nod_flag,
-                       register unsigned char **page, register unsigned char *key)
+uint32_t _mi_get_static_key(MI_KEYDEF *keyinfo, uint32_t nod_flag,
+                       unsigned char **page, unsigned char *key)
 {
   memcpy(key, *page, keyinfo->keylength+nod_flag);
   *page+=keyinfo->keylength+nod_flag;
@@ -743,10 +743,10 @@ uint32_t _mi_get_static_key(register MI_KEYDEF *keyinfo, uint32_t nod_flag,
     key_length + length of data pointer
 */
 
-uint32_t _mi_get_pack_key(register MI_KEYDEF *keyinfo, uint32_t nod_flag,
-                      register unsigned char **page_pos, register unsigned char *key)
+uint32_t _mi_get_pack_key(MI_KEYDEF *keyinfo, uint32_t nod_flag,
+                      unsigned char **page_pos, unsigned char *key)
 {
-  register HA_KEYSEG *keyseg;
+  HA_KEYSEG *keyseg;
   unsigned char *start_key,*page=*page_pos;
   uint32_t length;
 
@@ -873,10 +873,10 @@ uint32_t _mi_get_pack_key(register MI_KEYDEF *keyinfo, uint32_t nod_flag,
 
 /* key that is packed relatively to previous */
 
-uint32_t _mi_get_binary_pack_key(register MI_KEYDEF *keyinfo, uint32_t nod_flag,
-                             register unsigned char **page_pos, register unsigned char *key)
+uint32_t _mi_get_binary_pack_key(MI_KEYDEF *keyinfo, uint32_t nod_flag,
+                             unsigned char **page_pos, unsigned char *key)
 {
-  register HA_KEYSEG *keyseg;
+  HA_KEYSEG *keyseg;
   unsigned char *start_key,*page,*page_end,*from,*from_end;
   uint32_t length,tmp;
 
@@ -1104,9 +1104,9 @@ unsigned char *_mi_get_last_key(MI_INFO *info, MI_KEYDEF *keyinfo, unsigned char
 
         /* Calculate length of key */
 
-uint32_t _mi_keylength(MI_KEYDEF *keyinfo, register unsigned char *key)
+uint32_t _mi_keylength(MI_KEYDEF *keyinfo, unsigned char *key)
 {
-  register HA_KEYSEG *keyseg;
+  HA_KEYSEG *keyseg;
   unsigned char *start;
 
   if (! (keyinfo->flag & (HA_VAR_LENGTH_KEY | HA_BINARY_PACK_KEY)))
@@ -1139,10 +1139,10 @@ uint32_t _mi_keylength(MI_KEYDEF *keyinfo, register unsigned char *key)
   after '0xDF' but find 'ss'
 */
 
-uint32_t _mi_keylength_part(MI_KEYDEF *keyinfo, register unsigned char *key,
+uint32_t _mi_keylength_part(MI_KEYDEF *keyinfo, unsigned char *key,
 			HA_KEYSEG *end)
 {
-  register HA_KEYSEG *keyseg;
+  HA_KEYSEG *keyseg;
   unsigned char *start= key;
 
   for (keyseg=keyinfo->seg ; keyseg != end ; keyseg++)
@@ -1166,7 +1166,7 @@ uint32_t _mi_keylength_part(MI_KEYDEF *keyinfo, register unsigned char *key,
 
 unsigned char *_mi_move_key(MI_KEYDEF *keyinfo, unsigned char *to, unsigned char *from)
 {
-  register uint32_t length;
+  uint32_t length;
   length= _mi_keylength(keyinfo, from);
   memcpy(to, from, length);
   return to+length;
@@ -1175,7 +1175,7 @@ unsigned char *_mi_move_key(MI_KEYDEF *keyinfo, unsigned char *to, unsigned char
         /* Find next/previous record with same key */
         /* This can't be used when database is touched after last read */
 
-int _mi_search_next(register MI_INFO *info, register MI_KEYDEF *keyinfo,
+int _mi_search_next(MI_INFO *info, MI_KEYDEF *keyinfo,
                     unsigned char *key, uint32_t key_length, uint32_t nextflag, internal::my_off_t pos)
 {
   int error;
@@ -1251,8 +1251,8 @@ int _mi_search_next(register MI_INFO *info, register MI_KEYDEF *keyinfo,
         /* Search after position for the first row in an index */
         /* This is stored in info->lastpos */
 
-int _mi_search_first(register MI_INFO *info, register MI_KEYDEF *keyinfo,
-                     register internal::my_off_t pos)
+int _mi_search_first(MI_INFO *info, MI_KEYDEF *keyinfo,
+                     internal::my_off_t pos)
 {
   uint32_t nod_flag;
   unsigned char *page;
@@ -1293,8 +1293,8 @@ int _mi_search_first(register MI_INFO *info, register MI_KEYDEF *keyinfo,
         /* Search after position for the last row in an index */
         /* This is stored in info->lastpos */
 
-int _mi_search_last(register MI_INFO *info, register MI_KEYDEF *keyinfo,
-                    register internal::my_off_t pos)
+int _mi_search_last(MI_INFO *info, MI_KEYDEF *keyinfo,
+                    internal::my_off_t pos)
 {
   uint32_t nod_flag;
   unsigned char *buff,*page;
@@ -1405,7 +1405,7 @@ _mi_calc_var_pack_key_length(MI_KEYDEF *keyinfo,uint32_t nod_flag,
                              unsigned char *key,
                              MI_KEY_PARAM *s_temp)
 {
-  register HA_KEYSEG *keyseg;
+  HA_KEYSEG *keyseg;
   int length;
   uint32_t key_length,ref_length,org_key_length=0,
        length_pack,new_key_length,diff_flag,pack_marker;
@@ -1755,8 +1755,8 @@ _mi_calc_bin_pack_key_length(MI_KEYDEF *keyinfo,uint32_t nod_flag,unsigned char 
 /* store key without compression */
 
 void _mi_store_static_key(MI_KEYDEF *keyinfo,
-                          register unsigned char *key_pos,
-                          register MI_KEY_PARAM *s_temp)
+                          unsigned char *key_pos,
+                          MI_KEY_PARAM *s_temp)
 {
   (void)keyinfo;
   memcpy(key_pos, s_temp->key, s_temp->totlength);
@@ -1771,8 +1771,8 @@ void _mi_store_static_key(MI_KEYDEF *keyinfo,
 
 
 void _mi_store_var_pack_key(MI_KEYDEF *keyinfo,
-                            register unsigned char *key_pos,
-                            register MI_KEY_PARAM *s_temp)
+                            unsigned char *key_pos,
+                            MI_KEY_PARAM *s_temp)
 {
   (void)keyinfo;
   uint32_t length;
@@ -1836,8 +1836,8 @@ void _mi_store_var_pack_key(MI_KEYDEF *keyinfo,
 /* variable length key with prefix compression */
 
 void _mi_store_bin_pack_key(MI_KEYDEF *keyinfo,
-                            register unsigned char *key_pos,
-                            register MI_KEY_PARAM *s_temp)
+                            unsigned char *key_pos,
+                            MI_KEY_PARAM *s_temp)
 {
   (void)keyinfo;
   assert(s_temp->totlength >= s_temp->ref_length);

@@ -61,7 +61,7 @@ String *ReverseFunction::val_str(String *str)
   tmp= (char *) tmp_value.ptr() + tmp_value.length();
   if (use_mb(res->charset()))
   {
-    register uint32_t l;
+    uint32_t l;
     while (ptr < end)
     {
       if ((l= my_ismbchar(res->charset(),ptr,end)))

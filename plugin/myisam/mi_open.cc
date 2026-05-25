@@ -593,7 +593,7 @@ static uint64_t mi_safe_mul(uint64_t a, uint64_t b)
 
 	/* Set up functions in structs */
 
-void mi_setup_functions(register MYISAM_SHARE *share)
+void mi_setup_functions(MYISAM_SHARE *share)
 {
   if (share->options & HA_OPTION_PACK_RECORD)
   {
@@ -634,7 +634,7 @@ void mi_setup_functions(register MYISAM_SHARE *share)
 }
 
 
-static void setup_key_functions(register MI_KEYDEF *keyinfo)
+static void setup_key_functions(MI_KEYDEF *keyinfo)
 {
   {
     keyinfo->ck_insert = _mi_ck_write;

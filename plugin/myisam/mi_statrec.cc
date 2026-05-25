@@ -110,7 +110,7 @@ int _mi_delete_static_record(MI_INFO *info)
 }
 
 
-int _mi_cmp_static_record(register MI_INFO *info, register const unsigned char *old)
+int _mi_cmp_static_record(MI_INFO *info, const unsigned char *old)
 {
   if (info->opt_flag & WRITE_CACHE_USED)
   {
@@ -156,8 +156,8 @@ int _mi_cmp_static_unique(MI_INFO *info, MI_UNIQUEDEF *def,
 	/*	   1 if record is deleted */
 	/*	  MY_FILE_ERROR on read-error or locking-error */
 
-int _mi_read_static_record(register MI_INFO *info, register internal::my_off_t pos,
-			   register unsigned char *record)
+int _mi_read_static_record(MI_INFO *info, internal::my_off_t pos,
+			   unsigned char *record)
 {
   if (pos != HA_OFFSET_ERROR)
   {
@@ -188,7 +188,7 @@ int _mi_read_static_record(register MI_INFO *info, register internal::my_off_t p
 
 
 int _mi_read_rnd_static_record(MI_INFO *info, unsigned char *buf,
-			       register internal::my_off_t filepos,
+			       internal::my_off_t filepos,
 			       bool skip_deleted_blocks)
 {
   int locked,error,cache_read;

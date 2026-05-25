@@ -227,7 +227,7 @@ int mi_lock_database(MI_INFO *info, int lock_type)
  ** functions to read / write the state
 ****************************************************************************/
 
-int _mi_readinfo(register MI_INFO *info, int lock_type, int check_keybuffer)
+int _mi_readinfo(MI_INFO *info, int lock_type, int check_keybuffer)
 {
   if (info->lock_type == F_UNLCK)
   {
@@ -258,7 +258,7 @@ int _mi_readinfo(register MI_INFO *info, int lock_type, int check_keybuffer)
   request
 */
 
-int _mi_writeinfo(register MI_INFO *info, uint32_t operation)
+int _mi_writeinfo(MI_INFO *info, uint32_t operation)
 {
   int error,olderror;
   MYISAM_SHARE *share=info->s;
@@ -286,7 +286,7 @@ int _mi_writeinfo(register MI_INFO *info, uint32_t operation)
 	/* Test if someone has changed the database */
 	/* (Should be called after readinfo) */
 
-int _mi_test_if_changed(register MI_INFO *info)
+int _mi_test_if_changed(MI_INFO *info)
 {
   MYISAM_SHARE *share=info->s;
   if (share->state.process != share->last_process ||
@@ -326,7 +326,7 @@ int _mi_test_if_changed(register MI_INFO *info)
 int _mi_mark_file_changed(MI_INFO *info)
 {
   unsigned char buff[3];
-  register MYISAM_SHARE *share=info->s;
+  MYISAM_SHARE *share=info->s;
 
   if (!(share->state.changed & STATE_CHANGED) || ! share->global_changed)
   {
@@ -358,7 +358,7 @@ int _mi_mark_file_changed(MI_INFO *info)
 int _mi_decrement_open_count(MI_INFO *info)
 {
   unsigned char buff[2];
-  register MYISAM_SHARE *share=info->s;
+  MYISAM_SHARE *share=info->s;
   int lock_error=0,write_error=0;
   if (share->global_changed)
   {

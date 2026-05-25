@@ -31,7 +31,7 @@ using namespace drizzled;
 	   HA_ERR_END_OF_FILE = EOF.
 */
 
-int mi_rrnd(MI_INFO *info, unsigned char *buf, register internal::my_off_t filepos)
+int mi_rrnd(MI_INFO *info, unsigned char *buf, internal::my_off_t filepos)
 {
   bool skip_deleted_blocks;
 

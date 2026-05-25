@@ -31,7 +31,7 @@ static int underflow(MI_INFO *info,MI_KEYDEF *keyinfo,unsigned char *anc_buff,
 static uint32_t remove_key(MI_KEYDEF *keyinfo,uint32_t nod_flag,unsigned char *keypos,
 		       unsigned char *lastkey,unsigned char *page_end,
 		       internal::my_off_t *next_block);
-static int _mi_ck_real_delete(register MI_INFO *info,MI_KEYDEF *keyinfo,
+static int _mi_ck_real_delete(MI_INFO *info,MI_KEYDEF *keyinfo,
 			      unsigned char *key, uint32_t key_length, internal::my_off_t *root);
 
 
@@ -115,7 +115,7 @@ err:
 
 	/* Remove a key from the btree index */
 
-int _mi_ck_delete(register MI_INFO *info, uint32_t keynr, unsigned char *key,
+int _mi_ck_delete(MI_INFO *info, uint32_t keynr, unsigned char *key,
 		  uint32_t key_length)
 {
   return _mi_ck_real_delete(info, info->s->keyinfo+keynr, key, key_length,
@@ -123,7 +123,7 @@ int _mi_ck_delete(register MI_INFO *info, uint32_t keynr, unsigned char *key,
 } /* _mi_ck_delete */
 
 
-static int _mi_ck_real_delete(register MI_INFO *info, MI_KEYDEF *keyinfo,
+static int _mi_ck_real_delete(MI_INFO *info, MI_KEYDEF *keyinfo,
 			      unsigned char *key, uint32_t key_length, internal::my_off_t *root)
 {
   int error;
@@ -183,7 +183,7 @@ err:
 	** -1 on errors
 	*/
 
-static int d_search(register MI_INFO *info, register MI_KEYDEF *keyinfo,
+static int d_search(MI_INFO *info, MI_KEYDEF *keyinfo,
                     uint32_t comp_flag, unsigned char *key, uint32_t key_length,
                     internal::my_off_t page, unsigned char *anc_buff)
 {
@@ -287,7 +287,7 @@ err:
 
 	/* Remove a key that has a page-reference */
 
-static int del(register MI_INFO *info, register MI_KEYDEF *keyinfo, unsigned char *key,
+static int del(MI_INFO *info, MI_KEYDEF *keyinfo, unsigned char *key,
 	       unsigned char *anc_buff, internal::my_off_t leaf_page, unsigned char *leaf_buff,
 	       unsigned char *keypos,		/* Pos to where deleted key was */
 	       internal::my_off_t next_block,
@@ -384,7 +384,7 @@ err:
 
 	/* Balances adjacent pages if underflow occours */
 
-static int underflow(register MI_INFO *info, register MI_KEYDEF *keyinfo,
+static int underflow(MI_INFO *info, MI_KEYDEF *keyinfo,
 		     unsigned char *anc_buff,
 		     internal::my_off_t leaf_page,/* Ancestor page and underflow page */
 		     unsigned char *leaf_buff,

@@ -18,7 +18,7 @@
 #include "heap_priv.h"
 #include <drizzled/error_t.h>
 
-int hp_rectest(register HP_INFO *info, register const unsigned char *old_record)
+int hp_rectest(HP_INFO *info, const unsigned char *old_record)
 {
 
   if (hp_compare_record_data_to_chunkset(info->getShare(), old_record, info->current_ptr))
