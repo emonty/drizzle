@@ -308,6 +308,7 @@ char client_process(client_st *client, client_con_st *client_con)
     }
 
     client_con->state= CLIENT_FIELDS;
+    /* fallthrough */
 
   case CLIENT_FIELDS:
     if (client->level == BUFFER_ALL)
@@ -349,6 +350,7 @@ char client_process(client_st *client, client_con_st *client_con)
     }
 
     client_con->state= CLIENT_ROWS;
+    /* fallthrough */
 
   case CLIENT_ROWS:
     if (client->level == BUFFER_ALL)
