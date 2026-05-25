@@ -160,14 +160,10 @@ static Item* default_value_item(enum_field_types field_type, const charset_info_
   case DRIZZLE_TYPE_LONGLONG:
     {
       int error= 0;
-      Item* default_item= new Item_int(default_value.c_str(), (int64_t) internal::my_strtoll10(default_value.c_str(), NULL, &error), default_value.length());
-
+      int64_t val= (int64_t) internal::my_strtoll10(default_value.c_str(), NULL, &error);
       if (error && error != -1) /* was an error and wasn't a negative number */
-      {
-        delete default_item;
         return NULL;
-      }
-      return default_item;
+      return new Item_int(default_value.c_str(), val, default_value.length());
     }
   case DRIZZLE_TYPE_DOUBLE:
     return new Item_float(default_value.c_str(), default_value.length());
