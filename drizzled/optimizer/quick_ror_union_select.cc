@@ -81,7 +81,7 @@ int optimizer::QuickRorUnionSelect::reset()
   have_prev_rowid= false;
   if (not scans_inited)
   {
-    BOOST_FOREACH(QuickSelectInterface* it, quick_selects)
+    for (QuickSelectInterface* it : quick_selects)
     {
       if (it->init_ror_merged_scan(false))
       {
@@ -98,7 +98,7 @@ int optimizer::QuickRorUnionSelect::reset()
     Initialize scans for merged quick selects and put all merged quick
     selects into the queue.
   */
-  BOOST_FOREACH(QuickSelectInterface* it, quick_selects)
+  for (QuickSelectInterface* it : quick_selects)
   {
     if (it->reset())
       return 0;
@@ -140,7 +140,7 @@ optimizer::QuickRorUnionSelect::~QuickRorUnionSelect()
 
 bool optimizer::QuickRorUnionSelect::is_keys_used(const boost::dynamic_bitset<>& fields)
 {
-  BOOST_FOREACH(QuickSelectInterface* it, quick_selects)
+  for (QuickSelectInterface* it : quick_selects)
   {
     if (it->is_keys_used(fields))
       return true;
@@ -205,7 +205,7 @@ void optimizer::QuickRorUnionSelect::add_info_string(string *str)
 {
   bool first= true;
   str->append("union(");
-  BOOST_FOREACH(QuickSelectInterface* it, quick_selects)
+  for (QuickSelectInterface* it : quick_selects)
   {
     if (first)
       first= false;
@@ -220,7 +220,7 @@ void optimizer::QuickRorUnionSelect::add_info_string(string *str)
 void optimizer::QuickRorUnionSelect::add_keys_and_lengths(string *key_names, string *used_lengths)
 {
   bool first= true;
-  BOOST_FOREACH(QuickSelectInterface* it, quick_selects)
+  for (QuickSelectInterface* it : quick_selects)
   {
     if (first)
       first= false;

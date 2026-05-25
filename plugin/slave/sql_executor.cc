@@ -54,7 +54,7 @@ bool SQLExecutor::executeSQL(vector<string> &sql)
   Execute execute(*(_session.get()), true);
 
   string combined_sql;
-  BOOST_FOREACH(string& it, sql)
+  for (string& it : sql)
   {
     combined_sql.append(it);
     combined_sql.append("; ");

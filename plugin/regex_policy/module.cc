@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <boost/foreach.hpp>
 #include <unordered_set>
 #include <boost/thread/locks.hpp>
 
@@ -237,7 +236,7 @@ bool Policy::setPolicyFile(std::string &new_policy_file)
 
 static void clearPolicyItemList(PolicyItemList& policies)
 {
-  BOOST_FOREACH(PolicyItem* x, policies)
+  for (PolicyItem* x : policies)
   {
     delete x;
   }

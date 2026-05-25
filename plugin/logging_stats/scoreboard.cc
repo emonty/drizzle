@@ -92,13 +92,13 @@ Scoreboard::Scoreboard(uint32_t in_number_sessions, uint32_t in_number_buckets)
 
 Scoreboard::~Scoreboard()
 {
-  BOOST_FOREACH(std::vector<ScoreboardSlot*>* it0, vector_of_scoreboard_vectors)
+  for (std::vector<ScoreboardSlot*>* it0 : vector_of_scoreboard_vectors)
   {
-    BOOST_FOREACH(ScoreboardSlot* it, *it0)
-      delete it; 
+    for (ScoreboardSlot* it : *it0)
+      delete it;
     delete it0;
   }
-  BOOST_FOREACH(boost::shared_mutex* it, vector_of_scoreboard_locks)
+  for (boost::shared_mutex* it : vector_of_scoreboard_locks)
     delete it;
 }
 

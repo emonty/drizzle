@@ -57,7 +57,7 @@ void Listen::removePlugin(plugin::Listen *listen_obj)
 
 bool Listen::setup()
 {
-  BOOST_FOREACH(plugin::Listen* it, listen_list)
+  for (plugin::Listen* it : listen_list)
   {
     std::vector<int> fds;
     if (it->getFileDescriptors(fds))
@@ -68,7 +68,7 @@ bool Listen::setup()
 
     fd_list.resize(fd_count + fds.size() + 1);
     
-    BOOST_FOREACH(int fd, fds)
+    for (int fd : fds)
     {
       fd_list[fd_count].fd= fd;
       fd_list[fd_count].events= POLLIN | POLLERR;

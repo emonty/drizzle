@@ -493,7 +493,7 @@ int TransactionServices::commitTransaction(Session& session,
      */
     if (shouldConstructMessages())
     {
-      BOOST_FOREACH(TransactionContext::ResourceContexts::reference resource_context, resource_contexts)
+      for (TransactionContext::ResourceContexts::reference resource_context : resource_contexts)
       {
         if (error)
           break;
@@ -565,7 +565,7 @@ int TransactionServices::commitPhaseOne(Session& session,
 
   if (resource_contexts.empty() == false)
   {
-    BOOST_FOREACH(TransactionContext::ResourceContexts::reference resource_context, resource_contexts)
+    for (TransactionContext::ResourceContexts::reference resource_context : resource_contexts)
     {
       plugin::MonitoredInTransaction *resource= resource_context->getMonitored();
 
@@ -627,7 +627,7 @@ int TransactionServices::rollbackTransaction(Session& session,
 
   if (resource_contexts.empty() == false)
   {
-    BOOST_FOREACH(TransactionContext::ResourceContexts::reference resource_context, resource_contexts)
+    for (TransactionContext::ResourceContexts::reference resource_context : resource_contexts)
     {
       plugin::MonitoredInTransaction *resource= resource_context->getMonitored();
 
@@ -708,7 +708,7 @@ int TransactionServices::autocommitOrRollback(Session& session,
   {
     TransactionContext *trans = &session.transaction.stmt;
     TransactionContext::ResourceContexts &resource_contexts= trans->getResourceContexts();
-    BOOST_FOREACH(TransactionContext::ResourceContexts::reference resource_context, resource_contexts)
+    for (TransactionContext::ResourceContexts::reference resource_context : resource_contexts)
     {
       resource_context->getTransactionalStorageEngine()->endStatement(&session);
     }
@@ -757,7 +757,7 @@ int TransactionServices::rollbackToSavepoint(Session& session,
     rolling back to savepoint in all storage engines that were part of the
     transaction when the savepoint was set
   */
-  BOOST_FOREACH(TransactionContext::ResourceContexts::reference resource_context, sv_resource_contexts)
+  for (TransactionContext::ResourceContexts::reference resource_context : sv_resource_contexts)
   {
     plugin::MonitoredInTransaction *resource= resource_context->getMonitored();
 
@@ -809,7 +809,7 @@ int TransactionServices::rollbackToSavepoint(Session& session,
      * savepoint's resource contexts.
      */
         
-    BOOST_FOREACH(TransactionContext::ResourceContexts::reference resource_context, set_difference_contexts)
+    for (TransactionContext::ResourceContexts::reference resource_context : set_difference_contexts)
     {
       plugin::MonitoredInTransaction *resource= resource_context->getMonitored();
 
@@ -873,7 +873,7 @@ int TransactionServices::setSavepoint(Session& session,
 
   if (resource_contexts.empty() == false)
   {
-    BOOST_FOREACH(TransactionContext::ResourceContexts::reference resource_context, resource_contexts)
+    for (TransactionContext::ResourceContexts::reference resource_context : resource_contexts)
     {
       plugin::MonitoredInTransaction *resource= resource_context->getMonitored();
 
@@ -918,7 +918,7 @@ int TransactionServices::releaseSavepoint(Session& session,
 
   TransactionContext::ResourceContexts &resource_contexts= sv.getResourceContexts();
 
-  BOOST_FOREACH(TransactionContext::ResourceContexts::reference resource_context, resource_contexts)
+  for (TransactionContext::ResourceContexts::reference resource_context : resource_contexts)
   {
     plugin::MonitoredInTransaction *resource= resource_context->getMonitored();
 

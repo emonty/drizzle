@@ -228,7 +228,7 @@ int rm_table_part2(Session *session, TableList *tables, bool if_exists,
     {
       std::string table_error;
 
-      BOOST_FOREACH(util::string::vector::reference iter, wrong_tables)
+      for (util::string::vector::reference iter : wrong_tables)
       {
         table_error+= iter;
         table_error+= ',';
@@ -1806,7 +1806,7 @@ send_result:
     session->lex().cleanup_after_one_table_open();
     session->clear_error();  // these errors shouldn't get client
     {
-      BOOST_FOREACH(DRIZZLE_ERROR* err, session->main_da().m_warn_list)
+      for (DRIZZLE_ERROR* err : session->main_da().m_warn_list)
       {
         session->getClient()->store(table_name.c_str());
         session->getClient()->store(operator_name);

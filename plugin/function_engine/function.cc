@@ -19,7 +19,6 @@
  */
 
 #include <config.h>
-#include <boost/foreach.hpp>
 #include <plugin/function_engine/function.h>
 #include <plugin/function_engine/cursor.h>
 #include <string>
@@ -122,7 +121,7 @@ void Function::doGetTableIdentifiers(drizzled::CachedDirectory&,
   set<std::string> set_of_names;
   drizzled::plugin::TableFunction::getNames(schema_identifier.getSchemaName(), set_of_names);
 
-  BOOST_FOREACH(const std::string& iter, set_of_names)
+  for (const std::string& iter : set_of_names)
   {
     set_of_identifiers.push_back(identifier::Table(schema_identifier, iter, drizzled::message::Table::FUNCTION));
   }

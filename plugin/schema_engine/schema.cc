@@ -40,7 +40,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <boost/foreach.hpp>
 #include <memory>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -79,7 +78,7 @@ void Schema::prime_catalog(identifier::Catalog &catalog_identifier)
   CachedDirectory::Entries files= directory.getEntries();
   boost::unique_lock<boost::shared_mutex> scopedLock(mutex);
 
-  BOOST_FOREACH(CachedDirectory::Entries::reference entry, files)
+  for (CachedDirectory::Entries::reference entry : files)
   {
     if (not entry->filename.compare(GLOBAL_TEMPORARY_EXT))
       continue;
@@ -136,7 +135,7 @@ void Schema::prime()
 void Schema::doGetSchemaIdentifiers(identifier::schema::vector &set_of_names)
 {
   mutex.lock_shared();
-  BOOST_FOREACH(SchemaCache::reference iter, schema_cache)
+  for (SchemaCache::reference iter : schema_cache)
     set_of_names.push_back(identifier::Schema(identifier::Catalog(iter.second->catalog()),
                                               iter.second->name()));
   mutex.unlock_shared();

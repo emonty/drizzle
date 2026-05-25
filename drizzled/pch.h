@@ -22,7 +22,6 @@
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 #include <boost/date_time.hpp>
-#include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/ptr_container/ptr_container.hpp>
 #include <boost/smart_ptr.hpp>

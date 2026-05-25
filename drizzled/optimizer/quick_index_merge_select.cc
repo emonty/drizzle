@@ -82,7 +82,7 @@ void optimizer::QuickIndexMergeSelect::push_quick_back(optimizer::QuickRangeSele
 
 optimizer::QuickIndexMergeSelect::~QuickIndexMergeSelect()
 {
-  BOOST_FOREACH(QuickRangeSelect* it, quick_selects)
+  for (QuickRangeSelect* it : quick_selects)
     it->cursor= NULL;
   for_each(quick_selects.begin(), quick_selects.end(), DeletePtr());
   quick_selects.clear();
@@ -206,7 +206,7 @@ int optimizer::QuickIndexMergeSelect::get_next()
 
 bool optimizer::QuickIndexMergeSelect::is_keys_used(const boost::dynamic_bitset<>& fields)
 {
-  BOOST_FOREACH(QuickRangeSelect* it, quick_selects)
+  for (QuickRangeSelect* it : quick_selects)
   {
     if (is_key_used(head, it->index, fields))
       return 1;
@@ -219,7 +219,7 @@ void optimizer::QuickIndexMergeSelect::add_info_string(string *str)
 {
   bool first= true;
   str->append("sort_union(");
-  BOOST_FOREACH(QuickRangeSelect* it, quick_selects)
+  for (QuickRangeSelect* it : quick_selects)
   {
     if (! first)
       str->append(",");
@@ -243,7 +243,7 @@ void optimizer::QuickIndexMergeSelect::add_keys_and_lengths(string *key_names,
   uint32_t length= 0;
   bool first= true;
 
-  BOOST_FOREACH(QuickRangeSelect* it, quick_selects)
+  for (QuickRangeSelect* it : quick_selects)
   {
     if (first)
       first= false;

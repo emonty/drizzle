@@ -40,7 +40,6 @@
 #include <vector>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include <memory>
 
@@ -62,7 +61,7 @@ struct insensitive_hash : std::unary_function<std::string, std::size_t>
   std::size_t operator()(std::string const& x) const
   {
     std::size_t seed = 0;
-    BOOST_FOREACH(std::string::const_reference it, x)
+    for (std::string::const_reference it : x)
       boost::hash_combine(seed, std::toupper(it));
     return seed;
   }
@@ -73,7 +72,7 @@ struct sensitive_hash : std::unary_function< std::vector<char>, std::size_t>
   std::size_t operator()(std::vector<char> const& x) const
   {
     std::size_t seed = 0;
-    BOOST_FOREACH(std::vector<char>::const_reference it, x)
+    for (std::vector<char>::const_reference it : x)
       boost::hash_combine(seed, it);
     return seed;
   }

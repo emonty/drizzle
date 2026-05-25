@@ -45,7 +45,7 @@ static xa_resource_managers_t xa_resource_managers;
 int XaResourceManager::commitOrRollbackXID(XID *xid, bool commit)
 {
   std::vector<int> results;
-  BOOST_FOREACH(XaResourceManager* it, xa_resource_managers)
+  for (XaResourceManager* it : xa_resource_managers)
     results.push_back(commit ? it->xaCommitXid(xid) : it->xaRollbackXid(xid));
   return std::find(results.begin(), results.end(), 0) == results.end();
 }

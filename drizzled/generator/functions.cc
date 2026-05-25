@@ -34,10 +34,10 @@ Functions::Functions(Session&)
 {
   functions.reserve(plugin::Function::getMap().size() + FunctionContainer::getMap().size());
 
-  BOOST_FOREACH(FunctionContainer::Map::const_reference it, FunctionContainer::getMap()) 
+  for (FunctionContainer::Map::const_reference it : FunctionContainer::getMap())
     functions.push_back(it.first);
 
-  BOOST_FOREACH(plugin::Function::Map::const_reference it, plugin::Function::getMap())
+  for (plugin::Function::Map::const_reference it : plugin::Function::getMap())
     functions.push_back(it.first);
 
   iter= functions.begin();

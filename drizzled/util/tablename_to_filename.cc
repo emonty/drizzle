@@ -21,7 +21,6 @@
 #include <config.h>
 #include <string>
 
-#include <boost/foreach.hpp>
 #include <drizzled/util/tablename_to_filename.h>
 #include <drizzled/internal/my_sys.h>
 
@@ -45,7 +44,7 @@ static const char* hexchars= "0123456789abcdef";
 std::string tablename_to_filename(const std::string &from)
 {
   std::string to;
-  BOOST_FOREACH(char it, from)
+  for (char it : from)
   {
     if (isascii(it))
     {

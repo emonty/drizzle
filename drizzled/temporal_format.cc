@@ -30,7 +30,6 @@
 
 #include <config.h>
 
-#include <boost/foreach.hpp>
 #include <drizzled/temporal_format.h>
 #include <drizzled/temporal.h>
 
@@ -307,7 +306,7 @@ bool init_temporal_formats()
 /** Free all allocated temporal formats */
 void deinit_temporal_formats()
 {
-  BOOST_FOREACH(TemporalFormat* it, all_temporal_formats)
+  for (TemporalFormat* it : all_temporal_formats)
     delete it;
   known_date_formats.clear();
   known_datetime_formats.clear();

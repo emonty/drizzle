@@ -19,7 +19,6 @@
  */
 
 #include <config.h>
-#include <boost/foreach.hpp>
 #include <drizzled/plugin/authentication.h>
 #include <drizzled/error.h>
 #include <drizzled/gettext.h>
@@ -44,7 +43,7 @@ void plugin::Authentication::removePlugin(plugin::Authentication* auth)
 
 bool plugin::Authentication::isAuthenticated(const drizzled::identifier::User& sctx, const std::string& password)
 {
-  BOOST_FOREACH(plugin::Authentication* auth, all_authentication)
+  for (plugin::Authentication* auth : all_authentication)
   {
     if (auth->authenticate(sctx, password))
       return true;

@@ -118,7 +118,7 @@ public:
       to_execute.push(byte);
     }
     
-    BOOST_FOREACH(const string& iter, parsed_tokens)
+    for (const string& iter : parsed_tokens)
     {
       drizzled::util::String byte;
       byte.assign(1, COM_QUERY); // Insert our COM_QUERY

@@ -25,8 +25,6 @@
 #include <drizzled/catalog/local.h>
 #include <drizzled/error.h>
 
-#include <boost/foreach.hpp>
-
 namespace drizzled
 {
 namespace plugin
@@ -69,7 +67,7 @@ bool Catalog::create(const identifier::Catalog& identifier, message::catalog::sh
   }
 
   size_t create_count= 0;
-  BOOST_FOREACH(catalog::Engine::vector::const_reference ref, Engines::singleton().catalogs())
+  for (catalog::Engine::vector::const_reference ref : Engines::singleton().catalogs())
   {
     if (ref->create(identifier, message))
       create_count++;
@@ -102,7 +100,7 @@ bool Catalog::drop(const identifier::Catalog& identifier)
 
   
   size_t drop_count= 0;
-  BOOST_FOREACH(catalog::Engine::vector::const_reference ref, Engines::singleton().catalogs())
+  for (catalog::Engine::vector::const_reference ref : Engines::singleton().catalogs())
   {
     if (ref->drop(identifier))
     {
@@ -161,7 +159,7 @@ bool plugin::Catalog::exist(const identifier::Catalog& identifier)
     return true;
   }
 
-  BOOST_FOREACH(catalog::Engine::vector::const_reference ref, Engines::singleton().catalogs())
+  for (catalog::Engine::vector::const_reference ref : Engines::singleton().catalogs())
   {
     if (ref->exist(identifier))
     {
@@ -174,7 +172,7 @@ bool plugin::Catalog::exist(const identifier::Catalog& identifier)
 
 void plugin::Catalog::getIdentifiers(identifier::catalog::vector &identifiers)
 {
-  BOOST_FOREACH(catalog::Engine::vector::const_reference ref, Engines::singleton().catalogs())
+  for (catalog::Engine::vector::const_reference ref : Engines::singleton().catalogs())
   {
     ref->getIdentifiers(identifiers);
   }
@@ -182,7 +180,7 @@ void plugin::Catalog::getIdentifiers(identifier::catalog::vector &identifiers)
 
 void plugin::Catalog::getMessages(message::catalog::vector &messages)
 {
-  BOOST_FOREACH(catalog::Engine::vector::const_reference ref, Engines::singleton().catalogs())
+  for (catalog::Engine::vector::const_reference ref : Engines::singleton().catalogs())
   {
     ref->getMessages(messages);
   }
@@ -199,7 +197,7 @@ message::catalog::shared_ptr plugin::Catalog::getMessage(const identifier::Catal
     return instance->message();
   }
 
-  BOOST_FOREACH(catalog::Engine::vector::const_reference ref, Engines::singleton().catalogs())
+  for (catalog::Engine::vector::const_reference ref : Engines::singleton().catalogs())
   {
     if ((message= ref->getMessage(identifier)))
     {
@@ -220,7 +218,7 @@ catalog::Instance::shared_ptr plugin::Catalog::getInstance(const identifier::Cat
     return instance;
   }
 
-  BOOST_FOREACH(catalog::Engine::vector::const_reference ref, Engines::singleton().catalogs())
+  for (catalog::Engine::vector::const_reference ref : Engines::singleton().catalogs())
   {
     message::catalog::shared_ptr message;
     if (message= ref->getMessage(identifier))

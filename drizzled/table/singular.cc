@@ -57,7 +57,7 @@ Singular::Singular(Session *session, std::list<CreateField>& field_list) :
 
   /* Create all fields and calculate the total length of record */
   message::Table::Field null_field;
-	BOOST_FOREACH(CreateField& it, field_list)
+	for (CreateField& it : field_list)
   {
     *field_arg= getMutableShare()->make_field(null_field,
                                               NULL,

@@ -19,7 +19,6 @@
 
 #include <config.h>
 
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/exception/get_error_info.hpp>
 #include <string>
@@ -58,14 +57,14 @@ namespace drizzled
 int sql_set_variables(Session *session, const SetVarVector &var_list)
 {
   int error;
-  BOOST_FOREACH(SetVarVector::const_reference it, var_list)
+  for (SetVarVector::const_reference it : var_list)
   {
     if ((error= it->check(session)))
       goto err;
   }
   if (!(error= test(session->is_error())))
   {
-    BOOST_FOREACH(SetVarVector::const_reference it, var_list)
+    for (SetVarVector::const_reference it : var_list)
     {
       error|= it->update(session);         // Returns 0, -1 or 1
     }

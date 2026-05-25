@@ -128,7 +128,7 @@ int optimizer::QuickRorIntersectSelect::reset()
   if (! scans_inited && init_ror_merged_scan(true))
     return 0;
   scans_inited= true;
-  BOOST_FOREACH(QuickRangeSelect* it, quick_selects)
+  for (QuickRangeSelect* it : quick_selects)
     it->reset();
   return 0;
 }
@@ -142,7 +142,7 @@ void optimizer::QuickRorIntersectSelect::push_quick_back(optimizer::QuickRangeSe
 
 bool optimizer::QuickRorIntersectSelect::is_keys_used(const boost::dynamic_bitset<>& fields)
 {
-  BOOST_FOREACH(QuickRangeSelect* it, quick_selects)
+  for (QuickRangeSelect* it : quick_selects)
   {
     if (is_key_used(head, it->index, fields))
       return 1;
@@ -234,7 +234,7 @@ void optimizer::QuickRorIntersectSelect::add_info_string(string *str)
 {
   bool first= true;
   str->append("intersect(");
-  BOOST_FOREACH(QuickRangeSelect* it, quick_selects)
+  for (QuickRangeSelect* it : quick_selects)
   {
     KeyInfo *key_info= head->key_info + it->index;
     if (! first)
@@ -259,7 +259,7 @@ void optimizer::QuickRorIntersectSelect::add_keys_and_lengths(string *key_names,
   char buf[64];
   uint32_t length;
   bool first= true;
-  BOOST_FOREACH(QuickRangeSelect* it, quick_selects)
+  for (QuickRangeSelect* it : quick_selects)
   {
     KeyInfo *key_info= head->key_info + it->index;
     if (first)

@@ -5884,7 +5884,7 @@ static bool make_join_statistics(Join *join, TableList *tables, COND *conds, DYN
   */
   if (const_count && ! sargables.empty())
   {
-    BOOST_FOREACH(vector<optimizer::SargableParam>::reference iter, sargables)
+    for (vector<optimizer::SargableParam>::reference iter : sargables)
     {
       Field& field= *iter.getField();
       JoinTable *join_tab= field.getTable()->reginfo.join_tab;

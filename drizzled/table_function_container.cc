@@ -19,7 +19,6 @@
  */
 
 #include <config.h>
-#include <boost/foreach.hpp>
 #include <drizzled/plugin/table_function.h>
 #include <drizzled/table_function_container.h>
 #include <drizzled/util/find_ptr.h>
@@ -35,7 +34,7 @@ plugin::TableFunction *TableFunctionContainer::getFunction(const std::string &pa
 
 void TableFunctionContainer::getNames(const string &predicate, std::set<std::string> &set_of_names)
 {
-  BOOST_FOREACH(ToolMap::reference i, table_map)
+  for (ToolMap::reference i : table_map)
   {
     if (i.second->visible() && (predicate.empty() || boost::iequals(predicate, i.second->getSchemaHome())))
       set_of_names.insert(i.second->getTableLabel());

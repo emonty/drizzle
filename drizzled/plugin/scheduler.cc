@@ -31,7 +31,7 @@ static plugin::Scheduler* g_scheduler= NULL;
 
 bool plugin::Scheduler::addPlugin(plugin::Scheduler *sched)
 {
-  BOOST_FOREACH(schedulers_t::reference it, g_schedulers)
+  for (schedulers_t::reference it : g_schedulers)
   {
     if (it->getName() != sched->getName())
       continue;
@@ -50,7 +50,7 @@ void plugin::Scheduler::removePlugin(plugin::Scheduler *sched)
 
 bool plugin::Scheduler::setPlugin(const std::string& name)
 {
-  BOOST_FOREACH(schedulers_t::reference it, g_schedulers)
+  for (schedulers_t::reference it : g_schedulers)
   {
     if (it->getName() != name)
       continue;

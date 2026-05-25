@@ -176,7 +176,7 @@ void StorageEngine::removePlugin(StorageEngine *)
 
 StorageEngine *StorageEngine::findByName(const std::string &predicate)
 {
-  BOOST_FOREACH(EngineVector::reference it, g_engines)
+  for (EngineVector::reference it : g_engines)
   {
     if (not boost::iequals(it->getName(), predicate))
       continue;
@@ -200,7 +200,7 @@ StorageEngine *StorageEngine::findByName(Session& session, const std::string &pr
 */
 void StorageEngine::closeConnection(Session& session)
 {
-  BOOST_FOREACH(EngineVector::reference it, g_engines)
+  for (EngineVector::reference it : g_engines)
   {
     if (*session.getEngineData(it))
       it->close_connection(&session);
@@ -257,7 +257,7 @@ bool plugin::StorageEngine::doesTableExist(Session &session,
 {
   if (include_temporary_tables && session.open_tables.doDoesTableExist(identifier))
       return true;
-  BOOST_FOREACH(EngineVector::reference it, g_engines)
+  for (EngineVector::reference it : g_engines)
   {
     if (it->doDoesTableExist(session, identifier))
       return true;
@@ -491,7 +491,7 @@ void StorageEngine::getIdentifiers(Session &session, const identifier::Schema &s
     return;
   }
 
-  BOOST_FOREACH(EngineVector::reference it, g_engines)
+  for (EngineVector::reference it : g_engines)
     it->doGetTableIdentifiers(directory, schema_identifier, set_of_identifiers);
 
   session.open_tables.doGetTableIdentifiers(directory, schema_identifier, set_of_identifiers);
@@ -560,7 +560,7 @@ void StorageEngine::removeLostTemporaryTables(Session &session, const char *dire
     }
   }
 
-  BOOST_FOREACH(EngineVector::reference it, g_engines)
+  for (EngineVector::reference it : g_engines)
   {
     table_identifiers.erase(std::remove_if(table_identifiers.begin(), table_identifiers.end(), DropTable(session, it)),
       table_identifiers.end());
@@ -958,7 +958,7 @@ int StorageEngine::writeDefinitionFromPath(const identifier::Table &identifier, 
 */
 bool StorageEngine::canCreateTable(const identifier::Table &identifier)
 {
-  BOOST_FOREACH(EngineVector::reference it, g_engines)
+  for (EngineVector::reference it : g_engines)
   {
     if (not it->doCanCreateTable(identifier))
       return false;

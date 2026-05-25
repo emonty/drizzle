@@ -39,7 +39,7 @@ bool select_dumpvar::send_data(List<Item> &items)
     return 1;
   }
   List<Item>::iterator it(items.begin());
-  BOOST_FOREACH(var* current_var, var_list)
+  for (var* current_var : var_list)
   {
     Item* item= it++;
     if (not item)

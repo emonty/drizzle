@@ -29,7 +29,6 @@
 #include <dirent.h>
 #include <drizzled/definitions.h>
 
-#include <boost/foreach.hpp>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -83,7 +82,7 @@ CachedDirectory::CachedDirectory(const string& in_path, enum CachedDirectory::FI
 
 CachedDirectory::~CachedDirectory()
 {
-	BOOST_FOREACH(Entries::reference iter, entries)
+	for (Entries::reference iter : entries)
     delete iter;
 }
 
@@ -209,7 +208,7 @@ bool CachedDirectory::open(const string &in_path, set<string> &allowed_exts, enu
 std::ostream& operator<<(std::ostream& output, const CachedDirectory &directory)
 {
   output << "CachedDirectory:(Path: " << directory.getPath() << ")\n";
-  BOOST_FOREACH(const CachedDirectory::Entry* iter, directory.getEntries())
+  for (const CachedDirectory::Entry* iter : directory.getEntries())
     output << "\t(" << iter->filename << ")\n";
   return output;
 }

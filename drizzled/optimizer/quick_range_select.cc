@@ -465,7 +465,7 @@ optimizer::QuickSelectDescending::QuickSelectDescending(optimizer::QuickRangeSel
   rev_it= rev_ranges.begin();
 
   /* Remove EQ_RANGE flag for keys that are not using the full key */
-  BOOST_FOREACH(QuickRange* it, rev_ranges)
+  for (QuickRange* it : rev_ranges)
   {
     if ((it->flag & EQ_RANGE) && head->key_info[index].key_length != it->max_length)
     {

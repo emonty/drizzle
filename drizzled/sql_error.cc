@@ -219,7 +219,7 @@ bool show_warnings(Session *session, bitset<DRIZZLE_ERROR::NUM_ERRORS> &levels_t
 
   unit->set_limit(sel);
 
-  BOOST_FOREACH(DRIZZLE_ERROR* err, session->main_da().m_warn_list)
+  for (DRIZZLE_ERROR* err : session->main_da().m_warn_list)
   {
     /* Skip levels that the user is not interested in */
     if (! levels_to_show.test(err->level))

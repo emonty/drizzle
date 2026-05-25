@@ -487,7 +487,7 @@ void close_connections()
     boost::mutex::scoped_lock scopedLock(session::Cache::mutex());
     session::Cache::list list= session::Cache::getCache();
 
-    BOOST_FOREACH(session::Cache::list::reference tmp, list)
+    for (session::Cache::list::reference tmp : list)
     {
       tmp->setKilled(Session::KILL_CONNECTION);
       tmp->scheduler->killSession(tmp.get());
@@ -1050,7 +1050,7 @@ static void check_limits_transaction_message_threshold(size_t in_transaction_mes
 
 static void process_defaults_files()
 {
-	BOOST_FOREACH(vector<string>::reference iter, defaults_file_list)
+	for (vector<string>::reference iter : defaults_file_list)
   {
     fs::path file_location= iter;
 
@@ -1082,7 +1082,7 @@ static void process_defaults_files()
 
 static void compose_defaults_file_list(const vector<string>& in_options)
 {
-	BOOST_FOREACH(const string& it, in_options)
+	for (const string& it : in_options)
   {
     fs::path p(it);
     if (fs::is_regular_file(p))
@@ -1378,7 +1378,7 @@ bool init_variables_before_daemonizing(int argc, char **argv)
     CachedDirectory config_conf_d(config_conf_d_location.string());
     if (not config_conf_d.fail())
     {
-			BOOST_FOREACH(CachedDirectory::Entries::const_reference iter, config_conf_d.getEntries())
+			for (CachedDirectory::Entries::const_reference iter : config_conf_d.getEntries())
       {
         string file_entry(iter->filename);
         if (not file_entry.empty() && file_entry != "." && file_entry != "..")

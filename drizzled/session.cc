@@ -156,7 +156,7 @@ public:
 
   ~impl_c()
   {
-    BOOST_FOREACH(properties_t::reference it, properties)
+    for (properties_t::reference it : properties)
       delete it.second;
   }
 
@@ -396,7 +396,7 @@ void Session::cleanup()
   */
   TransactionServices::rollbackTransaction(*this, true);
 
-  BOOST_FOREACH(UserVars::reference iter, user_vars)
+  for (UserVars::reference iter : user_vars)
     boost::checked_delete(iter.second);
   user_vars.clear();
 
@@ -445,7 +445,7 @@ Session::~Session()
   plugin::Logging::postEndDo(this);
   plugin::EventObserver::deregisterSessionEvents(session_event_observers);
 
-	BOOST_FOREACH(impl_c::schema_event_observers_t::reference it, impl_->schema_event_observers)
+	for (impl_c::schema_event_observers_t::reference it : impl_->schema_event_observers)
     plugin::EventObserver::deregisterSchemaEvents(it.second);
 }
 

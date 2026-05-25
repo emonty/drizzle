@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <boost/foreach.hpp>
 #include <drizzled/plugin/plugin.h>
 #include <drizzled/atomics.h>
 #include <vector>
@@ -45,7 +44,7 @@ public:
 
   virtual ~Listen()
   {
-    BOOST_FOREACH(ListenCounter* counter, counters)
+    for (ListenCounter* counter : counters)
     {
       delete counter->first;
       delete counter;

@@ -24,7 +24,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <boost/foreach.hpp>
 #include <drizzled/display.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -119,7 +118,7 @@ void Engine::prime(drizzled::message::catalog::vector &messages)
   drizzled::CachedDirectory::Entries files= directory.getEntries();
 
 
-  BOOST_FOREACH(drizzled::CachedDirectory::Entries::reference entry, files)
+  for (drizzled::CachedDirectory::Entries::reference entry : files)
   {
     drizzled::message::catalog::shared_ptr message;
 

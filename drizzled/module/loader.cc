@@ -47,7 +47,6 @@
 #include <drizzled/util/tokenize.h>
 #include <drizzled/system_variables.h>
 
-#include <boost/foreach.hpp>
 
 /* FreeBSD 2.2.2 does not define RTLD_NOW) */
 #ifndef RTLD_NOW
@@ -172,7 +171,7 @@ static bool plugin_add(module::Registry &registry, memory::Root *tmp_root,
 
 static void reap_plugins(module::Registry &registry)
 {
-  BOOST_FOREACH(module::Registry::ModuleMap::const_reference module, registry.getModulesMap())
+  for (module::Registry::ModuleMap::const_reference module : registry.getModulesMap())
     delete module.second;
 }
 
@@ -200,9 +199,9 @@ static bool plugin_initialize(module::Registry &registry,
 static void compose_plugin_options(vector<string> &target,
                                    vector<string> options)
 {
-  BOOST_FOREACH(vector<string>::reference it, options)
+  for (vector<string>::reference it : options)
     tokenize(it, target, ",", true);
-  BOOST_FOREACH(vector<string>::reference it, target)
+  for (vector<string>::reference it : target)
     std::replace(it.begin(), it.end(), '-', '_');
 }
 
@@ -305,7 +304,7 @@ bool plugin_finalize(module::Registry &registry)
   /*
     Now we initialize all remaining plugins
   */
-  BOOST_FOREACH(module::Registry::ModuleList::const_reference module, registry.getList())
+  for (module::Registry::ModuleList::const_reference module : registry.getList())
   {
     if (not module->isInited && plugin_initialize(registry, module))
     {
@@ -314,7 +313,7 @@ bool plugin_finalize(module::Registry &registry)
       return true;
     }
   }
-  BOOST_FOREACH(plugin::Plugin::map::value_type value, registry.getPluginsMap())
+  for (plugin::Plugin::map::value_type value : registry.getPluginsMap())
   {
     value.second->prime();
   }
@@ -326,7 +325,7 @@ bool plugin_finalize(module::Registry &registry)
 */
 void plugin_startup_window(module::Registry &registry, drizzled::Session &session)
 {
-  BOOST_FOREACH(plugin::Plugin::map::value_type value, registry.getPluginsMap())
+  for (plugin::Plugin::map::value_type value : registry.getPluginsMap())
   {
     value.second->startup(session);
   }
@@ -370,7 +369,7 @@ static bool plugin_load_list(module::Registry &registry,
                              po::options_description &long_options,
                              bool builtin)
 {
-  BOOST_FOREACH(const string& plugin_name, plugin_list)
+  for (const string& plugin_name : plugin_list)
   {
     module::Library* library= registry.addLibrary(plugin_name, builtin);
     if (library == NULL)

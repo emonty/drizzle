@@ -59,7 +59,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <boost/array.hpp>
-#include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/smart_ptr.hpp>
 
@@ -5965,7 +5964,7 @@ int st_replace_regex::multi_reg_replace(char* val)
   buf_= 0;
 
   /* For each substitution, do the replace */
-  BOOST_FOREACH(regex_arr_t::const_reference i, regex_arr)
+  for (regex_arr_t::const_reference i : regex_arr)
   {
     char* save_out_buf= out_buf;
     if (!reg_replace(&out_buf, buf_len_p, i.pattern, i.replace,

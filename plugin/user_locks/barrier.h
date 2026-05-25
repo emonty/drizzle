@@ -31,7 +31,6 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <memory>
-#include <boost/foreach.hpp>
 
 #include "observer.h"
 

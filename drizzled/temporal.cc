@@ -36,7 +36,6 @@
 
 #include <config.h>
 
-#include <boost/foreach.hpp>
 #include <drizzled/charset.h>
 #include <drizzled/type/decimal.h>
 #include <drizzled/calendar.h>
@@ -147,7 +146,7 @@ void Temporal::set_epoch_seconds()
 bool Date::from_string(const char *from, size_t from_len)
 {
   _useconds= 0; // We may not match on it, so we need to make sure we zero it out.
-  BOOST_FOREACH(TemporalFormat* it, known_date_formats)
+  for (TemporalFormat* it : known_date_formats)
   {
     if (not it->matches(from, from_len, this))
       continue;
@@ -159,7 +158,7 @@ bool Date::from_string(const char *from, size_t from_len)
 
 bool DateTime::from_string(const char *from, size_t from_len)
 {
-  BOOST_FOREACH(TemporalFormat* it, known_datetime_formats)
+  for (TemporalFormat* it : known_datetime_formats)
   {
     if (not it->matches(from, from_len, this))
       continue;
@@ -977,7 +976,7 @@ std::ostream& operator<<(std::ostream& os, const Timestamp& subject)
 
 bool Time::from_string(const char *from, size_t from_len)
 {
-  BOOST_FOREACH(TemporalFormat* it, known_time_formats)
+  for (TemporalFormat* it : known_time_formats)
   {
     if (not it->matches(from, from_len, this))
       continue;

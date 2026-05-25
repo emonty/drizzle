@@ -35,7 +35,6 @@
 #include <drizzled/util/find_ptr.h>
 
 #include <boost/bind.hpp>
-#include <boost/foreach.hpp>
 
 using namespace std;
 
@@ -56,11 +55,11 @@ module::Registry::~Registry()
    * This can be used if shutdown code references
    * other plugins.
    */
-  BOOST_FOREACH(plugin::Plugin::map::reference it, plugin_registry)
+  for (plugin::Plugin::map::reference it : plugin_registry)
     it.second->shutdownPlugin();
 
   plugin::Plugin::vector error_plugins;
-  BOOST_FOREACH(plugin::Plugin::map::reference it, plugin_registry)
+  for (plugin::Plugin::map::reference it : plugin_registry)
   {
     if (it.second->removeLast())
       error_plugins.push_back(it.second);
@@ -68,7 +67,7 @@ module::Registry::~Registry()
       delete it.second;
   }
 
-  BOOST_FOREACH(plugin::Plugin::vector::reference it, error_plugins)
+  for (plugin::Plugin::vector::reference it : error_plugins)
     delete it;
 
   plugin_registry.clear();
@@ -78,11 +77,11 @@ module::Registry::~Registry()
   @TODO When we delete modules here, we segfault on a bad string. Why?
    */
 
-  BOOST_FOREACH(ModuleMap::reference it, module_registry_)
+  for (ModuleMap::reference it : module_registry_)
     delete it.second;
   module_registry_.clear();
 #endif
-  BOOST_FOREACH(LibraryMap::reference it, library_registry_)
+  for (LibraryMap::reference it : library_registry_)
     delete it.second;
   library_registry_.clear();
 }
@@ -117,10 +116,10 @@ void module::Registry::remove(module::Module *handle)
 
 void module::Registry::buildDeps()
 {
-  BOOST_FOREACH(ModuleMap::reference map_iter, module_registry_)
+  for (ModuleMap::reference map_iter : module_registry_)
   {
     Module* handle= map_iter.second;
-    BOOST_FOREACH(Module::Depends::const_reference handle_deps, handle->getDepends())
+    for (Module::Depends::const_reference handle_deps : handle->getDepends())
     {
       std::string dep_str(boost::to_lower_copy(handle_deps));
       bool found_dep= false;
@@ -151,7 +150,7 @@ module::Registry::ModuleList module::Registry::getList()
   VertexList vertex_list;
   boost::topological_sort(depend_graph_->getGraph(), std::back_inserter(vertex_list));
   ModuleList plugins;
-  BOOST_FOREACH(VertexList::reference it, vertex_list)
+  for (VertexList::reference it : vertex_list)
   {
     if (Module* mod_ptr= depend_graph_->properties(it).getModule())
       plugins.push_back(mod_ptr);

@@ -75,7 +75,7 @@ void TransactionalStorageEngine::setTransactionReadWrite(Session& session)
 */
 void TransactionalStorageEngine::releaseTemporaryLatches(Session *session)
 {
-  BOOST_FOREACH(TransactionalStorageEngine* it, g_engines) 
+  for (TransactionalStorageEngine* it : g_engines)
     it->doReleaseTemporaryLatches(session);
 }
 
@@ -85,7 +85,7 @@ int TransactionalStorageEngine::notifyStartTransaction(Session *session, start_t
     return 0;
   std::vector<int> results;
   results.reserve(g_engines.size());
-  BOOST_FOREACH(TransactionalStorageEngine* it, g_engines)
+  for (TransactionalStorageEngine* it : g_engines)
     results.push_back(it->startTransaction(session, options));
   return *std::max_element(results.begin(), results.end());
 }

@@ -20,7 +20,6 @@
 #include <config.h>
 #include <drizzled/session/cache.h>
 
-#include <boost/foreach.hpp>
 #include <drizzled/current_session.h>
 #include <drizzled/plugin/authorization.h>
 #include <drizzled/session.h>
@@ -37,7 +36,7 @@ boost::condition_variable Cache::_end;
 Cache::session_ptr Cache::find(const session_id_t &id)
 {
   boost::mutex::scoped_lock scopedLock(_mutex);
-  BOOST_FOREACH(list::const_reference it, cache)
+  for (list::const_reference it : cache)
   {
     if (it->thread_id == id)
       return it;

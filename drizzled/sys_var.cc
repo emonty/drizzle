@@ -1254,7 +1254,7 @@ drizzle_show_var* enumerate_sys_vars(Session *session)
 {
   drizzle_show_var *result= new (session->mem) drizzle_show_var[system_variable_map.size() + 1];
   drizzle_show_var *show= result;
-  BOOST_FOREACH(SystemVariableMap::const_reference iter, system_variable_map)
+  for (SystemVariableMap::const_reference iter : system_variable_map)
   {
     sys_var *var= iter.second;
     show->name= var->getName().c_str();
