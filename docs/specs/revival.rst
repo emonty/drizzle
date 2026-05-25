@@ -1031,6 +1031,12 @@ warnings, VC info) and ``DRIZZLE_BUILD_SETUP`` is in place at
   conversion so the macro set is stable. Skip the deliberately-kept
   ``pandora_plugins.m4`` and the plugin-dependency ``have-lib``
   macros still called by ``plugin/*/plugin.ac``.
+* **Revisit ``config/pandora-plugin`` as a generator.** The Python 2
+  script still earns its keep during the LTS ratchet because changing
+  the plugin enumeration machinery would be a structural rewrite. Once
+  Phase 11 owns the Pandora cleanup directly, replace it with a smaller
+  maintained generator or a generated-file-free build description
+  rather than continuing to carry Python as the default answer.
 * **Delete the now-unused ``m4/pandora_*.m4`` files** as each one's
   last caller goes away. One commit per file.
 * **InnoDB is an upstream-merge surface — do not touch.** Earlier
