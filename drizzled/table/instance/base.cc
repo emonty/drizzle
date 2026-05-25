@@ -524,7 +524,7 @@ bool TableShare::parse_table_proto(Session& session, const message::Table &table
              table.name().empty() ? " " :  table.name().c_str(),
              table.InitializationErrorString().c_str());
 
-    return ER_CORRUPT_TABLE_DEFINITION;
+    return true;
   }
 
   setTableMessage(table);
@@ -558,7 +558,7 @@ bool TableShare::parse_table_proto(Session& session, const message::Table &table
              table_options.collation().c_str(),
              table.name().c_str());
 
-    return ER_CORRUPT_TABLE_DEFINITION; // Historical
+    return true;
   }
 
   db_record_offset= 1;
@@ -828,7 +828,7 @@ bool TableShare::parse_table_proto(Session& session, const message::Table &table
     {
       my_error(ER_CORRUPT_TABLE_DEFINITION_ENUM, MYF(0), table.name().c_str());
 
-      return ER_CORRUPT_TABLE_DEFINITION_ENUM; // Historical
+      return true;
     }
 
 
