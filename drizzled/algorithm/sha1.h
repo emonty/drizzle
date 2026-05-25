@@ -42,7 +42,7 @@ public:
     SHA1_CTX() :
     	count(0)
     {
-      memset(state, 0, 5);
+      memset(state, 0, sizeof(state));
       memset(buffer, 0, SHA1_BLOCK_LENGTH);
     }
 };
