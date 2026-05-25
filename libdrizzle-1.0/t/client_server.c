@@ -223,6 +223,7 @@ static void _server(drizzle_con_st *con, server_state_st *state)
     drizzle_con_set_charset(con, 8);
     drizzle_con_set_status(con, DRIZZLE_CON_STATUS_NONE);
     drizzle_con_set_max_packet_size(con, DRIZZLE_MAX_PACKET_SIZE);
+    /* fallthrough */
 
   case SERVER_STATE_HANDSHAKE_WRITE:
     drizzle_test("drizzle_handshake_server_write");
@@ -236,6 +237,7 @@ static void _server(drizzle_con_st *con, server_state_st *state)
     {
       drizzle_test_error("returned %s (%d)", drizzle_con_error(con), ret);
     }
+    /* fallthrough */
 
   case SERVER_STATE_HANDSHAKE_READ:
     drizzle_test("drizzle_handshake_client_read");
@@ -261,6 +263,7 @@ static void _server(drizzle_con_st *con, server_state_st *state)
     drizzle_test("drizzle_result_create");
     if (drizzle_result_create(con, &state->result) == NULL)
       drizzle_test_error("returned %s", drizzle_con_error(con));
+    /* fallthrough */
 
   case SERVER_STATE_HANDSHAKE_RESULT:
     drizzle_test("drizzle_handshake_result_write");
@@ -274,6 +277,7 @@ static void _server(drizzle_con_st *con, server_state_st *state)
       drizzle_test_error("returned %s (%d)", drizzle_con_error(con), ret);
 
     drizzle_result_free(&state->result);
+    /* fallthrough */
 
   case SERVER_STATE_COMMAND_BUFFER:
     drizzle_test("drizzle_con_command_buffer");
@@ -304,6 +308,7 @@ static void _server(drizzle_con_st *con, server_state_st *state)
       drizzle_test_error("returned %s", drizzle_con_error(con));
 
     drizzle_result_set_column_count(&state->result, 2);
+    /* fallthrough */
 
   case SERVER_STATE_RESULT_HEADER:
     drizzle_test("drizzle_handshake_result_write");
@@ -330,6 +335,7 @@ static void _server(drizzle_con_st *con, server_state_st *state)
     drizzle_column_set_size(&state->column, 32);
     drizzle_column_set_type(&state->column, DRIZZLE_COLUMN_TYPE_VARCHAR);
     drizzle_column_set_flags(&state->column, DRIZZLE_COLUMN_FLAGS_NONE);
+    /* fallthrough */
 
   case SERVER_STATE_RESULT_COLUMN_1:
     drizzle_test("drizzle_column_write");
@@ -344,6 +350,7 @@ static void _server(drizzle_con_st *con, server_state_st *state)
 
     drizzle_column_set_name(&state->column, "test_column_2");
     drizzle_column_set_orig_name(&state->column, "test_orig_column_2");
+    /* fallthrough */
 
   case SERVER_STATE_RESULT_COLUMN_2:
     drizzle_test("drizzle_column_write");
@@ -360,6 +367,7 @@ static void _server(drizzle_con_st *con, server_state_st *state)
     drizzle_column_free(&state->column);
 
     drizzle_result_set_eof(&state->result, true);
+    /* fallthrough */
 
   case SERVER_STATE_RESULT_COLUMN_EOF:
     drizzle_test("drizzle_handshake_result_write");
@@ -373,17 +381,21 @@ static void _server(drizzle_con_st *con, server_state_st *state)
       drizzle_test_error("returned %s (%d)", drizzle_con_error(con), ret);
 
     drizzle_result_calc_row_size(&state->result, fields, field_sizes);
+    /* fallthrough */
 
   case SERVER_STATE_RESULT_ROW_1:
     ret= drizzle_row_write(&state->result);
+    /* fallthrough */
 
   case SERVER_STATE_RESULT_ROW_1_FIELD_1:
     ret= drizzle_field_write(&state->result, fields[0], field_sizes[0],
                              field_sizes[0]);
+    /* fallthrough */
 
   case SERVER_STATE_RESULT_ROW_1_FIELD_2:
     ret= drizzle_field_write(&state->result, fields[1], field_sizes[1],
                              field_sizes[1]);
+    /* fallthrough */
 
   case SERVER_STATE_RESULT_ROW_EOF:
     drizzle_test("drizzle_handshake_result_write");
@@ -434,6 +446,7 @@ static void _client(drizzle_con_st *con, client_state_st *state)
     {
       drizzle_test_error("returned %s (%d)", drizzle_con_error(con), ret);
     }
+    /* fallthrough */
 
   case CLIENT_STATE_RESULT:
     drizzle_test("drizzle_result_buffer");
