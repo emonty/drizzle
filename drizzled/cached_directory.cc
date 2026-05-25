@@ -109,25 +109,11 @@ bool CachedDirectory::open(const string &in_path, set<string> &allowed_exts, enu
 
   path= in_path;
 
-  union {
-    dirent entry;
-#ifdef __sun
-    /*
-     * The readdir_r() call on Solaris operates a bit differently from other
-     * systems in that the dirent structure must be allocated along with enough
-     * space to contain the filename (see man page for readdir_r on Solaris).
-     * Instead of dynamically try to allocate this buffer, just set the max
-     * name for a path instead.
-     */
-    char space[sizeof(dirent) + PATH_MAX + 1];
-#endif
-  } buffer;
-
-  int retcode;
   dirent *result;
+  int retcode= 0;
 
-  while ((retcode= readdir_r(dirp, &buffer.entry, &result)) == 0 &&
-         result != NULL)
+  errno= 0;
+  while ((result= readdir(dirp)) != NULL)
   {
     std::string buffered_fullpath;
     if (not allowed_exts.empty())
@@ -198,7 +184,8 @@ bool CachedDirectory::open(const string &in_path, set<string> &allowed_exts, enu
       }
     }
   }
-    
+
+  retcode= errno;
   closedir(dirp);
   error= retcode;
 
