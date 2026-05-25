@@ -108,7 +108,7 @@ class IPv6 {
 
 	ptr_src = strtok(ipv4,".");
 
-	while (ptr_src != '\0')
+	while (ptr_src != NULL)
 	{
 		sscanf(ptr_src, "%d", &octet[octet_index]);
 
