@@ -1,0 +1,17 @@
+{
+  "callgrind": {
+    "ir": 1204640060,
+    "estimated_cycles": 1567801710,
+    "l1_misses": 17661924,
+    "llc_misses": 1093886,
+    "branch_mispredicts": 7715381
+  },
+  "massif": {
+    "peak_heap_bytes": 30163384
+  },
+  "size": {
+    "drizzled_bytes": 8706792,
+    "plugins_total_bytes": 3995166,
+    "plugin_count": 40
+  }
+}

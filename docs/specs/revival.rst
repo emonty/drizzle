@@ -19,12 +19,20 @@ cold. Read this block first; the rest of the spec is the roadmap.
   (dead-platform strip, ``m4/pandora_*.m4`` simplifications, dead-dep
   plugins deleted), Phase 2 (performance baseline harness under
   ``perf/``), Phase 3 (container hygiene and Phase 0 follow-ups),
-  Phase 4 (LTS bump 12.04 → 14.04), and Phase 5 (LTS bump 14.04 →
-  16.04; C++11 baseline; ``boost::shared_ptr`` / ``boost::unordered_map``
-  swept to ``std::``). Each landed phase's commits are tagged in
-  commit messages, *under their old numbers* for Phases 0–2 — what
-  this spec now calls Phase 2 appears in older commits as Phase 1.5.
-  See the Renumber note below for the full map.
+  Phase 4 (LTS bump 12.04 → 14.04), Phase 5 (LTS bump 14.04 → 16.04;
+  C++11 baseline; ``boost::shared_ptr`` / ``boost::unordered_map``
+  swept to ``std::``), and Phase 6 (LTS bump 16.04 → 18.04; Boost
+  1.65 link-graph fix-ups; GCC 7 ``-Wimplicit-fallthrough`` /
+  ``-Wmemset-elt-size`` / ``-Wbool-compare`` / ``-Wmisleading-
+  indentation`` sweep; ``readdir_r`` → ``readdir`` and
+  ``__sync_fetch_and_add`` → ``__atomic_load_n``; C++03 dynamic-
+  exception-spec sweep; ``drizzle_result_st`` constructor was missing
+  two pointer initialisers — Bionic's stricter heap layout exposed
+  the bug as a ``free(): invalid pointer`` in DTR's auth path).
+  Each landed phase's commits are tagged in commit messages, *under
+  their old numbers* for Phases 0–2 — what this spec now calls Phase
+  2 appears in older commits as Phase 1.5. See the Renumber note
+  below for the full map.
 * **In flight, then paused.** Phase 11 (Pandora slim-down to
   ``m4/drizzle.m4``) — what older commit messages call Phase 2. A
   number of build-setup macros have folded into ``m4/drizzle.m4``
@@ -34,14 +42,23 @@ cold. Read this block first; the rest of the spec is the roadmap.
   finishing the bzr/svn/hg strip, the ``PANDORA_`` → ``DRIZZLE_``
   rename) is open but **deliberately deferred** until after the LTS
   ratchet reaches 26.04.
-* **Next.** Phase 6 (LTS bump 18.04 — Boost 1.65, OpenSSL 1.1, fs
-  v2→v3) is the next ratchet step.  The Pandora slim-down (Phase 11)
-  is still held back because the existing Pandora layer still works,
-  and the LTS ratchet brings in modern pkg-config / Boost / OpenSSL /
+* **Next.** Phase 7 (LTS bump 20.04 — protobuf 3, C++17, PCRE2) is
+  the next ratchet step. The Pandora slim-down (Phase 11) is still
+  held back because the existing Pandora layer still works, and the
+  LTS ratchet brings in modern pkg-config / Boost / OpenSSL /
   protobuf that make the macro conversion cleaner than fighting the
   12.04 toolchain. After the ratchet reaches 26.04: Phase 11
   (Pandora slim-down), Phase 12 (constant-fold), Phase 13 (plugin
   enable-by-default sweep), Phase 14 (Sphinx-only docs).
+* **Carry-overs from Phase 6.** Two pre-existing items surfaced by
+  the Bionic verification but deliberately left for follow-up: the
+  ``libdrizzle-1.0/t/`` race over hard-coded port 12399 is currently
+  papered over with ``AUTOMAKE_OPTIONS = serial-tests``; the longer
+  question is whether ``libdrizzle-1.0`` should stay at all
+  (drizzled and ``client/`` link against ``libdrizzle-2.0``; only
+  ``unittests/libdrizzle_test.cc`` still pulls in 1.0). And ``arm64``
+  verification was skipped on this laptop session — Zuul's arm64
+  nodes will pick up the gate.
 
 **Renumber note.** This revision renumbered phases for linear
 sequencing. Map: 1.5 → 2, 1.6 → 3, old 3–9 → 4–10, old 2 → 11, old
