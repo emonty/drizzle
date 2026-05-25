@@ -52,7 +52,7 @@
 #include <drizzled/show.h>
 #include "drizzled/probes.h"
 
-int yylex(union YYSTYPE *yylval, drizzled::Session *session);
+int yylex(union ParserType *yylval, drizzled::Session *session);
 
 #define yyoverflow(A,B,C,D,E,F)               \
   {                                           \
@@ -125,7 +125,7 @@ static void base_sql_error(drizzled::Session *session, const char* s)
 
 using namespace drizzled;
 %}
-%union {
+%union ParserType {
   bool boolean;
   int  num;
   unsigned long ulong_num;
@@ -168,7 +168,7 @@ using namespace drizzled;
 %{
 namespace drizzled
 {
-bool my_yyoverflow(short **a, union YYSTYPE **b, unsigned long *yystacksize);
+bool my_yyoverflow(short **a, union ParserType **b, unsigned long *yystacksize);
 }
 %}
 

@@ -44,14 +44,16 @@
 
 #include <drizzled/message/alter_table.pb.h>
 
+union ParserType;
+
 using namespace std;
 
 /* Stay outside of the namespace because otherwise bison goes nuts */
-int base_sql_lex(YYSTYPE *arg, drizzled::Session *yysession);
+int base_sql_lex(ParserType *arg, drizzled::Session *yysession);
 
 namespace drizzled {
 
-static int lex_one_token(YYSTYPE *arg, drizzled::Session *yysession);
+static int lex_one_token(ParserType *arg, drizzled::Session *yysession);
 
 /**
   save order by and tables in own lists.
@@ -556,7 +558,7 @@ static inline uint32_t int_token(const char *str,uint32_t length)
   - MY_LEX_OPERATOR_OR_IDENT	Last state was an ident, text or number
 				(which can't be followed by a signed number)
 */
-int base_sql_lex(union YYSTYPE *yylval, drizzled::Session *session)
+int base_sql_lex(union ParserType *yylval, drizzled::Session *session)
 {
   drizzled::Lex_input_stream *lip= session->m_lip;
   int token;
@@ -610,7 +612,7 @@ int base_sql_lex(union YYSTYPE *yylval, drizzled::Session *session)
 namespace drizzled
 {
 
-int lex_one_token(YYSTYPE *yylval, drizzled::Session *session)
+int lex_one_token(ParserType *yylval, drizzled::Session *session)
 {
   unsigned char c= 0; /* Just set to shutup GCC */
   bool comment_closed;
