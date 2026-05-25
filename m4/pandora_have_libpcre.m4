@@ -4,39 +4,24 @@ dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
 #--------------------------------------------------------------------
-# Check for libpcre
+# Check for libpcre2
 #--------------------------------------------------------------------
 
 
 AC_DEFUN([_PANDORA_SEARCH_LIBPCRE],[
-  AC_REQUIRE([AC_LIB_PREFIX])
-
-  AC_LIB_HAVE_LINKFLAGS(pcre,,
-  [#include <pcre.h>],
-  [
-    pcre *re= NULL;
-    pcre_version();
-  ])
-  AS_IF([test "x$ac_cv_libpcre" = "xno"],
-  [
-    unset ac_cv_libpcre
-    unset HAVE_LIBPCRE
-    unset LIBPCRE
-    unset LIBPCRE_PREFIX
-    unset LTLIBPCRE
-    AC_LIB_HAVE_LINKFLAGS(pcre,,
-    [#include <pcre/pcre.h>],
-    [
-      pcre *re= NULL;
-      pcre_version();
-    ])
-    AS_IF([test "x$ac_cv_libpcre" = "xyes"], [
-      ac_cv_pcre_location="<pcre/pcre.h>"
-    ])
+  PKG_CHECK_MODULES([PCRE2], [libpcre2-8], [
+    ac_cv_libpcre=yes
+    LIBPCRE="$PCRE2_LIBS"
+    LTLIBPCRE="$PCRE2_LIBS"
+    AM_CPPFLAGS="$AM_CPPFLAGS $PCRE2_CFLAGS"
+    AC_DEFINE([HAVE_LIBPCRE], [1],
+              [Define to 1 if libpcre2 is available])
   ],[
-    ac_cv_pcre_location="<pcre.h>"
+    ac_cv_libpcre=no
   ])
 
+  AC_SUBST([LIBPCRE])
+  AC_SUBST([LTLIBPCRE])
   AM_CONDITIONAL(HAVE_LIBPCRE, [test "x${ac_cv_libpcre}" = "xyes"])
 ])
 
@@ -61,10 +46,7 @@ AC_DEFUN([_PANDORA_REQUIRE_LIBPCRE],[
   _PANDORA_SEARCH_LIBPCRE
 
   AS_IF([test x$ac_cv_libpcre = xno],[
-    PANDORA_MSG_ERROR([libpcre is required for ${PACKAGE}. On Debian this can be found in libpcre3-dev. On RedHat this can be found in pcre-devel.])
-  ],[
-    AC_DEFINE_UNQUOTED(PCRE_HEADER,[${ac_cv_pcre_location}],
-                       [Location of pcre header])
+    PANDORA_MSG_ERROR([libpcre2 is required for ${PACKAGE}. On Debian this can be found in libpcre2-dev. On RedHat this can be found in pcre2-devel.])
   ])
 ])
 

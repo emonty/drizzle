@@ -59,7 +59,7 @@ dependencies installed. Scroll down for the apt-get install commands for Ubuntu 
  * libboost-regex-dev
  * libboost-test-dev
  * libboost-thread-dev
- * libpcre3-dev
+ * libpcre2-dev
  * libreadline5-dev | libreadline-dev
  * libtool
  * protobuf-compiler
@@ -157,7 +157,7 @@ After that, install the following packages:
  * gperf
  * libuuid-devel (part of e2fsprogs-devel on older RedHat based distributions)
  * zlib-devel
- * pcre-devel
+ * pcre2-devel
  * readline-devel
  * flex
  * bison
@@ -167,7 +167,6 @@ Note that you should be able to install all of the above simply with
 .. code-block:: bash
 
   yum-builddep drizzle
-
 
 
 

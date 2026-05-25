@@ -62,8 +62,6 @@
 #include <boost/program_options.hpp>
 #include <boost/smart_ptr.hpp>
 
-#include PCRE_HEADER
-
 #include <stdarg.h>
 #include <unordered_map>
 
@@ -72,6 +70,7 @@
 
 #include <drizzled/definitions.h>
 #include <drizzled/internal/my_sys.h>
+#include <drizzled/pcre.h>
 #include <drizzled/type/time.h>
 #include <drizzled/charset.h>
 #include <drizzled/typelib.h>
@@ -6026,28 +6025,37 @@ void do_get_replace_regex(st_command* command)
 int reg_replace(char** buf_p, int* buf_len_p, char *pattern,
                 char *replace, char *in_string, int icase, int global)
 {
-  const char *error= NULL;
-  int erroffset;
-  int ovector[3];
-  pcre *re= pcre_compile(pattern,
-                         icase ? PCRE_CASELESS | PCRE_MULTILINE : PCRE_MULTILINE,
-                         &error, &erroffset, NULL);
+  int error;
+  PCRE2_SIZE erroffset;
+  uint32_t options= icase ? PCRE2_CASELESS | PCRE2_MULTILINE : PCRE2_MULTILINE;
+  pcre2_code *re= pcre2_compile(reinterpret_cast<PCRE2_SPTR>(pattern),
+                                PCRE2_ZERO_TERMINATED, options, &error,
+                                &erroffset, NULL);
   if (re == NULL)
     return 1;
+
+  pcre2_match_data *match_data= pcre2_match_data_create_from_pattern(re, NULL);
+  if (match_data == NULL)
+  {
+    pcre2_code_free(re);
+    return 1;
+  }
 
   if (! global)
   {
 
-    int rc= pcre_exec(re, NULL, in_string, (int)strlen(in_string),
-                      0, 0, ovector, 3);
+    int rc= pcre2_match(re, reinterpret_cast<PCRE2_SPTR>(in_string),
+                        strlen(in_string), 0, 0, match_data, NULL);
     if (rc < 0)
     {
-      pcre_free(re);
+      pcre2_match_data_free(match_data);
+      pcre2_code_free(re);
       return 1;
     }
 
+    PCRE2_SIZE *ovector= pcre2_get_ovector_pointer(match_data);
     char *substring_to_replace= in_string + ovector[0];
-    int substring_length= ovector[1] - ovector[0];
+    size_t substring_length= ovector[1] - ovector[0];
     *buf_len_p= strlen(in_string) - substring_length + strlen(replace);
     char* new_buf= (char*)malloc(*buf_len_p+1);
 
@@ -6061,7 +6069,8 @@ int reg_replace(char** buf_p, int* buf_len_p, char *pattern,
              - (substring_to_replace-in_string));
     *buf_p= new_buf;
 
-    pcre_free(re);
+    pcre2_match_data_free(match_data);
+    pcre2_code_free(re);
     return 0;
   }
   else
@@ -6075,13 +6084,14 @@ int reg_replace(char** buf_p, int* buf_len_p, char *pattern,
 
     while (true) 
     {
-      rc= pcre_exec(re, NULL, subject.c_str(), subject.length(), 
-                    current_position, 0, ovector, 3);
+      rc= pcre2_match(re, reinterpret_cast<PCRE2_SPTR>(subject.c_str()),
+                      subject.length(), current_position, 0, match_data, NULL);
       if (rc < 0)
       {
         break;
       }
 
+      PCRE2_SIZE *ovector= pcre2_get_ovector_pointer(match_data);
       current_position= static_cast<size_t>(ovector[0]);
       replace_length= static_cast<size_t>(ovector[1] - ovector[0]);
       subject.replace(current_position, replace_length, replace, length_of_replacement);
@@ -6094,7 +6104,8 @@ int reg_replace(char** buf_p, int* buf_len_p, char *pattern,
     *buf_len_p= subject.length() + 1;
     *buf_p= new_buf;
           
-    pcre_free(re);
+    pcre2_match_data_free(match_data);
+    pcre2_code_free(re);
     return 0;
   }
 }

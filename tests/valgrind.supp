@@ -253,10 +253,10 @@
 }
 
 {
-   Static buffer in pcre. Not a leak.
+   Static buffer in pcre2. Not a leak.
    Memcheck:Leak
    fun:malloc
-   fun:pcre_compile2
+   fun:pcre2_compile_8
    ...
 }
 
@@ -568,4 +568,3 @@
    fun:_ZN8drizzled21drizzle_rm_tmp_tablesEv
    fun:main
 }
-

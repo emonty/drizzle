@@ -20,7 +20,7 @@
 #pragma once
 #include <drizzled/session.h>
 #include <drizzled/plugin/authentication.h>
-#include PCRE_HEADER
+#include <drizzled/pcre.h>
 
 using namespace std;
 using namespace drizzled;
@@ -128,7 +128,7 @@ private:
    */
   string escapeString(const string &input);
 
-  pcre *_ident_re;
+  pcre2_code *_ident_re;
   Session::shared_ptr _session; ///< Internal session for querying auth table
 };
 

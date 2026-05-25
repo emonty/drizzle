@@ -97,13 +97,14 @@ FilteredReplicator::FilteredReplicator(string name_arg,
    */
   if (not _sch_regex.empty())
   {
-    const char *error= NULL;
-    int32_t error_offset= 0;
-    sch_re= pcre_compile(_sch_regex.c_str(),
-                         0,
-                         &error,
-                         &error_offset,
-                         NULL);
+    int error= 0;
+    PCRE2_SIZE error_offset= 0;
+    sch_re= pcre2_compile(reinterpret_cast<PCRE2_SPTR>(_sch_regex.c_str()),
+                          PCRE2_ZERO_TERMINATED,
+                          0,
+                          &error,
+                          &error_offset,
+                          NULL);
   }
 
   /* 
@@ -112,13 +113,14 @@ FilteredReplicator::FilteredReplicator(string name_arg,
    */
   if (not _tab_regex.empty())
   {
-    const char *error= NULL;
-    int32_t error_offset= 0;
-    tab_re= pcre_compile(_tab_regex.c_str(),
-                         0,
-                         &error,
-                         &error_offset,
-                         NULL);
+    int error= 0;
+    PCRE2_SIZE error_offset= 0;
+    tab_re= pcre2_compile(reinterpret_cast<PCRE2_SPTR>(_tab_regex.c_str()),
+                          PCRE2_ZERO_TERMINATED,
+                          0,
+                          &error,
+                          &error_offset,
+                          NULL);
   }
 
   pthread_mutex_init(&sch_vector_lock, NULL);
@@ -131,11 +133,11 @@ FilteredReplicator::~FilteredReplicator()
 {
   if (sch_re)
   {
-    pcre_free(sch_re);
+    pcre2_code_free(sch_re);
   }
   if (tab_re)
   {
-    pcre_free(tab_re);
+    pcre2_code_free(tab_re);
   }
 
   pthread_mutex_destroy(&sch_vector_lock);
@@ -330,9 +332,15 @@ bool FilteredReplicator::isSchemaFiltered(const string &schema_name)
    * we check to see if this schema name matches the regular expression that
    * has been specified. 
    */
-  if (not _sch_regex.empty())
+  if (not _sch_regex.empty() && sch_re)
   {
-    int32_t result= pcre_exec(sch_re, NULL, schema_name.c_str(), schema_name.length(), 0, 0, NULL, 0);
+    pcre2_match_data *match_data= pcre2_match_data_create_from_pattern(sch_re, NULL);
+    if (match_data == NULL)
+      return false;
+    int32_t result= pcre2_match(sch_re,
+                                reinterpret_cast<PCRE2_SPTR>(schema_name.c_str()),
+                                schema_name.length(), 0, 0, match_data, NULL);
+    pcre2_match_data_free(match_data);
     if (result >= 0)
       return true;
   }
@@ -356,9 +364,15 @@ bool FilteredReplicator::isTableFiltered(const string &table_name)
    * we check to see if this table name matches the regular expression that
    * has been specified. 
    */
-  if (not _tab_regex.empty())
+  if (not _tab_regex.empty() && tab_re)
   {
-    int32_t result= pcre_exec(tab_re, NULL, table_name.c_str(), table_name.length(), 0, 0, NULL, 0);
+    pcre2_match_data *match_data= pcre2_match_data_create_from_pattern(tab_re, NULL);
+    if (match_data == NULL)
+      return false;
+    int32_t result= pcre2_match(tab_re,
+                                reinterpret_cast<PCRE2_SPTR>(table_name.c_str()),
+                                table_name.length(), 0, 0, match_data, NULL);
+    pcre2_match_data_free(match_data);
     if (result >= 0)
       return true;
   }

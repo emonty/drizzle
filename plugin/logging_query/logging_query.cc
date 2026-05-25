@@ -25,12 +25,13 @@
 #include <drizzled/session.h>
 #include <drizzled/session/times.h>
 #include <drizzled/sql_parse.h>
-#include PCRE_HEADER
+#include <drizzled/pcre.h>
 #include <limits.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include <string>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -155,11 +156,87 @@ class Logging_query: public drizzled::plugin::Logging
   std::string sysvar_filename;
   std::string sysvar_pcre;
   int fd;
-  pcre *re;
-  pcre_extra *pe;
+  pcre2_code *re;
+  bool re_jit_ready;
+  pthread_mutex_t pcre_lock;
 
   /** Format of the output string */
   boost::format formatter;
+
+  bool compilePCRE(const std::string &pattern, pcre2_code **compiled_re, bool *jit_ready)
+  {
+    int error_code;
+    PCRE2_SIZE error_offset;
+    *compiled_re= pcre2_compile(reinterpret_cast<PCRE2_SPTR>(pattern.c_str()),
+                                PCRE2_ZERO_TERMINATED,
+                                0,
+                                &error_code,
+                                &error_offset,
+                                NULL);
+    if (*compiled_re == NULL)
+      return false;
+
+    *jit_ready= (pcre2_jit_compile(*compiled_re, PCRE2_JIT_COMPLETE) == 0);
+    return true;
+  }
+
+  int matchPCRE(const std::string &subject)
+  {
+    pthread_mutex_lock(&pcre_lock);
+
+    if (re == NULL)
+    {
+      pthread_mutex_unlock(&pcre_lock);
+      return 0;
+    }
+
+    pcre2_match_data *match_data= pcre2_match_data_create_from_pattern(re, NULL);
+    if (match_data == NULL)
+    {
+      pthread_mutex_unlock(&pcre_lock);
+      return -1;
+    }
+
+    int rc;
+    if (re_jit_ready)
+    {
+      rc= pcre2_jit_match(re,
+                          reinterpret_cast<PCRE2_SPTR>(subject.c_str()),
+                          subject.length(),
+                          0,
+                          0,
+                          match_data,
+                          NULL);
+      if (rc >= 0 || rc == PCRE2_ERROR_NOMATCH)
+      {
+        pcre2_match_data_free(match_data);
+        pthread_mutex_unlock(&pcre_lock);
+        return rc;
+      }
+
+      rc= pcre2_match(re,
+                      reinterpret_cast<PCRE2_SPTR>(subject.c_str()),
+                      subject.length(),
+                      0,
+                      PCRE2_NO_JIT,
+                      match_data,
+                      NULL);
+    }
+    else
+    {
+      rc= pcre2_match(re,
+                      reinterpret_cast<PCRE2_SPTR>(subject.c_str()),
+                      subject.length(),
+                      0,
+                      0,
+                      match_data,
+                      NULL);
+    }
+
+    pcre2_match_data_free(match_data);
+    pthread_mutex_unlock(&pcre_lock);
+    return rc;
+  }
 
 public:
 
@@ -168,10 +245,11 @@ public:
     drizzled::plugin::Logging("csv_query_log"),
     sysvar_filename(filename),
     sysvar_pcre(query_pcre),
-    fd(-1), re(NULL), pe(NULL),
+    fd(-1), re(NULL), re_jit_ready(false),
     formatter("%1%,%2%,%3%,\"%4%\",\"%5%\",\"%6%\",%7%,%8%,"
               "%9%,%10%,%11%,%12%,%13%,%14%,\"%15%\"\n")
   {
+    pthread_mutex_init(&pcre_lock, NULL);
 
     /* if there is no destination filename, dont bother doing anything */
     if (sysvar_filename.empty())
@@ -189,11 +267,7 @@ public:
 
     if (not sysvar_pcre.empty())
     {
-      const char *this_pcre_error;
-      int this_pcre_erroffset;
-      re= pcre_compile(sysvar_pcre.c_str(), 0, &this_pcre_error,
-                       &this_pcre_erroffset, NULL);
-      pe= pcre_study(re, 0, &this_pcre_error);
+      compilePCRE(sysvar_pcre, &re, &re_jit_ready);
       /* TODO emit error messages if there is a problem */
     }
   }
@@ -236,22 +310,31 @@ public:
   {
     if (not new_pcre.empty())
     {
-      if (pe != NULL)
-      {
-        pcre_free(pe);
-      }
+      pcre2_code *new_re= NULL;
+      bool new_jit_ready= false;
 
+      if (! compilePCRE(new_pcre, &new_re, &new_jit_ready))
+        return false;
+
+      pthread_mutex_lock(&pcre_lock);
+      if (re != NULL)
+        pcre2_code_free(re);
+
+      re= new_re;
+      re_jit_ready= new_jit_ready;
+      pthread_mutex_unlock(&pcre_lock);
+      /* TODO emit error messages if there is a problem */
+    }
+    else
+    {
+      pthread_mutex_lock(&pcre_lock);
       if (re != NULL)
       {
-        pcre_free(re);
+        pcre2_code_free(re);
+        re= NULL;
       }
-
-      const char *tmp_this_pcre_error;
-      int tmp_this_pcre_erroffset;
-      re= pcre_compile(new_pcre.c_str(), 0, &tmp_this_pcre_error,
-                       &tmp_this_pcre_erroffset, NULL);
-      pe= pcre_study(re, 0, &tmp_this_pcre_error);
-      /* TODO emit error messages if there is a problem */
+      re_jit_ready= false;
+      pthread_mutex_unlock(&pcre_lock);
     }
     sysvar_pcre= new_pcre;
     return true;
@@ -284,15 +367,12 @@ public:
       close(fd);
     }
 
-    if (pe != NULL)
-    {
-      pcre_free(pe);
-    }
-
+    pthread_mutex_lock(&pcre_lock);
     if (re != NULL)
-    {
-      pcre_free(re);
-    }
+      pcre2_code_free(re);
+    re= NULL;
+    pthread_mutex_unlock(&pcre_lock);
+    pthread_mutex_destroy(&pcre_lock);
   }
 
   virtual bool post (Session *session)
@@ -335,13 +415,9 @@ public:
       return false;
     }
 
-    if (re)
-    {
-      int this_pcre_rc;
-      this_pcre_rc= pcre_exec(re, pe, query_string->c_str(), query_string->length(), 0, 0, NULL, 0);
-      if (this_pcre_rc < 0)
-        return false;
-    }
+    int this_pcre_rc= matchPCRE(*query_string);
+    if (this_pcre_rc < 0)
+      return false;
 
     // buffer to quotify the query
     string qs;
@@ -409,15 +485,10 @@ bool updateFileName(Session *, set_var* var)
  */
 bool updatePCRE(Session *, set_var* var)
 {
-  if (not var->value->str_value.empty())
-  {
-    std::string new_pcre(var->value->str_value.data());
-    if (handler->setPCRE(new_pcre))
-      return false; //success
-    else
-      return true; // error
-  }
-  return false; // success
+  std::string new_pcre(var->value->str_value.data());
+  if (handler->setPCRE(new_pcre))
+    return false; //success
+  return true; // error
 }
 
 static int init(drizzled::module::Context &context)

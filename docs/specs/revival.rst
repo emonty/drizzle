@@ -36,9 +36,9 @@ cold. Read this block first; the rest of the spec is the roadmap.
 * **In progress.** Phase 7 has its first local layers: C++17 build
   mode is enabled, the base image and bindep selectors are on Ubuntu
   20.04, protobuf 3 / Boost 1.71 / GCC 9 fallout is green on amd64,
-  and Focal perf numbers are recorded in ``perf/20.04.json``. PCRE2
-  remains the next structural migration; the C++17 mechanical sweep
-  currently audits clean.
+  Focal perf numbers are recorded in ``perf/20.04.json``, and the
+  direct PCRE users have migrated to PCRE2 with build/test/``make
+  check`` green. The C++17 mechanical sweep currently audits clean.
 * **In flight, then paused.** Phase 11 (Pandora slim-down to
   ``m4/drizzle.m4``) — what older commit messages call Phase 2. A
   number of build-setup macros have folded into ``m4/drizzle.m4``
@@ -48,15 +48,15 @@ cold. Read this block first; the rest of the spec is the roadmap.
   finishing the bzr/svn/hg strip, the ``PANDORA_`` → ``DRIZZLE_``
   rename) is open but **deliberately deferred** until after the LTS
   ratchet reaches 26.04.
-* **Next.** Finish Phase 7's PCRE2 migration and final C++17-source
-  audit, then re-run the Focal build/test/perf checks after that
-  structural slice. The Pandora slim-down (Phase 11) is still held
-  back because the existing Pandora layer still works, and the LTS
-  ratchet brings in modern pkg-config / Boost / OpenSSL / protobuf
-  that make the macro conversion cleaner than fighting the 12.04
-  toolchain. After the ratchet reaches 26.04: Phase 11 (Pandora
-  slim-down), Phase 12 (constant-fold), Phase 13 (plugin
-  enable-by-default sweep), Phase 14 (Sphinx-only docs).
+* **Next.** Land any final Phase 7 C++17-source cleanup that the static
+  audit missed; if that changes source, re-run the Focal build/test/perf
+  checks. The Pandora slim-down (Phase 11) is still held back because
+  the existing Pandora layer still works, and the LTS ratchet brings in
+  modern pkg-config / Boost / OpenSSL / protobuf that make the macro
+  conversion cleaner than fighting the 12.04 toolchain. After the
+  ratchet reaches 26.04: Phase 11 (Pandora slim-down), Phase 12
+  (constant-fold), Phase 13 (plugin enable-by-default sweep), Phase 14
+  (Sphinx-only docs).
 * **Carry-overs from Phase 6.** Two pre-existing items surfaced by
   the Bionic verification but deliberately left for follow-up: the
   ``libdrizzle-1.0/t/`` race over hard-coded port 12399 is currently
@@ -1003,9 +1003,10 @@ warnings, VC info) and ``DRIZZLE_BUILD_SETUP`` is in place at
   one commit each, protobuf first.** ``pandora_have_protobuf.m4``
   ``AC_REQUIRE``\ s ``AX_PTHREAD``, which is the last live caller of
   the pthread probe; replacing it with ``PKG_CHECK_MODULES`` removes
-  ``AX_PTHREAD`` from the build entirely. Then ``libz``, ``libssl``,
-  ``libpcre`` (each ships a pkg-config file on the 26.04 base; pcre1
-  → pcre2 happened in Phase 7). ``libdl`` becomes
+  ``AX_PTHREAD`` from the build entirely. Then ``libz`` and ``libssl``.
+  ``libpcre`` already switched to ``PKG_CHECK_MODULES`` during Phase 7
+  because the PCRE2 API migration needed the package's compiler flags.
+  ``libdl`` becomes
   ``AC_SEARCH_LIBS([dlopen],[dl])`` — ``dlopen`` is in glibc and
   there is no ``libdl.pc`` on any release. ``readline`` finally
   converts to ``PKG_CHECK_MODULES`` as well now that ``readline.pc``
@@ -1442,6 +1443,13 @@ natural ratchet delivers them in context.
   ``__atomic_store_n(..., __ATOMIC_RELEASE)`` (with a documented
   fallback for the 12.04 compiler if needed); extend
   ``unittests/atomics_test.cc`` beyond single-thread arithmetic.
+* **``logging_query`` PCRE2 regex replacement lock** —
+  ``plugin/logging_query/logging_query.cc``. Phase 7's PCRE2 port uses
+  a coarse mutex around compiled-regex replacement and matching so
+  runtime sysvar updates cannot race readers that still hold the old
+  compiled pattern. After the LTS ratchet reaches current toolchains,
+  revisit this with an ownership model that lets readers match without
+  serializing on the update lock.
 * **``Join`` cloned with ``memcpy``** —
   ``drizzled/join.cc:1289-1292``. ``Join`` is noncopyable and owns
   non-trivial members, so the raw ``sizeof(Join)`` copy is

@@ -35,14 +35,15 @@ AuthSchema::AuthSchema(bool enabled) :
   plugin::Authentication("auth_schema"),
     sysvar_enabled(enabled)
 {
-  const char *error;
-  int erroffset;
-  _ident_re= pcre_compile(
-    "^`[^`]+`",   /* the pattern */
-    0,            /* default options */
-    &error,       /* for error message */
-    &erroffset,   /* for error offset */
-    NULL);        /* use default character tables */
+  int error;
+  PCRE2_SIZE erroffset;
+  _ident_re= pcre2_compile(
+    reinterpret_cast<PCRE2_SPTR>("^`[^`]+`"),
+    PCRE2_ZERO_TERMINATED,
+    0,
+    &error,
+    &erroffset,
+    NULL);
 }
 
 bool AuthSchema::setTable(const string &table)
@@ -176,10 +177,19 @@ string AuthSchema::escapeQuoteIdentifier(const string &input)
    * The input may already be a quoted ident with no extra backticks.
    * If so, return it.
    */
-  int match_result= pcre_exec(
-    _ident_re, NULL, input.c_str(), input.length(), 0, 0, NULL, 0);
-  if (match_result >= 0)
-    return input;
+  if (_ident_re != NULL)
+  {
+    pcre2_match_data *match_data= pcre2_match_data_create_from_pattern(_ident_re, NULL);
+    if (match_data != NULL)
+    {
+      int match_result= pcre2_match(
+        _ident_re, reinterpret_cast<PCRE2_SPTR>(input.c_str()),
+        input.length(), 0, 0, match_data, NULL);
+      pcre2_match_data_free(match_data);
+      if (match_result >= 0)
+        return input;
+    }
+  }
 
   const char *pos= input.c_str();
   const char *end= input.c_str()+input.length();
@@ -251,7 +261,7 @@ string AuthSchema::escapeString(const string &input)
 AuthSchema::~AuthSchema()
 {
   if (_ident_re != NULL)
-    pcre_free(_ident_re);
+    pcre2_code_free(_ident_re);
 }
 
 } /* end namespace drizzle_plugin::auth_schema */

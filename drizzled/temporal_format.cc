@@ -34,7 +34,6 @@
 #include <drizzled/temporal.h>
 
 #include <string.h>
-#include PCRE_HEADER
 
 #include <string>
 #include <vector>
@@ -46,7 +45,7 @@ namespace drizzled {
 TemporalFormat::TemporalFormat(const char *pattern) :
   _pattern(pattern)
 , _error_offset(0)
-, _error(NULL)
+, _error(0)
 , _year_part_index(0)
 , _month_part_index(0)
 , _day_part_index(0)
@@ -57,17 +56,18 @@ TemporalFormat::TemporalFormat(const char *pattern) :
 , _nsecond_part_index(0)
 {
   /* Compile our regular expression */
-  _re= pcre_compile(pattern
-                    , 0 /* Default options */
-                    , &_error
-                    , &_error_offset
-                    , NULL /* Use default character table */
-                    );
+  _re= pcre2_compile(reinterpret_cast<PCRE2_SPTR>(pattern),
+                     PCRE2_ZERO_TERMINATED,
+                     0,
+                     &_error,
+                     &_error_offset,
+                     NULL);
 }
 
 TemporalFormat::~TemporalFormat()
 {
-  pcre_free(_re);
+  if (_re != NULL)
+    pcre2_code_free(_re);
 }
 
 bool TemporalFormat::matches(const char *data, size_t data_len, Temporal *to)
@@ -75,26 +75,24 @@ bool TemporalFormat::matches(const char *data, size_t data_len, Temporal *to)
   if (! is_valid()) 
     return false;
 
-  int32_t match_vector[OUT_VECTOR_SIZE]; /**< Stores match substring indexes */
-  
-  /* Make sure we've got no junk in the match_vector. */
-  memset(match_vector, 0, sizeof(match_vector));
+  pcre2_match_data *match_data= pcre2_match_data_create_from_pattern(_re, NULL);
+  if (match_data == NULL)
+    return false;
 
   /* Simply check the subject against the compiled regular expression */
-  int32_t result= pcre_exec(_re
-                            , NULL /* No extra data */
-                            , data
-                            , data_len
-                            , 0 /* Start at offset 0 of subject...*/
-                            , 0 /* Default options */
-                            , match_vector
-                            , OUT_VECTOR_SIZE
-                            );
+  int32_t result= pcre2_match(_re,
+                              reinterpret_cast<PCRE2_SPTR>(data),
+                              data_len,
+                              0 /* Start at offset 0 of subject...*/,
+                              0 /* Default options */,
+                              match_data,
+                              NULL);
   if (result < 0)
   {
+    pcre2_match_data_free(match_data);
     switch (result)
     {
-      case PCRE_ERROR_NOMATCH:
+      case PCRE2_ERROR_NOMATCH:
         return false; /* No match, just return false */
       default:
         return false;
@@ -112,10 +110,14 @@ bool TemporalFormat::matches(const char *data, size_t data_len, Temporal *to)
                               + (_nsecond_part_index > 1 ? 1 : 0)
                               + 1; /* Add one for the entire match... */
   if (result != expected_match_count)
+  {
+    pcre2_match_data_free(match_data);
     return false;
+  }
 
   /* C++ string class easy to use substr() method is very useful here */
   string copy_data(data, data_len);
+  PCRE2_SIZE *match_vector= pcre2_get_ovector_pointer(match_data);
   /* 
    * OK, we have the expected substring matches, so grab
    * the various temporal parts from the subject string
@@ -201,6 +203,7 @@ bool TemporalFormat::matches(const char *data, size_t data_len, Temporal *to)
     }
     to->_nseconds= atoi(copy_data.substr(nsecond_start, nsecond_len).c_str()) * multiplier;
   }
+  pcre2_match_data_free(match_data);
   return true;
 }
 

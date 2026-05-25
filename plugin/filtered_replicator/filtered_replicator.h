@@ -32,7 +32,7 @@
 #include <drizzled/atomics.h>
 #include <drizzled/plugin/transaction_replicator.h>
 
-#include PCRE_HEADER
+#include <drizzled/pcre.h>
 
 #include <vector>
 #include <string>
@@ -228,9 +228,8 @@ private:
   pthread_mutex_t sysvar_sch_lock;
   pthread_mutex_t sysvar_tab_lock;
 
-  pcre *sch_re;
-  pcre *tab_re;
+  pcre2_code *sch_re;
+  pcre2_code *tab_re;
 };
 
 } /* namespace drizzle_plugin */
-

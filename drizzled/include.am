@@ -357,6 +357,7 @@ nobase_dist_pkginclude_HEADERS+= \
 			      drizzled/option.h \
 			      drizzled/order.h \
 			      drizzled/parser.h \
+			      drizzled/pcre.h \
 			      drizzled/plugin.h \
 			      drizzled/plugin/authentication.h \
 			      drizzled/plugin/authorization.h \
@@ -1051,4 +1052,3 @@ drizzled/sql_reserved_words.h: drizzled/sql_reserved_words.stamp-h
 			cp $@ ${top_builddir}/$*.h ; \
 		fi \
 	fi
-

@@ -31,11 +31,7 @@
 #pragma once
 
 #include <drizzled/common_fwd.h>
-
-#include PCRE_HEADER
-
-/* Output vector size for pcre matching.  Should be multiple of 3. */
-#define OUT_VECTOR_SIZE 30
+#include <drizzled/pcre.h>
 
 namespace drizzled {
 
@@ -43,9 +39,9 @@ class TemporalFormat
 {
 protected:
   const char *_pattern; /**< The regular expression string to match */
-  pcre *_re; /**< The compiled regular expression struct */
-  int32_t _error_offset; /**< Any error encountered during compilation or matching */
-  const char *_error;
+  pcre2_code *_re; /**< The compiled regular expression struct */
+  PCRE2_SIZE _error_offset; /**< Any error encountered during compilation or matching */
+  int32_t _error;
   /* Index of the pattern which is a specific temporal part */
   uint32_t _year_part_index;
   uint32_t _month_part_index;
@@ -70,7 +66,7 @@ public:
    * Returns whether the instance is compiled
    * and contains a valid regular expression.
    */
-  inline bool is_valid() const {return _re && (_error == NULL);}
+  inline bool is_valid() const {return _re != NULL;}
   /**
    * Sets the index for the year part of the pattern.
    *
@@ -149,4 +145,3 @@ bool init_temporal_formats();
 void deinit_temporal_formats();
 
 } /* end namespace drizzled */
-
