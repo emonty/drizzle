@@ -5266,6 +5266,7 @@ try
       case Q_LET: do_let(command); break;
       case Q_EVAL_RESULT:
         die("'eval_result' command  is deprecated");
+        /* fallthrough */
       case Q_EVAL:
       case Q_QUERY_VERTICAL:
       case Q_QUERY_HORIZONTAL:
