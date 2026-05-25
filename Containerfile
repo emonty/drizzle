@@ -30,7 +30,7 @@ RUN --mount=type=bind,source=.,target=/host-src,readonly,Z \
     cp -au --no-preserve=context /host-src/. /build/ && \
     cd /build && \
     if [ ! -f Makefile ] || [ bindep.txt -nt Makefile ] ; then autoreconf -i && ./configure ; fi && \
-    make -j"$(nproc)" && \
+    make -j"$(($(nproc) > 2 ? $(nproc) - 4 : 2))" && \
     mkdir -p /opt/drizzle-build && \
     cp -au /build/. /opt/drizzle-build/
 
