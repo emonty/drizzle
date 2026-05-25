@@ -1535,7 +1535,7 @@ void Session::disconnect(error_t errcode)
 
   if (client->wasAborted())
   {
-    if (not getKilled() && variables.log_warnings > 1)
+    if (not getKilled() && variables.log_warnings)
     {
       errmsg_printf(error::WARN, ER(ER_NEW_ABORTING_CONNECTION)
                   , thread_id
