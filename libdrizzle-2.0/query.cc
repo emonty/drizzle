@@ -301,6 +301,7 @@ static void drizzle_query_run_state(drizzle_query_st* query,
   {
   case DRIZZLE_QUERY_STATE_INIT:
     query->state= DRIZZLE_QUERY_STATE_QUERY;
+    /* fallthrough */
 
   case DRIZZLE_QUERY_STATE_QUERY:
     query->result= drizzle_query(query->con, query->result, query->string,
@@ -316,6 +317,7 @@ static void drizzle_query_run_state(drizzle_query_st* query,
     }
 
     query->state= DRIZZLE_QUERY_STATE_RESULT;
+    /* fallthrough */
 
   case DRIZZLE_QUERY_STATE_RESULT:
     *ret_ptr= drizzle_result_buffer(query->result);
