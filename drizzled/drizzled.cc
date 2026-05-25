@@ -2246,7 +2246,7 @@ static void fix_paths()
     if (errno != EEXIST)
     {
       drizzled_abort << "There was an error creating the '"
-        << fs::path(drizzle_tmpdir).leaf()
+        << fs::path(drizzle_tmpdir).filename()
         << "' part of the path '"
         << drizzle_tmpdir
         << "'.  Please check the path exists and is writable.";
