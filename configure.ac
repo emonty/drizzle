@@ -139,6 +139,13 @@ BOOST_IOSTREAMS
 BOOST_REGEX
 BOOST_TEST
 
+dnl Aggregate the per-library link flags the Makefiles reference as
+dnl ${BOOST_LIBS}.  Include BOOST_FILESYSTEM_LIBS (which BOOST_FILESYSTEM
+dnl already appends BOOST_SYSTEM_LIBS to) so anything that transitively
+dnl drags in boost::system (e.g. boost::lexical_cast in 1.65+) links.
+BOOST_LIBS="$BOOST_PROGRAM_OPTIONS_LIBS $BOOST_THREAD_LIBS $BOOST_DATE_TIME_LIBS $BOOST_FILESYSTEM_LIBS $BOOST_IOSTREAMS_LIBS $BOOST_REGEX_LIBS"
+AC_SUBST([BOOST_LIBS])
+
 AM_CONDITIONAL([HAVE_BOOST_TEST],[ test "x$ac_cv_header_boost_test_unit_test_hpp" = "xyes" ])
 
 dnl GCC drives both compilation and linking of threaded code with -pthread.
