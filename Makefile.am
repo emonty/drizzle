@@ -16,6 +16,12 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_YFLAGS= -d --verbose
 
+# The libdrizzle-1.0/t/ unit tests share a hard-coded port
+# (DRIZZLE_TEST_PORT) for their drizzle_con_listen calls, so they race
+# under automake 1.13+'s parallel-tests driver. Force serial-tests
+# until those tests are reworked to pick free ports dynamically.
+AUTOMAKE_OPTIONS = serial-tests
+
 # includes append to these:
 # Pandora build system takes input from plugin.ini files that are appended to these
 # Corresponding Pandora parameter names are mentioned in comments
