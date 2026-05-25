@@ -111,9 +111,7 @@ public:
   invalid_syntax(const std::string& in_tokens, kind_t in_kind);
 
 
-  // gcc says that throw specification on dtor is loosened
-  // without this line
-  ~invalid_syntax() throw() {}
+  ~invalid_syntax() noexcept {}
 
   kind_t kind() const
   {

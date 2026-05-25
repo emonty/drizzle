@@ -45,7 +45,7 @@ private:
 public:
   rabbitmq_handler_exception(const char* m):message(m) {};
   rabbitmq_handler_exception(std::string m):message(m.c_str()) {};
-  virtual const char* what() const throw()
+  virtual const char* what() const noexcept
   {
     return message;
   }
@@ -92,8 +92,7 @@ public:
                   const std::string &password, 
                   const std::string &virtualhost,
 		  const std::string &exchange,
-		  const std::string &routingKey)
-    throw(rabbitmq_handler_exception);
+		  const std::string &routingKey);
 
   ~RabbitMQHandler();
 
@@ -108,13 +107,12 @@ public:
    * @param[in] length the length of the message
    * @throw exception if there is a problem publishing
    */
-  void publish(void *message, 
-               const int length)
-    throw(rabbitmq_handler_exception);
+  void publish(void *message,
+               const int length);
 
-  void reconnect() throw(rabbitmq_handler_exception);
-  void disconnect() throw(rabbitmq_handler_exception);
-  void connect() throw(rabbitmq_handler_exception);
+  void reconnect();
+  void disconnect();
+  void connect();
 
 private:
   /**
@@ -129,7 +127,7 @@ private:
    *
    * @throw exception with the message unless the command was successful
    */
-  void handleAMQPError(amqp_rpc_reply_t x, std::string context) throw(rabbitmq_handler_exception);
+  void handleAMQPError(amqp_rpc_reply_t x, std::string context);
 
 };
 

@@ -230,7 +230,7 @@ static void init_signals(void)
 
 static void GoogleProtoErrorThrower(google::protobuf::LogLevel level,
                                     const char* ,
-                                    int, const string& ) throw(const char *)
+                                    int, const string& )
 {
   switch(level)
   {

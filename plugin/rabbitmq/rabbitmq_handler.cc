@@ -44,8 +44,7 @@ RabbitMQHandler::RabbitMQHandler(const std::string &rabbitMQHost,
                                  const std::string &rabbitMQPassword, 
                                  const std::string &rabbitMQVirtualhost, 
 				 const std::string &rabbitMQExchange, 
-				 const std::string &rabbitMQRoutingKey) 
-  throw(rabbitmq_handler_exception) :
+				 const std::string &rabbitMQRoutingKey) :
     rabbitmqConnection(amqp_new_connection()),
     hostname(rabbitMQHost),
     port(rabbitMQPort),
@@ -66,9 +65,8 @@ RabbitMQHandler::~RabbitMQHandler()
   disconnect();
 }
 
-void RabbitMQHandler::publish(void *message, 
+void RabbitMQHandler::publish(void *message,
                               const int length)
-throw(rabbitmq_handler_exception)
 {
   // return if query logging is not enabled
   //if (sysvar_logging_enable == false)
@@ -95,13 +93,13 @@ throw(rabbitmq_handler_exception)
 
 }
 
-void RabbitMQHandler::reconnect() throw(rabbitmq_handler_exception)
+void RabbitMQHandler::reconnect()
 {
   disconnect();
   connect();
 }
 
-void RabbitMQHandler::disconnect() throw(rabbitmq_handler_exception) 
+void RabbitMQHandler::disconnect() 
 {
   try
   {
@@ -117,7 +115,7 @@ void RabbitMQHandler::disconnect() throw(rabbitmq_handler_exception)
   catch(exception& e) {} // do not throw in destructorn
 }
 
-void RabbitMQHandler::connect() throw(rabbitmq_handler_exception) {
+void RabbitMQHandler::connect() {
   amqp_socket_t *socket= amqp_tcp_socket_new(rabbitmqConnection);
   if (socket == NULL)
   {
@@ -155,7 +153,7 @@ void RabbitMQHandler::connect() throw(rabbitmq_handler_exception) {
   }
 }
 
-void RabbitMQHandler::handleAMQPError(amqp_rpc_reply_t x, string context) throw(rabbitmq_handler_exception)
+void RabbitMQHandler::handleAMQPError(amqp_rpc_reply_t x, string context)
 {
   string errorMessage("");
   switch (x.reply_type) {
