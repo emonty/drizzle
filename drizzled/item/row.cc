@@ -176,7 +176,7 @@ Item *Item_row::transform(Item_transformer transformer, unsigned char *arg)
     Item *new_item= items[i]->transform(transformer, arg);
     if (!new_item)
       return 0;
-      items[i]= new_item;
+    items[i]= new_item;
   }
   return (this->*transformer)(arg);
 }

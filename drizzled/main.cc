@@ -340,6 +340,7 @@ int main(int argc, char **argv)
           char cwd[1024];
           drizzled_abort << "Could not create local catalog, permission denied in directory:" << getcwd(cwd, sizeof(cwd));
         }
+        /* fallthrough */
 
       default:
         {
