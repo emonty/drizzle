@@ -942,22 +942,24 @@ Mostly free. GCC 13 / Boost 1.83 ``-Werror`` casualty sweep.
 Phase 10 — Ubuntu 26.04 (final landing)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Drop every ``[platform:ubuntu-*]`` selector from ``bindep.txt`` — we
-  don't support those platforms anymore; the LTS bumps were one-way
-  ratchets.
-* **arm64 becomes fully gating.** ``make test-drizzle`` must pass on
-  both architectures. Extend step 5 of the LTS bump template to also
-  build ``--target=test`` on arm64 and to run the resulting
-  ``drizzle:phase10-arm64-test`` image; fix arm64-specific test
-  failures accumulated during Phases 4–9.
-* Produce a multi-arch manifest from the per-arch test images:
+* We should be able to test building directly on the laptop.
+* We may consider adding Fedora support to bindep.txt at this point.
+  Maybe.
+* If we have running zuul jobs:
+  * **arm64 becomes fully gating.** ``make test-drizzle`` must pass on
+    both architectures. Extend step 5 of the LTS bump template to also^
+    build ``--target=test`` on arm64 and to run the resulting
+    ``drizzle:phase10-arm64-test`` image; fix arm64-specific test
+    failures accumulated during Phases 4–9.
+  * Make multi-node jobs using buildset registry for coordiation
+    to do native arm64 and amd64 builds, then produce a final
+    manifest like:
 
   .. code-block:: console
 
      podman manifest create drizzle:26.04
      podman manifest add drizzle:26.04 drizzle:phase10-amd64-test
      podman manifest add drizzle:26.04 drizzle:phase10-arm64-test
-
 
 .. _spec-revival-pandora-slimdown:
 
