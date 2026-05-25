@@ -33,6 +33,12 @@ cold. Read this block first; the rest of the spec is the roadmap.
   their old numbers* for Phases 0–2 — what this spec now calls Phase
   2 appears in older commits as Phase 1.5. See the Renumber note
   below for the full map.
+* **In progress.** Phase 7 has its first local layers: C++17 build
+  mode is enabled, the base image and bindep selectors are on Ubuntu
+  20.04, protobuf 3 / Boost 1.71 / GCC 9 fallout is green on amd64,
+  and Focal perf numbers are recorded in ``perf/20.04.json``. PCRE2
+  remains the next structural migration; the C++17 mechanical sweep
+  currently audits clean.
 * **In flight, then paused.** Phase 11 (Pandora slim-down to
   ``m4/drizzle.m4``) — what older commit messages call Phase 2. A
   number of build-setup macros have folded into ``m4/drizzle.m4``
@@ -42,13 +48,14 @@ cold. Read this block first; the rest of the spec is the roadmap.
   finishing the bzr/svn/hg strip, the ``PANDORA_`` → ``DRIZZLE_``
   rename) is open but **deliberately deferred** until after the LTS
   ratchet reaches 26.04.
-* **Next.** Phase 7 (LTS bump 20.04 — protobuf 3, C++17, PCRE2) is
-  the next ratchet step. The Pandora slim-down (Phase 11) is still
-  held back because the existing Pandora layer still works, and the
-  LTS ratchet brings in modern pkg-config / Boost / OpenSSL /
-  protobuf that make the macro conversion cleaner than fighting the
-  12.04 toolchain. After the ratchet reaches 26.04: Phase 11
-  (Pandora slim-down), Phase 12 (constant-fold), Phase 13 (plugin
+* **Next.** Finish Phase 7's PCRE2 migration and final C++17-source
+  audit, then re-run the Focal build/test/perf checks after that
+  structural slice. The Pandora slim-down (Phase 11) is still held
+  back because the existing Pandora layer still works, and the LTS
+  ratchet brings in modern pkg-config / Boost / OpenSSL / protobuf
+  that make the macro conversion cleaner than fighting the 12.04
+  toolchain. After the ratchet reaches 26.04: Phase 11 (Pandora
+  slim-down), Phase 12 (constant-fold), Phase 13 (plugin
   enable-by-default sweep), Phase 14 (Sphinx-only docs).
 * **Carry-overs from Phase 6.** Two pre-existing items surfaced by
   the Bionic verification but deliberately left for follow-up: the
