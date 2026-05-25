@@ -36,9 +36,10 @@ cold. Read this block first; the rest of the spec is the roadmap.
 * **In progress.** Phase 7 has its first local layers: C++17 build
   mode is enabled, the base image and bindep selectors are on Ubuntu
   20.04, protobuf 3 / Boost 1.71 / GCC 9 fallout is green on amd64,
-  Focal perf numbers are recorded in ``perf/20.04.json``, and the
-  direct PCRE users have migrated to PCRE2 with build/test/``make
-  check`` green. The C++17 mechanical sweep currently audits clean.
+  Focal perf numbers are recorded in ``perf/20.04.json``, a native-AIO
+  comparison is captured in ``perf/20.04-aio.json``, and the direct PCRE
+  users have migrated to PCRE2 with build/test/``make check`` green.
+  The C++17 mechanical sweep currently audits clean.
 * **In flight, then paused.** Phase 11 (Pandora slim-down to
   ``m4/drizzle.m4``) — what older commit messages call Phase 2. A
   number of build-setup macros have folded into ``m4/drizzle.m4``

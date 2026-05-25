@@ -29,7 +29,7 @@ RUN --mount=type=bind,source=.,target=/host-src,readonly,Z \
     --mount=type=cache,target=/build,id=drizzle-build-${TARGETPLATFORM}-${UBUNTU},sharing=locked \
     cp -au --no-preserve=context /host-src/. /build/ && \
     cd /build && \
-    if [ ! -f Makefile ] ; then autoreconf -i && ./configure ; fi && \
+    if [ ! -f Makefile ] || [ bindep.txt -nt Makefile ] ; then autoreconf -i && ./configure ; fi && \
     make -j"$(nproc)" && \
     mkdir -p /opt/drizzle-build && \
     cp -au /build/. /opt/drizzle-build/

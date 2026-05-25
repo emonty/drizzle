@@ -28,6 +28,7 @@ libssl-dev           [compile platform:dpkg]
 librabbitmq-dev      [compile platform:dpkg]
 libjsoncpp-dev       [compile platform:dpkg]
 libpcre2-dev         [compile platform:dpkg]
+libaio-dev           [compile platform:dpkg]
 
 # Test dependencies
 # DTR (tests/test-run.pl) is Perl and uses only core modules.
@@ -52,6 +53,7 @@ libreadline8                   [platform:ubuntu-focal]
 libuuid1                       [platform:ubuntu-focal]
 libmemcached11                 [platform:ubuntu-focal]
 libpcre2-8-0                   [platform:ubuntu-focal]
+libaio1                        [platform:ubuntu-focal]
 libevent-2.1-7                 [platform:ubuntu-focal]
 librabbitmq4                   [platform:ubuntu-focal]
 libjsoncpp1                    [platform:ubuntu-focal]
