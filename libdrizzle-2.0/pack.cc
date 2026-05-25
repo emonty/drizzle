@@ -250,8 +250,11 @@ uint8_t *drizzle_pack_auth(drizzle_con_st *con, uint8_t *ptr, drizzle_return_t *
 
     if (con->options & DRIZZLE_CON_MYSQL && con->options & DRIZZLE_CON_AUTH_PLUGIN)
     {
-      snprintf((char *)ptr, DRIZZLE_MAX_SCRAMBLE_SIZE, "%s", con->password);
-      ptr[DRIZZLE_MAX_SCRAMBLE_SIZE-1]= 0;
+      size_t pwlen= strlen(con->password);
+      if (pwlen >= DRIZZLE_MAX_SCRAMBLE_SIZE)
+        pwlen= DRIZZLE_MAX_SCRAMBLE_SIZE - 1;
+      memcpy(ptr, con->password, pwlen);
+      memset(ptr + pwlen, 0, DRIZZLE_MAX_SCRAMBLE_SIZE - pwlen);
     }
     else if (con->options & DRIZZLE_CON_MYSQL)
     {
@@ -263,8 +266,11 @@ uint8_t *drizzle_pack_auth(drizzle_con_st *con, uint8_t *ptr, drizzle_return_t *
     }
     else // We assume Drizzle
     {
-      snprintf((char *)ptr, DRIZZLE_MAX_SCRAMBLE_SIZE, "%s", con->password);
-      ptr[DRIZZLE_MAX_SCRAMBLE_SIZE-1]= 0;
+      size_t pwlen= strlen(con->password);
+      if (pwlen >= DRIZZLE_MAX_SCRAMBLE_SIZE)
+        pwlen= DRIZZLE_MAX_SCRAMBLE_SIZE - 1;
+      memcpy(ptr, con->password, pwlen);
+      memset(ptr + pwlen, 0, DRIZZLE_MAX_SCRAMBLE_SIZE - pwlen);
     }
 
     ptr+= DRIZZLE_MAX_SCRAMBLE_SIZE;
