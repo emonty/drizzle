@@ -88,6 +88,7 @@ type::Decimal *Item_func_mod::decimal_op(type::Decimal *decimal_value)
     return decimal_value;
   case E_DEC_DIV_ZERO:
     signal_divide_by_null();
+    /* fallthrough */
   default:
     null_value= 1;
     return 0;
