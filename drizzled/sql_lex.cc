@@ -655,6 +655,7 @@ int lex_one_token(ParserType *yylval, drizzled::Session *session)
         yylval->lex_str.assign("\\N", 2);
         return NULL_SYM;
       }
+      /* fallthrough */
     case MY_LEX_CHAR:			// Unknown or single char token
     case MY_LEX_SKIP:			// This should not happen
       if (c == '-' && lip->yyPeek() == '-' &&
@@ -690,12 +691,14 @@ int lex_one_token(ParserType *yylval, drizzled::Session *session)
         state= MY_LEX_HEX_NUMBER;
         break;
       }
+      /* fallthrough */
     case MY_LEX_IDENT_OR_BIN:
       if (lip->yyPeek() == '\'')
       {                                 // Found b'bin-number'
         state= MY_LEX_BIN_NUMBER;
         break;
       }
+      /* fallthrough */
     case MY_LEX_IDENT:
       const char *start;
       if (use_mb(cs))
@@ -986,6 +989,7 @@ int lex_one_token(ParserType *yylval, drizzled::Session *session)
         break;
       }
       /* " used for strings */
+      /* fallthrough */
     case MY_LEX_STRING:			// Incomplete text string
       if (!(yylval->lex_str.str_ = get_text(lip, 1, 1)))
       {

@@ -102,6 +102,7 @@ int64_t Item_func_to_days::val_int()
       if (temporal.from_int64_t(args[0]->val_int()))
         break;
       /* Intentionally fall-through on invalid conversion from integer */
+      /* fallthrough */
     default:
       {
         /* 
@@ -204,6 +205,7 @@ int64_t Item_func_to_days::val_int_endpoint(bool left_endp, bool *incl_endp)
       if (temporal.from_int64_t(args[0]->val_int()))
         break;
       /* Intentionally fall-through on invalid conversion from integer */
+      /* fallthrough */
     default:
       {
         /* 

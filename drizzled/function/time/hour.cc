@@ -110,6 +110,7 @@ int64_t Item_func_hour::val_int()
         if (temporal_datetime.from_int64_t(args[0]->val_int()))
           break;
         /* Intentionally fall-through on invalid conversion from integer */
+        /* fallthrough */
       default:
         {
           /* 

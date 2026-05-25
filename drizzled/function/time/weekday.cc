@@ -79,6 +79,7 @@ int64_t Item_func_weekday::val_int()
       if (temporal.from_int64_t(args[0]->val_int()))
         break;
       /* Intentionally fall-through on invalid conversion from integer */
+      /* fallthrough */
     default:
       {
         /* 
