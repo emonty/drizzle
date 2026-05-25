@@ -17,11 +17,14 @@ cold. Read this block first; the rest of the spec is the roadmap.
 * **Landed.** Phase 0 (tests in container, Zuul scaffolding sitting
   inert under ``future-zuul.d/``, this spec landed), Phase 1
   (dead-platform strip, ``m4/pandora_*.m4`` simplifications, dead-dep
-  plugins deleted), and Phase 2 (performance baseline harness under
-  ``perf/``). Each landed phase's commits are tagged in commit
-  messages, *under their old numbers* — what this spec now calls
-  Phase 2 appears in older commits as Phase 1.5. See the Renumber
-  note below for the full map.
+  plugins deleted), Phase 2 (performance baseline harness under
+  ``perf/``), Phase 3 (container hygiene and Phase 0 follow-ups),
+  Phase 4 (LTS bump 12.04 → 14.04), and Phase 5 (LTS bump 14.04 →
+  16.04; C++11 baseline; ``boost::shared_ptr`` / ``boost::unordered_map``
+  swept to ``std::``). Each landed phase's commits are tagged in
+  commit messages, *under their old numbers* for Phases 0–2 — what
+  this spec now calls Phase 2 appears in older commits as Phase 1.5.
+  See the Renumber note below for the full map.
 * **In flight, then paused.** Phase 11 (Pandora slim-down to
   ``m4/drizzle.m4``) — what older commit messages call Phase 2. A
   number of build-setup macros have folded into ``m4/drizzle.m4``
@@ -31,14 +34,14 @@ cold. Read this block first; the rest of the spec is the roadmap.
   finishing the bzr/svn/hg strip, the ``PANDORA_`` → ``DRIZZLE_``
   rename) is open but **deliberately deferred** until after the LTS
   ratchet reaches 26.04.
-* **Next.** Phase 3 (container hygiene and Phase 0 follow-ups),
-  then Phases 4–10 (the LTS-bump ratchet from 14.04 through 26.04).
-  The Pandora slim-down (Phase 11) is held back from this run because
-  the existing Pandora layer still works, and the LTS ratchet brings
-  in modern pkg-config / Boost / OpenSSL / protobuf that make the
-  macro conversion cleaner than fighting the 12.04 toolchain. Then
-  Phase 12 (constant-fold), Phase 13 (plugin enable-by-default
-  sweep), Phase 14 (Sphinx-only docs).
+* **Next.** Phase 6 (LTS bump 18.04 — Boost 1.65, OpenSSL 1.1, fs
+  v2→v3) is the next ratchet step.  The Pandora slim-down (Phase 11)
+  is still held back because the existing Pandora layer still works,
+  and the LTS ratchet brings in modern pkg-config / Boost / OpenSSL /
+  protobuf that make the macro conversion cleaner than fighting the
+  12.04 toolchain. After the ratchet reaches 26.04: Phase 11
+  (Pandora slim-down), Phase 12 (constant-fold), Phase 13 (plugin
+  enable-by-default sweep), Phase 14 (Sphinx-only docs).
 
 **Renumber note.** This revision renumbered phases for linear
 sequencing. Map: 1.5 → 2, 1.6 → 3, old 3–9 → 4–10, old 2 → 11, old
