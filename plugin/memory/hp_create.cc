@@ -133,7 +133,7 @@ int heap_create(const char *name, uint32_t keys, HP_KEYDEF *keydef,
         case HA_KEYTYPE_VARBINARY1:
           /* Case-insensitiveness is handled in coll->hash_sort */
           keyinfo->seg[j].type= HA_KEYTYPE_VARTEXT1;
-          /* fall_through */
+          /* fallthrough */
         case HA_KEYTYPE_VARTEXT1:
           keyinfo->flag|= HA_VAR_LENGTH_KEY;
           length+= 2;
@@ -142,7 +142,7 @@ int heap_create(const char *name, uint32_t keys, HP_KEYDEF *keydef,
           break;
         case HA_KEYTYPE_VARBINARY2:
           /* Case-insensitiveness is handled in coll->hash_sort */
-          /* fall_through */
+          /* fallthrough */
         case HA_KEYTYPE_VARTEXT2:
           keyinfo->flag|= HA_VAR_LENGTH_KEY;
           length+= 2;
