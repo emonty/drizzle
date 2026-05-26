@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Drizzle Client & Protocol Library
-# 
+#
 # Copyright (C) 2008 Eric Day (eday@oddments.org)
 # All rights reserved.
 #
@@ -40,7 +40,7 @@ MySQL Protocol Handshake Objects
 
 import struct
 import unittest
-import bitfield
+from . import bitfield
 
 class Capabilities(bitfield.BitField):
   _fields = [
@@ -95,7 +95,7 @@ class Status(bitfield.BitField):
 class ServerHandshake(object):
   '''This class represents the initial handshake sent from server to client.'''
 
-  def __init__(self, packed=None, protocol_version=10, server_version='',
+  def __init__(self, packed=None, protocol_version=10, server_version=b'',
                thread_id=0, scramble=tuple([0] * 20), null1=0, capabilities=0,
                charset=0, status=0, unused=tuple([0] * 13), null2=0):
     if packed is None:
@@ -111,7 +111,7 @@ class ServerHandshake(object):
       self.null2 = null2
     else:
       self.protocol_version = struct.unpack('B', packed[:1])[0]
-      server_version_length = packed[1:].index('\x00')
+      server_version_length = packed[1:].index(b'\x00')
       self.server_version = packed[1:1+server_version_length]
       data = struct.unpack('<I8BB2BB2B13B12BB', packed[2+server_version_length:])
       self.thread_id = data[0]
@@ -125,9 +125,9 @@ class ServerHandshake(object):
 
   def pack(self):
     data = struct.pack('B', self.protocol_version)
-    data += self.server_version + '\x00'
+    data += self.server_version + b'\x00'
     data += struct.pack('<I', self.thread_id)
-    data += ''.join(map(chr, self.scramble[:8]))
+    data += bytes(self.scramble[:8])
     data += struct.pack('B2BB2B',
                        self.null1,
                        self.capabilities.value() & 0xFF,
@@ -135,8 +135,8 @@ class ServerHandshake(object):
                        self.charset,
                        self.status.value() & 0xFF,
                        (self.status.value() >> 8) & 0xFF)
-    data += ''.join(map(chr, self.unused))
-    data += ''.join(map(chr, self.scramble[8:]))
+    data += bytes(self.unused)
+    data += bytes(self.scramble[8:])
     data += struct.pack('B', self.null2)
     return data
 
@@ -165,7 +165,7 @@ class TestServerHandshake(unittest.TestCase):
 
   def testKeywordInit(self):
     handshake = ServerHandshake(protocol_version=11,
-                                server_version='test',
+                                server_version=b'test',
                                 thread_id=1234,
                                 scramble=tuple([5] * 20),
                                 null1=1,
@@ -179,12 +179,12 @@ class TestServerHandshake(unittest.TestCase):
 
   def testUnpackInit(self):
     data = struct.pack('B', 11)
-    data += 'test\x00'
+    data += b'test\x00'
     data += struct.pack('<I', 1234)
-    data += ''.join([chr(5)] * 8)
+    data += bytes([5] * 8)
     data += struct.pack('B2BB2B', 1, 255, 254, 253, 252, 251)
-    data += ''.join([chr(6)] * 13)
-    data += ''.join([chr(5)] * 12)
+    data += bytes([6] * 13)
+    data += bytes([5] * 12)
     data += struct.pack('B', 2)
 
     handshake = ServerHandshake(data)
@@ -196,7 +196,7 @@ class TestServerHandshake(unittest.TestCase):
 
   def verifyDefault(self, handshake):
     self.assertEqual(handshake.protocol_version, 10)
-    self.assertEqual(handshake.server_version, '')
+    self.assertEqual(handshake.server_version, b'')
     self.assertEqual(handshake.thread_id, 0)
     self.assertEqual(handshake.scramble, tuple([0] * 20))
     self.assertEqual(handshake.null1, 0)
@@ -208,7 +208,7 @@ class TestServerHandshake(unittest.TestCase):
 
   def verifyCustom(self, handshake):
     self.assertEqual(handshake.protocol_version, 11)
-    self.assertEqual(handshake.server_version, 'test')
+    self.assertEqual(handshake.server_version, b'test')
     self.assertEqual(handshake.thread_id, 1234)
     self.assertEqual(handshake.scramble, tuple([5] * 20))
     self.assertEqual(handshake.null1, 1)
@@ -222,8 +222,8 @@ class ClientHandshake(object):
   '''This class represents the client handshake sent back to the server.'''
 
   def __init__(self, packed=None, capabilities=0, max_packet_size=0, charset=0,
-               unused=tuple([0] * 23), user='', scramble_size=0,
-               scramble=None, db=''):
+               unused=tuple([0] * 23), user=b'', scramble_size=0,
+               scramble=None, db=b''):
     if packed is None:
       self.capabilities = Capabilities(capabilities)
       self.max_packet_size = max_packet_size
@@ -240,30 +240,30 @@ class ClientHandshake(object):
       self.charset = data[2]
       self.unused = data[3:]
       packed = packed[32:]
-      user_length = packed.index('\x00')
+      user_length = packed.index(b'\x00')
       self.user = packed[:user_length]
       packed = packed[1+user_length:]
-      self.scramble_size = ord(packed[0])
+      self.scramble_size = packed[0]
       if self.scramble_size == 0:
         self.scramble = None
       else:
-        self.scramble = tuple(map(ord, packed[1:21]))
-      if packed[-1:] == '\x00':
+        self.scramble = tuple(packed[1:21])
+      if packed[-1:] == b'\x00':
         self.db = packed[21:-1]
       else:
         self.db = packed[21:]
 
   def pack(self):
-    data = struct.pack('<IIB', 
+    data = struct.pack('<IIB',
                        self.capabilities.value(),
                        self.max_packet_size,
                        self.charset)
-    data += ''.join(map(chr, self.unused))
-    data += self.user + '\x00'
-    data += chr(self.scramble_size)
+    data += bytes(self.unused)
+    data += self.user + b'\x00'
+    data += bytes([self.scramble_size])
     if self.scramble_size != 0:
-      data += ''.join(map(chr, self.scramble))
-    data += self.db + '\x00'
+      data += bytes(self.scramble)
+    data += self.db + b'\x00'
     return data
 
   def __str__(self):
@@ -291,20 +291,20 @@ class TestClientHandshake(unittest.TestCase):
                                 max_packet_size=64508,
                                 charset=253,
                                 unused=tuple([6] * 23),
-                                user='user',
+                                user=b'user',
                                 scramble_size=20,
                                 scramble=tuple([5] * 20),
-                                db='db')
+                                db=b'db')
     self.verifyCustom(handshake)
     handshake.__str__()
 
   def testUnpackInit(self):
     data = struct.pack('<IIB', 65279, 64508, 253)
-    data += ''.join([chr(6)] * 23)
-    data += 'user\x00'
-    data += chr(20)
-    data += ''.join([chr(5)] * 20)
-    data += 'db\x00'
+    data += bytes([6] * 23)
+    data += b'user\x00'
+    data += bytes([20])
+    data += bytes([5] * 20)
+    data += b'db\x00'
 
     handshake = ClientHandshake(data)
     self.verifyCustom(handshake)
@@ -318,20 +318,20 @@ class TestClientHandshake(unittest.TestCase):
     self.assertEqual(handshake.max_packet_size, 0)
     self.assertEqual(handshake.charset, 0)
     self.assertEqual(handshake.unused, tuple([0] * 23))
-    self.assertEqual(handshake.user, '')
+    self.assertEqual(handshake.user, b'')
     self.assertEqual(handshake.scramble_size, 0)
     self.assertEqual(handshake.scramble, None)
-    self.assertEqual(handshake.db, '')
+    self.assertEqual(handshake.db, b'')
 
   def verifyCustom(self, handshake):
     self.assertEqual(handshake.capabilities.value(), 65279)
     self.assertEqual(handshake.max_packet_size, 64508)
     self.assertEqual(handshake.charset, 253)
     self.assertEqual(handshake.unused, tuple([6] * 23))
-    self.assertEqual(handshake.user, 'user')
+    self.assertEqual(handshake.user, b'user')
     self.assertEqual(handshake.scramble_size, 20)
     self.assertEqual(handshake.scramble, tuple([5] * 20))
-    self.assertEqual(handshake.db, 'db')
+    self.assertEqual(handshake.db, b'db')
 
 if __name__ == '__main__':
   unittest.main()

@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Drizzle Client & Protocol Library
-# 
+#
 # Copyright (C) 2008 Eric Day (eday@oddments.org)
 # All rights reserved.
 #
@@ -48,7 +48,7 @@ class OkResult(object):
   '''This class represents an OK result packet sent from the server.'''
 
   def __init__(self, packed=None, affected_rows=0, insert_id=0, status=0,
-               warning_count=0, message='', version_40=False):
+               warning_count=0, message=b'', version_40=False):
     if packed is None:
       self.affected_rows = affected_rows
       self.insert_id = insert_id
@@ -59,14 +59,14 @@ class OkResult(object):
         self.warning_count = warning_count
     else:
       self.version_40 = version_40
-      if ord(packed[0]) != 0:
-        raise BadFieldCount('Expected 0, received ' + str(ord(packed[0])))
-      self.affected_rows = ord(packed[1])
-      self.insert_id = ord(packed[2])
+      if packed[0] != 0:
+        raise BadFieldCount('Expected 0, received ' + str(packed[0]))
+      self.affected_rows = packed[1]
+      self.insert_id = packed[2]
       if version_40 is True:
         if len(packed) == 3:
           self.status = 0
-          self.message = ''
+          self.message = b''
         else:
           data = struct.unpack('<H', packed[3:5])
           self.status = data[0]
@@ -106,7 +106,7 @@ class TestOkResult(unittest.TestCase):
     self.assertEqual(result.insert_id, 0)
     self.assertEqual(result.status, 0)
     self.assertEqual(result.warning_count, 0)
-    self.assertEqual(result.message, '')
+    self.assertEqual(result.message, b'')
     self.assertEqual(result.version_40, False)
     result.__str__()
 
@@ -115,52 +115,52 @@ class TestOkResult(unittest.TestCase):
     self.assertEqual(result.affected_rows, 0)
     self.assertEqual(result.insert_id, 0)
     self.assertEqual(result.status, 0)
-    self.assertEqual(result.message, '')
+    self.assertEqual(result.message, b'')
     self.assertEqual(result.version_40, True)
     result.__str__()
 
   def testKeywordInit(self):
     result = OkResult(affected_rows=3, insert_id=5, status=2,
-                      warning_count=7, message='test', version_40=False)
+                      warning_count=7, message=b'test', version_40=False)
     self.assertEqual(result.affected_rows, 3)
     self.assertEqual(result.insert_id, 5)
     self.assertEqual(result.status, 2)
     self.assertEqual(result.warning_count, 7)
-    self.assertEqual(result.message, 'test')
+    self.assertEqual(result.message, b'test')
     self.assertEqual(result.version_40, False)
 
   def testUnpackInit(self):
     data = struct.pack('BBB', 0, 3, 5)
     data += struct.pack('<HH', 2, 7)
-    data += 'test'
+    data += b'test'
 
     result = OkResult(data)
     self.assertEqual(result.affected_rows, 3)
     self.assertEqual(result.insert_id, 5)
     self.assertEqual(result.status, 2)
     self.assertEqual(result.warning_count, 7)
-    self.assertEqual(result.message, 'test')
+    self.assertEqual(result.message, b'test')
     self.assertEqual(result.version_40, False)
     result.__str__()
 
   def testUnpackInit40(self):
     data = struct.pack('BBB', 0, 3, 5)
     data += struct.pack('<H', 2)
-    data += 'test'
+    data += b'test'
 
     result = OkResult(data, version_40=True)
     self.assertEqual(result.affected_rows, 3)
     self.assertEqual(result.insert_id, 5)
     self.assertEqual(result.status, 2)
-    self.assertEqual(result.message, 'test')
+    self.assertEqual(result.message, b'test')
     self.assertEqual(result.version_40, True)
     result.__str__()
 
 class ErrorResult(object):
   '''This class represents an error result packet sent from the server.'''
 
-  def __init__(self, packed=None, error_code=0, sqlstate_marker='#',
-               sqlstate='XXXXX', message='', version_40=False):
+  def __init__(self, packed=None, error_code=0, sqlstate_marker=b'#',
+               sqlstate=b'XXXXX', message=b'', version_40=False):
     if packed is None:
       self.error_code = error_code
       self.message = message
@@ -170,14 +170,14 @@ class ErrorResult(object):
         self.sqlstate = sqlstate
     else:
       self.version_40 = version_40
-      if ord(packed[0]) != 255:
-        raise BadFieldCount('Expected 255, received ' + str(ord(packed[0])))
+      if packed[0] != 255:
+        raise BadFieldCount('Expected 255, received ' + str(packed[0]))
       data = struct.unpack('<H', packed[1:3])
       self.error_code = data[0]
       if version_40 is True:
         self.message = packed[3:]
       else:
-        self.sqlstate_marker = packed[3]
+        self.sqlstate_marker = packed[3:4]
         self.sqlstate = packed[4:9]
         self.message = packed[9:]
 
@@ -203,51 +203,51 @@ class TestErrorResult(unittest.TestCase):
   def testDefaultInit(self):
     result = ErrorResult()
     self.assertEqual(result.error_code, 0)
-    self.assertEqual(result.sqlstate_marker, '#')
-    self.assertEqual(result.sqlstate, 'XXXXX')
-    self.assertEqual(result.message, '')
+    self.assertEqual(result.sqlstate_marker, b'#')
+    self.assertEqual(result.sqlstate, b'XXXXX')
+    self.assertEqual(result.message, b'')
     self.assertEqual(result.version_40, False)
     result.__str__()
 
   def testDefaultInit40(self):
     result = ErrorResult(version_40=True)
     self.assertEqual(result.error_code, 0)
-    self.assertEqual(result.message, '')
+    self.assertEqual(result.message, b'')
     self.assertEqual(result.version_40, True)
     result.__str__()
 
   def testKeywordInit(self):
-    result = ErrorResult(error_code=3, sqlstate_marker='@', sqlstate='ABCDE',
-                         message='test', version_40=False)
+    result = ErrorResult(error_code=3, sqlstate_marker=b'@', sqlstate=b'ABCDE',
+                         message=b'test', version_40=False)
     self.assertEqual(result.error_code, 3)
-    self.assertEqual(result.sqlstate_marker, '@')
-    self.assertEqual(result.sqlstate, 'ABCDE')
-    self.assertEqual(result.message, 'test')
+    self.assertEqual(result.sqlstate_marker, b'@')
+    self.assertEqual(result.sqlstate, b'ABCDE')
+    self.assertEqual(result.message, b'test')
     self.assertEqual(result.version_40, False)
     result.__str__()
 
   def testUnpackInit(self):
-    data = chr(255)
+    data = bytes([255])
     data += struct.pack('<H', 1234)
-    data += '#ABCDE'
-    data += 'test'
+    data += b'#ABCDE'
+    data += b'test'
 
     result = ErrorResult(data)
     self.assertEqual(result.error_code, 1234)
-    self.assertEqual(result.sqlstate_marker, '#')
-    self.assertEqual(result.sqlstate, 'ABCDE')
-    self.assertEqual(result.message, 'test')
+    self.assertEqual(result.sqlstate_marker, b'#')
+    self.assertEqual(result.sqlstate, b'ABCDE')
+    self.assertEqual(result.message, b'test')
     self.assertEqual(result.version_40, False)
     result.__str__()
 
   def testUnpackInit40(self):
-    data = chr(255)
+    data = bytes([255])
     data += struct.pack('<H', 1234)
-    data += 'test'
+    data += b'test'
 
     result = ErrorResult(data, version_40=True)
     self.assertEqual(result.error_code, 1234)
-    self.assertEqual(result.message, 'test')
+    self.assertEqual(result.message, b'test')
     self.assertEqual(result.version_40, True)
     result.__str__()
 
@@ -262,8 +262,8 @@ class EofResult(object):
         self.status = status
     else:
       self.version_40 = version_40
-      if ord(packed[0]) != 254:
-        raise BadFieldCount('Expected 254, received ' + str(ord(packed[0])))
+      if packed[0] != 254:
+        raise BadFieldCount('Expected 254, received ' + str(packed[0]))
       if version_40 is False:
         data = struct.unpack('<HH', packed[1:])
         self.warning_count = data[0]
@@ -303,7 +303,7 @@ class TestEofResult(unittest.TestCase):
     result.__str__()
 
   def testUnpackInit(self):
-    data = chr(254)
+    data = bytes([254])
     data += struct.pack('<HH', 3, 5)
 
     result = EofResult(data)
@@ -313,7 +313,7 @@ class TestEofResult(unittest.TestCase):
     result.__str__()
 
   def testUnpackInit40(self):
-    result = EofResult(chr(254), version_40=True)
+    result = EofResult(bytes([254]), version_40=True)
     self.assertEqual(result.version_40, True)
     result.__str__()
 
@@ -324,9 +324,9 @@ class CountResult(object):
     if packed is None:
       self.count = count
     else:
-      self.count = ord(packed[0])
+      self.count = packed[0]
       if self.count == 0 or self.count > 253:
-        raise BadFieldCount('Expected 1-253, received ' + str(ord(packed[0])))
+        raise BadFieldCount('Expected 1-253, received ' + str(packed[0]))
 
   def __str__(self):
     return '''CountResult
@@ -346,14 +346,14 @@ class TestCountResult(unittest.TestCase):
     result.__str__()
 
   def testUnpackInit(self):
-    result = CountResult("\x03")
+    result = CountResult(b"\x03")
     self.assertEqual(result.count, 3)
     result.__str__()
 
 def create_result(packed, version_40=False):
   '''This function creates the appropriate result object instance depending on
      first byte.'''
-  count = ord(packed[0])
+  count = packed[0]
   if count == 0:
     return OkResult(packed, version_40=version_40)
   if count == 254:

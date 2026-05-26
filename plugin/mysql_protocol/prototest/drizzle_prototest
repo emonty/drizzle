@@ -1,10 +1,10 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Drizzle Client & Protocol Library
-# 
+#
 # Copyright (C) 2008 Eric Day (eday@oddments.org)
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
@@ -71,7 +71,8 @@ PACKETS_OUT_OF_ORDER = 1156
 
 # This is a comment range that is used in a number of tests for
 # testing various interesting boundaries.
-common_range = range(0, 1024) + range(65520, 65550) + range(1024*1024-20, 1024*1024+20)
+common_range = (list(range(0, 1024)) + list(range(65520, 65550)) +
+                list(range(1024*1024-20, 1024*1024+20)))
 
 class TestHandshake(unittest.TestCase):
   def setUp(self):
@@ -100,10 +101,10 @@ class TestHandshake(unittest.TestCase):
 
       # Send the MySQL 4.1 protocol flag if possible.
       if x == 1:
-        self.s.send('\x00')
+        self.s.send(b'\x00')
       elif x > 1:
         try:
-          self.s.send('\x00\x02' + '\x00' * (x - 2))
+          self.s.send(b'\x00\x02' + b'\x00' * (x - 2))
         except socket.error:
           self.assertTrue(x >= 1024*1024)
           return
@@ -125,14 +126,14 @@ class TestHandshake(unittest.TestCase):
       self.reconnect()
 
   def testUserOverrun(self):
-    for x in range(0, 1024) + range(65520, 65550):
+    for x in list(range(0, 1024)) + list(range(65520, 65550)):
       server_handshake = self.verifyServerHandshake()
       client_handshake = ClientHandshake(capabilities=server_handshake.capabilities.value())
 
       self.s.send(Packet(size=32+x, sequence=1).pack())
       self.s.send(client_handshake.pack()[:32])
       if x > 0:
-        self.s.send('\xff' * x)
+        self.s.send(b'\xff' * x)
 
       (packet, data) = self.verifyPacket(2)
       result = ErrorResult(data, version_40=True)
@@ -148,9 +149,9 @@ class TestHandshake(unittest.TestCase):
 
       self.s.send(Packet(size=34+x, sequence=1).pack())
       self.s.send(client_handshake.pack()[:33])
-      self.s.send(chr(x))
+      self.s.send(bytes([x]))
       if x > 0:
-        self.s.send('\xff' * x)
+        self.s.send(b'\xff' * x)
 
       (packet, data) = self.verifyPacket(2)
       result = create_result(data)
@@ -173,7 +174,7 @@ class TestHandshake(unittest.TestCase):
       self.s.send(Packet(size=34+x, sequence=1).pack())
       self.s.send(client_handshake.pack()[:34])
       if x > 0:
-        self.s.send('x' * x)
+        self.s.send(b'x' * x)
 
       (packet, data) = self.verifyPacket(2)
       result = create_result(data)
@@ -218,7 +219,7 @@ class TestHandshake(unittest.TestCase):
     self.assertEqual(len(data), packet.size)
 
     return (packet, data)
-    
+
   def verifyServerHandshake(self):
     (packet, data) = self.verifyPacket(0)
 
@@ -255,7 +256,7 @@ class TestCommand(unittest.TestCase):
     data = self.s.recv(packet.size)
     result = OkResult(data)
 
-    self._data = ''
+    self._data = b''
 
   def tearDown(self):
     self.s.close()
@@ -282,7 +283,7 @@ class TestCommand(unittest.TestCase):
     for command in [CommandID.SLEEP, CommandID.CONNECT, CommandID.TIME, CommandID.DELAYED_INSERT]:
       # Test a range of sizes for each
       for x in [0, 1, 250, 251, 252, 253, 254, 255, 256, 65535, 65536]:
-        data = Command(command=command, payload='x' * x).pack()
+        data = Command(command=command, payload=b'x' * x).pack()
         self.s.send(Packet(size=len(data), sequence=0).pack())
         self.s.send(data)
 
@@ -299,14 +300,14 @@ class TestCommand(unittest.TestCase):
     self.assertRaises(SocketEof, self.readData, 4)
 
   def testQuitCommandData(self):
-    data = Command(command=CommandID.QUIT, payload='x' * 65536).pack()
+    data = Command(command=CommandID.QUIT, payload=b'x' * 65536).pack()
     self.s.send(Packet(size=len(data), sequence=0).pack())
     self.s.send(data)
     self.assertRaises(SocketEof, self.readData, 4)
 
   def testInitDBCommand(self):
     for x in [0, 2, 250, 251, 252, 253, 254, 255, 256, 65535, 65536, 1024*512]:
-      data = Command(command=CommandID.INIT_DB, payload='x' * x).pack()
+      data = Command(command=CommandID.INIT_DB, payload=b'x' * x).pack()
       self.s.send(Packet(size=len(data), sequence=0).pack())
       self.s.send(data)
 
@@ -323,7 +324,7 @@ class TestCommand(unittest.TestCase):
 
   def testRangeQuery(self):
     for x in common_range:
-      data = QueryCommand(query="SELECT '" + 'x' * x + "'").pack()
+      data = QueryCommand(query=b"SELECT '" + b'x' * x + b"'").pack()
       self.s.send(Packet(size=len(data), sequence=0).pack())
       try:
         self.s.send(data)
@@ -339,12 +340,12 @@ class TestCommand(unittest.TestCase):
         packet = Packet(self.readData(4))
         self.assertEqual(packet.sequence, 2)
         column = Column(self.readData(packet.size))
-        self.assertEqual(column.catalog, 'def')
-        self.assertEqual(column.db, '')
-        self.assertEqual(column.table, '')
-        self.assertEqual(column.orig_table, '')
-        self.assertEqual(column.name, 'x' * len(column.name))
-        self.assertEqual(column.orig_name, '')
+        self.assertEqual(column.catalog, b'def')
+        self.assertEqual(column.db, b'')
+        self.assertEqual(column.table, b'')
+        self.assertEqual(column.orig_table, b'')
+        self.assertEqual(column.name, b'x' * len(column.name))
+        self.assertEqual(column.orig_name, b'')
         self.assertEqual(column.unused1, 12)
         # Match both 3 and 4 byte charaters depending on character set.
         self.assertTrue(column.size == x * 3 or column.size == x*4)
@@ -353,7 +354,7 @@ class TestCommand(unittest.TestCase):
         self.assertEqual(column.flags.value(), 1)
         self.assertEqual(column.decimal, 31)
         self.assertEqual(column.unused2, tuple())
-        self.assertEqual(column.default_value, '')
+        self.assertEqual(column.default_value, b'')
 
         packet = Packet(self.readData(4))
         self.assertEqual(packet.sequence, 3)
@@ -362,7 +363,7 @@ class TestCommand(unittest.TestCase):
         packet = Packet(self.readData(4))
         self.assertEqual(packet.sequence, 4)
         row = parse_row(1, self.readData(packet.size))
-        self.assertEqual(row[0], 'x' * x)
+        self.assertEqual(row[0], b'x' * x)
 
         packet = Packet(self.readData(4))
         self.assertEqual(packet.sequence, 5)
@@ -374,7 +375,7 @@ class TestCommand(unittest.TestCase):
 
   def testRangeResult(self):
     for x in common_range:
-      data = QueryCommand(query="SELECT REPEAT('x', %s)" % x).pack()
+      data = QueryCommand(query=b"SELECT REPEAT('x', %d)" % x).pack()
       self.s.send(Packet(size=len(data), sequence=0).pack())
       self.s.send(data)
 
@@ -386,7 +387,7 @@ class TestCommand(unittest.TestCase):
         packet = Packet(self.readData(4))
         self.assertEqual(packet.sequence, 2)
         column = Column(self.readData(packet.size))
-        self.assertEqual(column.name, "REPEAT('x', %s)" % x)
+        self.assertEqual(column.name, b"REPEAT('x', %d)" % x)
         self.assertTrue(column.type == ColumnType.VAR_STRING or
                         column.type == ColumnType.VARCHAR or
                         column.type == ColumnType.MEDIUM_BLOB or
@@ -411,8 +412,8 @@ class TestCommand(unittest.TestCase):
         return
 
   def testRangeColumn(self):
-    for x in range(0, 300) + range(1024*64 - 20, 1024*64):
-      data = QueryCommand(query="SELECT 'x'" + ",'x'" * x).pack()
+    for x in list(range(0, 300)) + list(range(1024*64 - 20, 1024*64)):
+      data = QueryCommand(query=b"SELECT 'x'" + b",'x'" * x).pack()
       self.s.send(Packet(size=len(data), sequence=0).pack())
       self.s.send(data)
 
@@ -425,7 +426,7 @@ class TestCommand(unittest.TestCase):
           packet = Packet(self.readData(4))
           self.assertEqual(packet.sequence, (2+y) % 256)
           column = Column(self.readData(packet.size))
-          self.assertEqual(column.name, 'x')
+          self.assertEqual(column.name, b'x')
           self.assertTrue(column.type == ColumnType.VAR_STRING or
                           column.type == ColumnType.VARCHAR or
                           column.type == ColumnType.MEDIUM_BLOB or
@@ -499,7 +500,18 @@ class TestCommand(unittest.TestCase):
       self.assertTrue(isinstance(result, ErrorResult))
       self.assertEqual(result.error_code, UNKNOWN_COMMAND)
 
+class StableDescriptionResult(unittest.TextTestResult):
+  # Python 3.11 changed the verbose-mode test description format from
+  # "method (module.Class)" to "method (module.Class.method)". The committed
+  # prototest.result file expects the legacy form, so emit it explicitly.
+  def getDescription(self, test):
+    return "%s (%s.%s)" % (test._testMethodName,
+                           test.__class__.__module__,
+                           test.__class__.__name__)
+
 class CustomTestRunner(unittest.TextTestRunner):
+  resultclass = StableDescriptionResult
+
   def run(self, test):
     result = self._makeResult()
     test(result)

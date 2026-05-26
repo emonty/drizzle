@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 #  Copyright (C) 2009 Sun Microsystems, Inc.
 #  Copyright (C) 2010, 2011 Monty Taylor
@@ -20,7 +20,7 @@ pandora_plugin_file = 'config/pandora-plugin.ini'
 
 # Find plugins in the tree and add them to the build system
 
-import ConfigParser, os, sys
+import configparser, os, sys
 import datetime, time
 import subprocess
 
@@ -54,7 +54,7 @@ class ChangeProtectedFile(object):
     new_content = self.new_file.read()
     self.new_file.close()
     try:
-        old_file = file(self.real_fname, 'r')
+        old_file = open(self.real_fname, 'r')
         old_content = old_file.read()
         old_file.close()
     except IOError:
@@ -146,7 +146,7 @@ bin_PROGRAMS=
   if plugin['install_headers'] != "":
     plugin_file.write("nobase_pkginclude_HEADERS += %(install_headers)s\n" % plugin)
   if plugin['testsuite']:
-    if plugin.has_key('testsuitedir') and plugin['testsuitedir'] != "":
+    if 'testsuitedir' in plugin and plugin['testsuitedir'] != "":
       plugin_file.write("EXTRA_DIST += %(testsuitedir)s\n" % plugin)
   plugin_file.write("""
 pkgplugin_LTLIBRARIES=%(libname)s.la
@@ -178,12 +178,12 @@ def write_external_plugin():
 
 def write_plugin(plugin, plugin_ini_list):
   # Since this function is recursive, make sure we're not already in it.
-  if plugin.has_key('writing_status'):
+  if 'writing_status' in plugin:
     if plugin['writing_status'] == 'done':
       return
     else:
-      print "Dependency loop detected with %s" % plugin['name']
-      exit(1)
+      print("Dependency loop detected with %s" % plugin['name'])
+      sys.exit(1)
 
   plugin['writing_status'] = 'dependencies'
 
@@ -196,8 +196,8 @@ def write_plugin(plugin, plugin_ini_list):
         write_plugin(find_plugin, plugin_ini_list)
         break
     if found is False:
-      print "Could not find dependency %s: %s" % (plugin['name'], dependency)
-      exit(1)
+      print("Could not find dependency %s: %s" % (plugin['name'], dependency))
+      sys.exit(1)
 
   write_plugin_ac(plugin, plugin_ac_file)
   write_plugin_am(plugin, plugin_am_file)
@@ -230,7 +230,7 @@ dnl Config for %(title)s
 """ % plugin)
   for m4_file in plugin_m4_files:
     plugin_ac.write('m4_sinclude([%s])\n' % m4_file)
-  plugin['plugin_dep_libs']=" ".join(["\${top_builddir}/%s" % f for f in plugin['libs'].split()])
+  plugin['plugin_dep_libs']=" ".join([r"\${top_builddir}/%s" % f for f in plugin['libs'].split()])
 
   plugin_ac.write("""
 AC_ARG_WITH([%(name_with_dashes)s-plugin],[
@@ -315,7 +315,7 @@ AS_IF([test "x$with_%(name)s_plugin" = "xyes"],[
         ])
         pandora_builtin_list="%(module_name)s,${pandora_builtin_list}"
         pandora_builtin_symbols_list="_drizzled_%(module_name)s_plugin_,${pandora_builtin_symbols_list}"
-        pandora_plugin_libs="${pandora_plugin_libs} \${top_builddir}/%(root_plugin_dir)s/%(libname)s.la"
+        pandora_plugin_libs="${pandora_plugin_libs} \\${top_builddir}/%(root_plugin_dir)s/%(libname)s.la"
      ],[
         AS_IF([test "x$enable_%(name)s_plugin" = "xyes"],[
           pandora_default_plugin_list="%(name)s,${pandora_default_plugin_list}"
@@ -341,7 +341,7 @@ def fix_file_paths(plugin, files):
 
 def expand_plugin_ini(plugin):
     if plugin['name'] == "**OUT-OF-TREE**":
-      print "Out of tree plugins require the name field to be specified in plugin.ini"
+      print("Out of tree plugins require the name field to be specified in plugin.ini")
       sys.exit(1)
 
     if plugin['plugin_dir'] == ".":
@@ -363,25 +363,25 @@ def expand_plugin_ini(plugin):
     else:
       plugin['default_yesno']="no"
 
-    if plugin.has_key('extra_dist'):
+    if 'extra_dist' in plugin:
       plugin['extra_dist']=" ".join([os.path.join(plugin['rel_path'],f) for f in plugin['extra_dist'].split()])
-    if plugin.has_key('bin_scripts'):
+    if 'bin_scripts' in plugin:
       plugin['bin_scripts']=" ".join([os.path.join(plugin['rel_path'],f) for f in plugin['bin_scripts'].split()])
-    if plugin.has_key('scripts'):
+    if 'scripts' in plugin:
       plugin['scripts']=" ".join([os.path.join(plugin['rel_path'],f) for f in plugin['scripts'].split()])
-    if plugin.has_key('sbin_scripts'):
+    if 'sbin_scripts' in plugin:
       plugin['sbin_scripts']=" ".join([os.path.join(plugin['rel_path'],f) for f in plugin['sbin_scripts'].split()])
-    if plugin.has_key('libexec_scripts'):
+    if 'libexec_scripts' in plugin:
       plugin['libexec_scripts']=" ".join([os.path.join(plugin['rel_path'],f) for f in plugin['libexec_scripts'].split()])
-    if plugin.has_key('pkg_scripts'):
+    if 'pkg_scripts' in plugin:
       plugin['pkg_scripts']=" ".join([os.path.join(plugin['rel_path'],f) for f in plugin['pkg_scripts'].split()])
-    if plugin.has_key('data'):
+    if 'data' in plugin:
       plugin['data']=" ".join([os.path.join(plugin['rel_path'],f) for f in plugin['data'].split()])
-    if plugin.has_key('pkg_data'):
+    if 'pkg_data' in plugin:
       plugin['pkg_data']=" ".join([os.path.join(plugin['rel_path'],f) for f in plugin['pkg_data'].split()])
-    if plugin.has_key('sysconf_data'):
+    if 'sysconf_data' in plugin:
       plugin['sysconf_data']=" ".join([os.path.join(plugin['rel_path'],f) for f in plugin['sysconf_data'].split()])
-    
+
 
     if plugin['static']:
       plugin['static_yesno']="yes"
@@ -391,7 +391,7 @@ def expand_plugin_ini(plugin):
     plugin['shared_build_conditional_tag']= "BUILD_%s_PLUGIN_SHARED" % plugin['name'].upper()
     plugin['static_build_conditional_tag']= "BUILD_%s_PLUGIN_STATIC" % plugin['name'].upper()
     plugin['name_with_dashes']= plugin['name'].replace('_','-')
-    if plugin.has_key('build_conditional'):
+    if 'build_conditional' in plugin:
       plugin['has_build_conditional']=True
       plugin['build_conditional']='"x${with_%(name)s_plugin}" = "xyes" -a %(build_conditional)s' % plugin
     else:
@@ -450,29 +450,29 @@ def read_plugin_ini(plugin_dir):
                           dependency_aliases="",
                           tests="",
                           install=config['default_install'])
-    parser=ConfigParser.ConfigParser(defaults= plugin_defaults)
+    parser=configparser.ConfigParser(defaults= plugin_defaults)
     parser.read(plugin_file)
     plugin=dict(parser.items('plugin'))
     plugin['plugin_dir'] = plugin_dir
     if plugin_dir == '.':
-      if not plugin.has_key('url'):
-        print "External Plugins are required to specifiy a url"
+      if 'url' not in plugin:
+        print("External Plugins are required to specifiy a url")
         plugin['url']= 'http://launchpad.net/%(name)s' % plugin
         sys.exit(1)
-      if plugin_dir == '.' and not plugin.has_key('version'):
-        print "External Plugins are required to specifiy a version"
+      if plugin_dir == '.' and 'version' not in plugin:
+        print("External Plugins are required to specifiy a version")
         sys.exit(1)
-    if not plugin.has_key('version'):
+    if 'version' not in plugin:
       plugin['version'] = config['default_plugin_version']
-    if plugin.has_key('load_by_default'):
+    if 'load_by_default' in plugin:
       plugin['load_by_default']=parser.getboolean('plugin','load_by_default')
-    if plugin.has_key('disabled'):
+    if 'disabled' in plugin:
       plugin['disabled']=parser.getboolean('plugin','disabled')
     if plugin['disabled']:
       plugin['enabled']="no"
     else:
       plugin['enabled']="yes"
-    if plugin.has_key('static'):
+    if 'static' in plugin:
       try:
         plugin['static']= parser.getboolean('plugin','static')
       except:
@@ -480,9 +480,9 @@ def read_plugin_ini(plugin_dir):
           plugin['static']= True
         else:
           plugin['static']= False
-    if plugin.has_key('install'):
+    if 'install' in plugin:
       plugin['install']= parser.getboolean('plugin','install')
-    if plugin.has_key('testsuite'):
+    if 'testsuite' in plugin:
       if plugin['testsuite'] == 'disable':
         plugin['testsuite']= False
         plugin['dist_testsuite']= find_testsuite(plugin_dir)
@@ -548,32 +548,32 @@ EXTRA_DIST += %(rel_path)s/plugin.ini
 %(rel_path)s/plugin.ini:
 
 """ % plugin)
-  if plugin.has_key('extra_dist') and plugin['extra_dist'] != "":
+  if 'extra_dist' in plugin and plugin['extra_dist'] != "":
     plugin_am.write("EXTRA_DIST += %(extra_dist)s\n" % plugin)
-  if plugin.has_key('bin_scripts') and plugin['bin_scripts'] != "":
+  if 'bin_scripts' in plugin and plugin['bin_scripts'] != "":
     plugin_am.write("dist_bin_SCRIPTS += %(bin_scripts)s\n" % plugin)
-  if plugin.has_key('scripts') and plugin['scripts'] != "":
+  if 'scripts' in plugin and plugin['scripts'] != "":
     plugin_am.write("dist_bin_SCRIPTS += %(scripts)s\n" % plugin)
-  if plugin.has_key('sbin_scripts') and plugin['sbin_scripts'] != "":
+  if 'sbin_scripts' in plugin and plugin['sbin_scripts'] != "":
     plugin_am.write("dist_sbin_SCRIPTS += %(sbin_scripts)s\n" % plugin)
-  if plugin.has_key('libexec_scripts') and plugin['libexec_scripts'] != "":
+  if 'libexec_scripts' in plugin and plugin['libexec_scripts'] != "":
     plugin_am.write("dist_libexec_SCRIPTS += %(libexec_scripts)s\n" % plugin)
-  if plugin.has_key('pkg_scripts') and plugin['pkg_scripts'] != "":
+  if 'pkg_scripts' in plugin and plugin['pkg_scripts'] != "":
     plugin_am.write("dist_pkgdata_SCRIPTS += %(pkg_scripts)s\n" % plugin)
-  if plugin.has_key('data') and plugin['data'] != "":
+  if 'data' in plugin and plugin['data'] != "":
     plugin_am.write("dist_data_DATA += %(data)s\n" % plugin)
-  if plugin.has_key('pkg_data') and plugin['pkg_data'] != "":
+  if 'pkg_data' in plugin and plugin['pkg_data'] != "":
     plugin_am.write("dist_pkgdata_DATA += %(pkg_data)s\n" % plugin)
-  if plugin.has_key('sysconf_data') and plugin['sysconf_data'] != "":
+  if 'sysconf_data' in plugin and plugin['sysconf_data'] != "":
     plugin_am.write("dist_sysconf_DATA += %(sysconf_data)s\n" % plugin)
   if plugin['headers'] != "":
     plugin_am.write("noinst_HEADERS += %(headers)s\n" % plugin)
   if plugin['install_headers'] != "":
     plugin_am.write("nobase_pkginclude_HEADERS += %(install_headers)s\n" % plugin)
   if plugin['testsuite']:
-    if plugin.has_key('testsuitedir') and plugin['testsuitedir'] != "":
+    if 'testsuitedir' in plugin and plugin['testsuitedir'] != "":
       plugin_am.write("EXTRA_DIST += %(rel_path)s/%(testsuitedir)s\n" % plugin)
-  if plugin.has_key('dist_testsuite') and plugin['dist_testsuite'] != "":
+  if 'dist_testsuite' in plugin and plugin['dist_testsuite'] != "":
     plugin_am.write("EXTRA_DIST += %(rel_path)s/%(dist_testsuite)s\n" % plugin)
   if plugin['docs'] is not None:
     plugin_am.write("EXTRA_DIST += ${top_srcdir}/%(rel_path)s/docs/*.rst\n" % plugin)
@@ -636,7 +636,7 @@ config_defaults= dict(
   module_name_separator='::'
 )
 
-config_parser = ConfigParser.ConfigParser(defaults=config_defaults)
+config_parser = configparser.ConfigParser(defaults=config_defaults)
 config_parser.read(pandora_plugin_file)
 config = dict(config_parser.items('pandora-plugin'))
 config['force_lowercase_libname']=config_parser.getboolean('pandora-plugin','force_lowercase_libname')
@@ -644,7 +644,7 @@ config['force_lowercase_libname']=config_parser.getboolean('pandora-plugin','for
 # I'm 3 seconds away from writing a comprehensive build solution
 if not os.path.exists('config/pandora_vc_revinfo'):
   if os.path.exists('.bzr'):
-    bzr_revno= subprocess.Popen(["bzr", "revno"], stdout=subprocess.PIPE).communicate()[0].strip()
+    bzr_revno= subprocess.Popen(["bzr", "revno"], stdout=subprocess.PIPE).communicate()[0].strip().decode()
     rev_date= datetime.date.fromtimestamp(time.time())
     config['default_plugin_version'] = "%d.%02d.%s" % (rev_date.year, rev_date.month, bzr_revno)
   else:
@@ -679,15 +679,11 @@ if len(actions) == 0:
 
 plugin_list=[]
 
-def accumulate_plugins(arg, dirname, fnames):
+for dirname, _dirs, fnames in os.walk(os.path.join(config['top_srcdir'],
+                                                   config['root_plugin_dir'])):
   # plugin_ini_fname is a name in dirname indicating dirname is a plugin.
   if config['plugin_ini_fname'] in fnames:
-    arg.append(dirname)
-
-os.path.walk(os.path.join(config['top_srcdir'],
-                          config['root_plugin_dir']),
-             accumulate_plugins,
-             plugin_list)
+    plugin_list.append(dirname)
 
 if not os.path.exists("config/pandora-plugin.am") or "write" in actions:
   plugin_am_file = ChangeProtectedFile(os.path.join('config', 'pandora-plugin.am'))
@@ -696,7 +692,7 @@ if not os.path.exists("config/pandora-plugin.am") or "write" in actions:
 # pandora-plugin.list: datestamp preserved list
 ${srcdir}/config/pandora-plugin.list: .plugin.scan
 .plugin.scan:
-	@cd ${top_srcdir} && $${PYTHON:-python2} config/pandora-plugin plugin-list
+	@cd ${top_srcdir} && $${PYTHON:-python3} config/pandora-plugin plugin-list
 
 # Plugins affect configure; so to prevent configure running twice in a tarball
 # build (once up front, once with the right list of plugins, we ship the
@@ -757,7 +753,7 @@ if not os.path.exists("config/pandora-plugin.am") or 'write' in actions:
   plugin_am_file.write("\n${top_srcdir}/config/pandora-plugin.am: ${top_srcdir}/config/pandora-plugin.list ${top_srcdir}/config/pandora-plugin ")
   for plugin_dir in plugin_list:
     plugin_am_file.write("\\\n\t%s/plugin.ini " % plugin_dir)
-  plugin_am_file.write("\n\tcd ${top_srcdir} && $${PYTHON:-python2} config/pandora-plugin write\n")
+  plugin_am_file.write("\n\tcd ${top_srcdir} && $${PYTHON:-python3} config/pandora-plugin write\n")
   plugin_ini_list=[]
 
   # Load all plugin.ini files first so we can do dependency tracking.
@@ -770,8 +766,8 @@ if not os.path.exists("config/pandora-plugin.am") or 'write' in actions:
   plugin_name_list = [plugin['libname'] for plugin in plugin_ini_list]
   for plugin in plugin_ini_list:
     if plugin_name_list.count(plugin['libname']) != 1:
-      print "Duplicate module name %s" % plugin['libname']
-      exit(1)
+      print("Duplicate module name %s" % plugin['libname'])
+      sys.exit(1)
 
   for plugin in plugin_ini_list:
     write_plugin(plugin, plugin_ini_list)

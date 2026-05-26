@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Drizzle Client & Protocol Library
-# 
+#
 # Copyright (C) 2008 Eric Day (eday@oddments.org)
 # All rights reserved.
 #
@@ -76,16 +76,16 @@ class CommandID(object):
 class Command(object):
   '''This class represents a command packet sent from the client.'''
 
-  def __init__(self, packed=None, command=CommandID.SLEEP, payload=''):
+  def __init__(self, packed=None, command=CommandID.SLEEP, payload=b''):
     if packed is None:
       self.command = command
       self.payload = payload
     else:
-      self.command = ord(packed[0])
+      self.command = packed[0]
       self.payload = packed[1:]
 
   def pack(self):
-    return chr(self.command) + self.payload
+    return bytes([self.command]) + self.payload
 
   def __str__(self):
     return '''Command
@@ -98,25 +98,25 @@ class TestCommand(unittest.TestCase):
   def testDefaultInit(self):
     command = Command()
     self.assertEqual(command.command, CommandID.SLEEP)
-    self.assertEqual(command.payload, '')
+    self.assertEqual(command.payload, b'')
 
   def testKeywordInit(self):
-    command = Command(command=CommandID.QUERY, payload='abc')
+    command = Command(command=CommandID.QUERY, payload=b'abc')
     self.assertEqual(command.command, CommandID.QUERY)
-    self.assertEqual(command.payload, 'abc')
+    self.assertEqual(command.payload, b'abc')
 
   def testUnpackInit(self):
-    command = Command('\x03abc')
+    command = Command(b'\x03abc')
     self.assertEqual(command.command, CommandID.QUERY)
-    self.assertEqual(command.payload, 'abc')
+    self.assertEqual(command.payload, b'abc')
 
   def testPack(self):
-    command = Command(Command(command=CommandID.QUERY, payload='abc').pack())
+    command = Command(Command(command=CommandID.QUERY, payload=b'abc').pack())
     self.assertEqual(command.command, CommandID.QUERY)
-    self.assertEqual(command.payload, 'abc')
+    self.assertEqual(command.payload, b'abc')
 
 class QueryCommand(Command):
-  def __init__(self, packed=None, query=''):
+  def __init__(self, packed=None, query=b''):
     super(QueryCommand, self).__init__(packed=packed, command=CommandID.QUERY,
                                        payload=query)
 
@@ -131,22 +131,22 @@ class TestQueryCommand(unittest.TestCase):
   def testDefaultInit(self):
     query = QueryCommand()
     self.assertEqual(query.command, CommandID.QUERY)
-    self.assertEqual(query.payload, '')
+    self.assertEqual(query.payload, b'')
 
   def testKeywordInit(self):
-    query = QueryCommand(query='abc')
+    query = QueryCommand(query=b'abc')
     self.assertEqual(query.command, CommandID.QUERY)
-    self.assertEqual(query.payload, 'abc')
+    self.assertEqual(query.payload, b'abc')
 
   def testUnpackInit(self):
-    query = QueryCommand('\x03abc')
+    query = QueryCommand(b'\x03abc')
     self.assertEqual(query.command, CommandID.QUERY)
-    self.assertEqual(query.payload, 'abc')
+    self.assertEqual(query.payload, b'abc')
 
   def testPack(self):
-    query = QueryCommand(QueryCommand(query='abc').pack())
+    query = QueryCommand(QueryCommand(query=b'abc').pack())
     self.assertEqual(query.command, CommandID.QUERY)
-    self.assertEqual(query.payload, 'abc')
+    self.assertEqual(query.payload, b'abc')
 
 if __name__ == '__main__':
   unittest.main()

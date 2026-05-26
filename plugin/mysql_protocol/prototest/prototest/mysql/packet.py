@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Drizzle Client & Protocol Library
 # 
@@ -126,7 +126,7 @@ def parse_row(count, data):
   row = []
   while count > 0:
     count -= 1
-    if ord(data[0]) == 251:
+    if data[0] == 251:
       row.append(None)
       data = data[1:]
     else:
@@ -139,7 +139,7 @@ class BadSize(Exception):
   pass
 
 def parse_encoded_size(data):
-  size = ord(data[0])
+  size = data[0]
   packed_size = 1
   if size == 252:
     size = struct.unpack('<H', data[1:3])[0]

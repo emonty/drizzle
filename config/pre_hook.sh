@@ -36,5 +36,5 @@ if test ! -f  config/plugin.stamp
 then
   touch config/plugin.stamp
 fi
-PYTHON=${PYTHON:-python2}
+PYTHON=${PYTHON:-python3}
 run $PYTHON config/pandora-plugin write

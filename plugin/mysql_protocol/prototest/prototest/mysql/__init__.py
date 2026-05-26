@@ -30,9 +30,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-from bitfield import *
-from packet import *
-from handshake import *
-from result import *
-from command import *
-from column import *
+from .bitfield import *
+from .packet import *
+from .handshake import *
+from .result import *
+from .command import *
+from .column import *

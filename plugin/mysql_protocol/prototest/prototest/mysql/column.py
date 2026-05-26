@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Drizzle Client & Protocol Library
-# 
+#
 # Copyright (C) 2008 Eric Day (eday@oddments.org)
 # All rights reserved.
 #
@@ -40,8 +40,8 @@ MySQL Protocol Column Objects
 
 import struct
 import unittest
-import bitfield
-import packet
+from . import bitfield
+from . import packet
 
 class ColumnType(object):
   DECIMAL = 0
@@ -102,9 +102,9 @@ class ColumnFlags(bitfield.BitField):
 class Column(object):
   '''This class represents a column packet sent from the client.'''
 
-  def __init__(self, packed=None, catalog='', db='', table='', orig_table='',
-               name='', orig_name='', unused1=0, charset=0, size=0, type=0,
-               flags=0, decimal=0, unused2=tuple([0] * 2), default_value=''):
+  def __init__(self, packed=None, catalog=b'', db=b'', table=b'', orig_table=b'',
+               name=b'', orig_name=b'', unused1=0, charset=0, size=0, type=0,
+               flags=0, decimal=0, unused2=tuple([0] * 2), default_value=b''):
     if packed is None:
       self.catalog = catalog
       self.db = db
@@ -145,7 +145,7 @@ class Column(object):
     return string
 
   def pack(self):
-    return chr(self.command) + self.payload
+    return bytes([self.command]) + self.payload
 
   def __str__(self):
     return '''Column
