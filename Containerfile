@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1.4
-ARG UBUNTU=24.04
+ARG UBUNTU=26.04
 
 FROM quay.io/inaugust/bindep-rs AS bindep_rs
 
-FROM quay.io/opendevmirror/ubuntu:${UBUNTU} AS base
+FROM docker.io/library/ubuntu:${UBUNTU} AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 

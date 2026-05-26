@@ -808,13 +808,15 @@ BOOST_DEFUN([String_Algo],
 
 # BOOST_SYSTEM([PREFERRED-RT-OPT])
 # --------------------------------
-# Look for Boost.System.  For the documentation of PREFERRED-RT-OPT, see the
-# documentation of BOOST_FIND_LIB above.  This library was introduced in Boost
-# 1.35.0.
+# Look for Boost.System.  Header-only since 1.66; the libboost_system
+# shared library was kept as an empty backward-compat stub through 1.83
+# and dropped in 1.87.  PREFERRED-RT-OPT is accepted but unused.
 BOOST_DEFUN([System],
-[BOOST_FIND_LIB([system], [$1],
-                [boost/system/error_code.hpp],
-                [boost::system::error_code e; e.clear();])
+[BOOST_FIND_HEADER([boost/system/error_code.hpp])
+BOOST_SYSTEM_LIBS=
+BOOST_SYSTEM_LDFLAGS=
+AC_SUBST([BOOST_SYSTEM_LIBS])
+AC_SUBST([BOOST_SYSTEM_LDFLAGS])
 ])# BOOST_SYSTEM
 
 

@@ -5,8 +5,8 @@ AC_LIB_HAVE_LINKFLAGS(rabbitmq,,
 #include <string.h>
 
 #include <stdint.h>
-#include <amqp.h>
-#include <amqp_framing.h>
+#include <rabbitmq-c/amqp.h>
+#include <rabbitmq-c/framing.h>
 
 #include <unistd.h>
   ],
