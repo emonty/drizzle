@@ -331,8 +331,7 @@ void plugin_startup_window(module::Registry &registry, drizzled::Session &sessio
   }
 }
 
-class PrunePlugin :
-  public unary_function<string, bool>
+class PrunePlugin
 {
   const string to_match;
 public:
@@ -340,7 +339,7 @@ public:
     to_match(match_in)
   { }
 
-  result_type operator()(const string &match_against)
+  bool operator()(const string &match_against)
   {
     return match_against == to_match;
   }

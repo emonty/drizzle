@@ -157,15 +157,15 @@ namespace plugin {
   /* For each EventObserver plugin call its registerTableEventsDo() meathod so that it can
    * register what events, if any, it is interested in on this table.
    */ 
-  class RegisterTableEventsIterate : public std::unary_function<EventObserver *, void>
+  class RegisterTableEventsIterate
   {
     TableShare &table_share;
     EventObserverList &observers;
 
   public:
-    RegisterTableEventsIterate(TableShare &table_share_arg, EventObserverList &observers_arg): 
+    RegisterTableEventsIterate(TableShare &table_share_arg, EventObserverList &observers_arg):
       table_share(table_share_arg), observers(observers_arg) {}
-    inline result_type operator() (argument_type eventObserver)
+    inline void operator() (EventObserver *eventObserver)
     {
       eventObserver->registerTableEventsDo(table_share, observers);
     }
@@ -227,16 +227,16 @@ namespace plugin {
   /* For each EventObserver plugin call its registerSchemaEventsDo() meathod so that it can
    * register what events, if any, it is interested in on the schema.
    */ 
-  class RegisterSchemaEventsIterate : public std::unary_function<EventObserver *, void>
+  class RegisterSchemaEventsIterate
   {
     const std::string &db;
     EventObserverList &observers;
   public:
-    RegisterSchemaEventsIterate(const std::string &db_arg, EventObserverList &observers_arg) :     
+    RegisterSchemaEventsIterate(const std::string &db_arg, EventObserverList &observers_arg) :
       db(db_arg),
       observers(observers_arg){}
 
-    inline result_type operator() (argument_type eventObserver)
+    inline void operator() (EventObserver *eventObserver)
     {
       eventObserver->registerSchemaEventsDo(db, observers);
     }
@@ -275,14 +275,14 @@ namespace plugin {
   /* For each EventObserver plugin call its registerSessionEventsDo() meathod so that it can
    * register what events, if any, it is interested in on this session.
    */ 
-  class RegisterSessionEventsIterate : public std::unary_function<EventObserver *, void>
+  class RegisterSessionEventsIterate
   {
     Session &session;
     EventObserverList &observers;
   public:
-    RegisterSessionEventsIterate(Session &session_arg, EventObserverList &observers_arg) : 
+    RegisterSessionEventsIterate(Session &session_arg, EventObserverList &observers_arg) :
       session(session_arg), observers(observers_arg) {}
-    inline result_type operator() (argument_type eventObserver)
+    inline void operator() (EventObserver *eventObserver)
     {
       eventObserver->registerSessionEventsDo(session, observers);
     }
@@ -326,17 +326,16 @@ namespace plugin {
 
   /* Event observer list iterator: */
   //----------
-  class EventIterate : public std::unary_function<std::pair<uint32_t, EventObserver *>, bool>
+  class EventIterate
   {
     EventData &data;
 
   public:
     EventIterate(EventData &data_arg) :
-      std::unary_function<std::pair<uint32_t, EventObserver *>, bool>(),
       data(data_arg)
     {}
 
-    inline result_type operator()(argument_type handler)
+    inline bool operator()(std::pair<uint32_t, EventObserver *> handler)
     {
       bool result= handler.second->observeEventDo(data);
       if (result)

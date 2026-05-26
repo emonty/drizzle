@@ -66,7 +66,7 @@ int XaResourceManager::commitOrRollbackXID(XID *xid, bool commit)
     in this case commit_list.size()==0, tc_heuristic_recover == 0
     there should be no prepared transactions in this case.
 */
-class XaRecover : std::unary_function<XaResourceManager *, void>
+class XaRecover
 {
 private:
   int trans_len, found_foreign_xids, found_my_xids;
@@ -94,7 +94,7 @@ public:
     return found_my_xids;
   }
 
-  result_type operator() (argument_type resource_manager)
+  void operator() (XaResourceManager *resource_manager)
   {
 
     int got;

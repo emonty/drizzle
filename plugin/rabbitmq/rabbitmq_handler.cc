@@ -25,6 +25,7 @@
 
 #include <config.h>
 
+#include <pthread.h>
 #include <unistd.h>
 
 #include <drizzled/gettext.h>

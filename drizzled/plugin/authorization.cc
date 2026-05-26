@@ -55,8 +55,7 @@ void plugin::Authorization::removePlugin(plugin::Authorization *auth)
 namespace
 {
 
-class RestrictDbFunctor :
-  public std::unary_function<plugin::Authorization *, bool>
+class RestrictDbFunctor
 {
   const identifier::User &user_ctx;
   const identifier::Schema& schema;
@@ -64,66 +63,59 @@ class RestrictDbFunctor :
 public:
   RestrictDbFunctor(const identifier::User &user_ctx_arg,
                     const identifier::Schema& schema_arg) :
-    std::unary_function<plugin::Authorization *, bool>(),
     user_ctx(user_ctx_arg),
     schema(schema_arg)
   { }
 
-  inline result_type operator()(argument_type auth)
+  inline bool operator()(plugin::Authorization *auth)
   {
     return auth->restrictSchema(user_ctx, schema);
   }
 };
 
-class RestrictTableFunctor :
-  public std::unary_function<plugin::Authorization *, bool>
+class RestrictTableFunctor
 {
   const identifier::User& user_ctx;
   const identifier::Table& table;
 public:
   RestrictTableFunctor(const identifier::User& user_ctx_arg,
                        const identifier::Table& table_arg) :
-    std::unary_function<plugin::Authorization *, bool>(),
     user_ctx(user_ctx_arg),
     table(table_arg)
   { }
 
-  inline result_type operator()(argument_type auth)
+  inline bool operator()(plugin::Authorization *auth)
   {
     return auth->restrictTable(user_ctx, table);
   }
 };
 
-class RestrictProcessFunctor :
-  public std::unary_function<plugin::Authorization *, bool>
+class RestrictProcessFunctor
 {
   const identifier::User &user_ctx;
   const identifier::User &session_ctx;
 public:
   RestrictProcessFunctor(const identifier::User &user_ctx_arg,
                          const identifier::User &session_ctx_arg) :
-    std::unary_function<plugin::Authorization *, bool>(),
     user_ctx(user_ctx_arg),
     session_ctx(session_ctx_arg)
   { }
 
-  inline result_type operator()(argument_type auth)
+  inline bool operator()(plugin::Authorization *auth)
   {
     return auth->restrictProcess(user_ctx, session_ctx);
   }
 };
 
-class PruneSchemaFunctor :
-  public std::unary_function<identifier::Schema&, bool>
+class PruneSchemaFunctor
 {
   const drizzled::identifier::User& user_ctx;
 public:
   PruneSchemaFunctor(const drizzled::identifier::User& user_ctx_arg) :
-    std::unary_function<identifier::Schema&, bool>(),
     user_ctx(user_ctx_arg)
   { }
 
-  inline result_type operator()(argument_type auth)
+  inline bool operator()(identifier::Schema& auth)
   {
     return not plugin::Authorization::isAuthorized(user_ctx, auth, false);
   }

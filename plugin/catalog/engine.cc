@@ -129,7 +129,7 @@ void Engine::prime(drizzled::message::catalog::vector &messages)
 
     drizzled::identifier::Catalog identifier(entry->filename);
 
-    if (message= readFile(identifier))
+    if ((message= readFile(identifier)))
     {
       messages.push_back(message);
 

@@ -212,7 +212,7 @@ private:
     checkObservers();
   }
 
-  struct isReady : public std::unary_function<Observer::list::const_reference, bool>
+  struct isReady
   {
     const int64_t count;
 
@@ -220,7 +220,7 @@ private:
       count(arg)
     { }
 
-    result_type operator() (argument_type observer)
+    bool operator() (Observer::list::const_reference observer)
     {
       if (observer->getLimit() <= count or count == 0)
       {

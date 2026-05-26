@@ -7458,7 +7458,7 @@ ha_innobase::info(
 
     fs::path get_status_path(catalog::local_identifier().getPath());
     get_status_path /= ib_table->name;
-    fs::change_extension(get_status_path, "dfe");
+    get_status_path.replace_extension("dfe");
 
     /* Note that we do not know the access time of the table,
     nor the CHECK TABLE time, nor the UPDATE or INSERT time. */

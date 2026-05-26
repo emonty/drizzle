@@ -227,7 +227,8 @@ DrizzleLock *Session::lockTables(Table **tables, uint32_t count, uint32_t flags)
 
       for_each(involved_engines.begin(),
                involved_engines.end(),
-               bind2nd(mem_fun(&plugin::StorageEngine::startStatement), this));
+               std::bind(std::mem_fn(&plugin::StorageEngine::startStatement),
+                         std::placeholders::_1, this));
     }
 
     set_proc_info("External lock");

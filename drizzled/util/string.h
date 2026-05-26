@@ -48,7 +48,7 @@
 namespace drizzled {
 namespace util {
 
-struct insensitive_equal_to : std::binary_function<std::string, std::string, bool>
+struct insensitive_equal_to
 {
   bool operator()(std::string const& x, std::string const& y) const
   {
@@ -56,7 +56,7 @@ struct insensitive_equal_to : std::binary_function<std::string, std::string, boo
   }
 };
 
-struct insensitive_hash : std::unary_function<std::string, std::size_t>
+struct insensitive_hash
 {
   std::size_t operator()(std::string const& x) const
   {
@@ -67,7 +67,7 @@ struct insensitive_hash : std::unary_function<std::string, std::size_t>
   }
 };
 
-struct sensitive_hash : std::unary_function< std::vector<char>, std::size_t>
+struct sensitive_hash
 {
   std::size_t operator()(std::vector<char> const& x) const
   {

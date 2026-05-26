@@ -221,7 +221,7 @@ catalog::Instance::shared_ptr plugin::Catalog::getInstance(const identifier::Cat
   for (catalog::Engine::vector::const_reference ref : Engines::singleton().catalogs())
   {
     message::catalog::shared_ptr message;
-    if (message= ref->getMessage(identifier))
+    if ((message= ref->getMessage(identifier)))
     {
       instance= catalog::Instance::make_shared(message);
       // If this should fail inserting into the cache, we are in a world of

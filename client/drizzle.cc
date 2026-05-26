@@ -2552,10 +2552,9 @@ inline string lower_string(const char* from)
 }
 
 template <class T>
-class CompletionMatch :
-  public unary_function<const string&, bool>
+class CompletionMatch
 {
-  string match_text; 
+  string match_text;
   T match_func;
 public:
   CompletionMatch(string text) : match_text(text) {}

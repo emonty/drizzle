@@ -35,15 +35,13 @@ QueryCaches all_query_cache;
 /* Namespaces are here to prevent global symbol clashes with these classes */
 
 class IsCachedIterate
- : public std::unary_function<plugin::QueryCache *, bool>
 {
   Session *session;
 public:
   IsCachedIterate(Session* session_arg) :
-    std::unary_function<plugin::QueryCache *, bool>(),
     session(session_arg) { }
 
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::QueryCache *handler)
   {
     return handler->doIsCached(session);
   }
@@ -64,15 +62,13 @@ bool plugin::QueryCache::isCached(Session *session)
 
 
 class SendCachedResultsetIterate
- : public std::unary_function<plugin::QueryCache *, bool>
 {
   Session *session;
 public:
   SendCachedResultsetIterate(Session *session_arg) :
-    std::unary_function<plugin::QueryCache *, bool>(),
     session(session_arg) { }
 
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::QueryCache *handler)
   {
     return handler->doSendCachedResultset(session);
   }
@@ -90,15 +86,14 @@ bool plugin::QueryCache::sendCachedResultset(Session *session)
   return iter != all_query_cache.end();
 }
 
-class PrepareResultsetIterate : public std::unary_function<plugin::QueryCache *, bool>
+class PrepareResultsetIterate
 {
   Session *session;
 public:
   PrepareResultsetIterate(Session *session_arg) :
-    std::unary_function<plugin::QueryCache *, bool>(),
     session(session_arg) { }
 
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::QueryCache *handler)
   {
     return handler->doPrepareResultset(session);
   }
@@ -116,15 +111,14 @@ bool plugin::QueryCache::prepareResultset(Session *session)
   return iter != all_query_cache.end();
 }
 
-class SetResultsetIterate : public std::unary_function<plugin::QueryCache *, bool>
+class SetResultsetIterate
 {
   Session *session;
 public:
   SetResultsetIterate(Session *session_arg) :
-    std::unary_function<plugin::QueryCache *, bool>(),
     session(session_arg) { }
 
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::QueryCache *handler)
   {
     return handler->doSetResultset(session);
   }
@@ -144,16 +138,14 @@ bool plugin::QueryCache::setResultset(Session *session)
 }
 
 class InsertRecordIterate
- : public std::unary_function<plugin::QueryCache *, bool>
 {
   Session *session;
   List<Item> &item;
 public:
   InsertRecordIterate(Session *session_arg, List<Item> &item_arg) :
-    std::unary_function<plugin::QueryCache *, bool>(),
     session(session_arg), item(item_arg) { }
 
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::QueryCache *handler)
   {
     return handler->doInsertRecord(session, item);
   }

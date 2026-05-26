@@ -3521,7 +3521,7 @@ btr_record_not_null_field_in_rec(
 	for (i = 0; i < n_unique; i++) {
 		ulint	rec_len;
 
-		rec_get_nth_field(rec, offsets, i, &rec_len);
+		(void) rec_get_nth_field(rec, offsets, i, &rec_len);
 
 		if (rec_len != UNIV_SQL_NULL) {
 			n_not_null[i]++;

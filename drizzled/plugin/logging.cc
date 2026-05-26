@@ -43,15 +43,14 @@ void plugin::Logging::removePlugin(plugin::Logging *handler)
 }
 
 
-class PreIterate : public std::unary_function<plugin::Logging *, bool>
+class PreIterate
 {
   Session *session;
 public:
   PreIterate(Session *session_arg) :
-    std::unary_function<plugin::Logging *, bool>(),
     session(session_arg) {}
 
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::Logging *handler)
   {
     if (handler->pre(session))
     {
@@ -67,16 +66,15 @@ public:
 };
 
 
-class PostIterate : public std::unary_function<plugin::Logging *, bool>
+class PostIterate
 {
   Session *session;
 public:
   PostIterate(Session *session_arg) :
-    std::unary_function<plugin::Logging *, bool>(),
     session(session_arg) {}
 
   /* This gets called once for each loaded logging plugin */
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::Logging *handler)
   {
     if (handler->post(session))
     {
@@ -91,16 +89,15 @@ public:
   }
 };
 
-class PostEndIterate : public std::unary_function<plugin::Logging *, bool>
+class PostEndIterate
 {
   Session *session;
 public:
   PostEndIterate(Session *session_arg) :
-    std::unary_function<plugin::Logging *, bool>(),
     session(session_arg) {}
 
   /* This gets called once for each loaded logging plugin */
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::Logging *handler)
   {
     if (handler->postEnd(session))
     {
@@ -115,15 +112,14 @@ public:
   }
 };
 
-class ResetIterate : public std::unary_function<plugin::Logging *, bool>
+class ResetIterate
 {
   Session *session;
 public:
   ResetIterate(Session *session_arg) :
-    std::unary_function<plugin::Logging *, bool>(),
     session(session_arg) {}
 
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::Logging *handler)
   {
     if (handler->resetGlobalScoreboard())
     {

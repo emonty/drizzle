@@ -734,9 +734,9 @@ int TransactionServices::autocommitOrRollback(Session& session,
   return error;
 }
 
-struct ResourceContextCompare : public std::binary_function<ResourceContext *, ResourceContext *, bool>
+struct ResourceContextCompare
 {
-  result_type operator()(const ResourceContext *lhs, const ResourceContext *rhs) const
+  bool operator()(const ResourceContext *lhs, const ResourceContext *rhs) const
   {
     /* The below is perfectly fine, since we're simply comparing addresses for the underlying
      * resources aren't the same... */

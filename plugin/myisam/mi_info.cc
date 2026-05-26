@@ -117,7 +117,7 @@ int mi_status(MI_INFO *info, MI_ISAMINFO *x, uint32_t flag)
 
 void mi_report_error(int errcode, const char *file_name)
 {
-  mi_report_error(errcode, file_name);
+  mi_report_error(static_cast<drizzled::error_t>(errcode), file_name);
 }
 
 void mi_report_error(drizzled::error_t errcode, const char *file_name)

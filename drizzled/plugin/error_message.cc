@@ -44,7 +44,7 @@ void plugin::ErrorMessage::removePlugin(plugin::ErrorMessage *)
 }
 
 
-class Print : public std::unary_function<plugin::ErrorMessage *, bool>
+class Print
 {
   error::priority_t priority;
   const char *format;
@@ -52,8 +52,7 @@ class Print : public std::unary_function<plugin::ErrorMessage *, bool>
 
 public:
   Print(error::priority_t priority_arg,
-        const char *format_arg, va_list ap_arg) : 
-    std::unary_function<plugin::ErrorMessage *, bool>(),
+        const char *format_arg, va_list ap_arg) :
     priority(priority_arg), format(format_arg)
   {
     va_copy(ap, ap_arg);
@@ -61,7 +60,7 @@ public:
 
   ~Print()  { va_end(ap); }
 
-  inline result_type operator()(argument_type handler)
+  inline bool operator()(plugin::ErrorMessage *handler)
   {
     va_list handler_ap;
     va_copy(handler_ap, ap);

@@ -63,12 +63,9 @@ bool StateTool::Generator::populate()
       if var->type is SHOW_FUNC, call the function.
       Repeat as necessary, if new var is again SHOW_FUNC
     */
-    {
-      drizzle_show_var tmp;
-
-      for (var= variables; var->type == SHOW_FUNC; var= &tmp)
-        ((drizzle_show_var_func)((st_show_var_func_container *)var->value)->func)(&tmp, buff);
-    }
+    drizzle_show_var tmp;
+    for (var= variables; var->type == SHOW_FUNC; var= &tmp)
+      ((drizzle_show_var_func)((st_show_var_func_container *)var->value)->func)(&tmp, buff);
 
     if (isWild(variables->name))
     {

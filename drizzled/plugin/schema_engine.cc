@@ -31,8 +31,7 @@
 namespace drizzled {
 namespace plugin {
 
-class AddSchemaNames :
-  public std::unary_function<StorageEngine *, void>
+class AddSchemaNames
 {
   identifier::schema::vector &schemas;
 
@@ -43,7 +42,7 @@ public:
   {
   }
 
-  result_type operator() (argument_type engine)
+  void operator() (StorageEngine *engine)
   {
     engine->doGetSchemaIdentifiers(schemas);
   }
@@ -58,7 +57,7 @@ void StorageEngine::getIdentifiers(Session &session, identifier::schema::vector 
   plugin::Authorization::pruneSchemaNames(*session.user(), schemas);
 }
 
-class StorageEngineGetSchemaDefinition: public std::unary_function<StorageEngine *, bool>
+class StorageEngineGetSchemaDefinition
 {
   const identifier::Schema &identifier;
   message::schema::shared_ptr &schema_proto;
@@ -71,7 +70,7 @@ public:
   {
   }
 
-  result_type operator() (argument_type engine)
+  bool operator() (StorageEngine *engine)
   {
     schema_proto= engine->doGetSchemaDefinition(identifier);
     return bool(schema_proto);
@@ -124,8 +123,7 @@ const charset_info_st *StorageEngine::getSchemaCollation(const identifier::Schem
   return default_charset_info;
 }
 
-class CreateSchema :
-  public std::unary_function<StorageEngine *, void>
+class CreateSchema
 {
   const drizzled::message::Schema &schema_message;
   uint64_t &success_count;
@@ -138,7 +136,7 @@ public:
   {
   }
 
-  result_type operator() (argument_type engine)
+  void operator() (StorageEngine *engine)
   {
     // @todo eomeday check that at least one engine said "true"
     bool success= engine->doCreateSchema(schema_message);
@@ -166,8 +164,7 @@ bool StorageEngine::createSchema(const drizzled::message::Schema &schema_message
   return (bool)success_count;
 }
 
-class DropSchema :
-  public std::unary_function<StorageEngine *, void>
+class DropSchema
 {
   uint64_t &success_count;
   const identifier::Schema &identifier;
@@ -180,7 +177,7 @@ public:
   {
   }
 
-  result_type operator() (argument_type engine)
+  void operator() (StorageEngine *engine)
   {
     // @todo someday check that at least one engine said "true"
     bool success= engine->doDropSchema(identifier);
@@ -293,8 +290,7 @@ bool StorageEngine::dropSchema(Session& session,
   return error;
 }
 
-class AlterSchema :
-  public std::unary_function<StorageEngine *, void>
+class AlterSchema
 {
   uint64_t &success_count;
   const drizzled::message::Schema &schema_message;
@@ -307,7 +303,7 @@ public:
   {
   }
 
-  result_type operator() (argument_type engine)
+  void operator() (StorageEngine *engine)
   {
     // @todo eomeday check that at least one engine said "true"
     bool success= engine->doAlterSchema(schema_message);

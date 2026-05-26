@@ -211,7 +211,7 @@ bool StorageEngine::flushLogs(StorageEngine *engine)
 {
   if (not engine)
   {
-    if (std::find_if(g_engines.begin(), g_engines.end(), std::mem_fun(&StorageEngine::flush_logs))
+    if (std::find_if(g_engines.begin(), g_engines.end(), std::mem_fn(&StorageEngine::flush_logs))
         != g_engines.begin()) // Shouldn't this be .end()?
       return true;
   }
@@ -220,7 +220,7 @@ bool StorageEngine::flushLogs(StorageEngine *engine)
   return false;
 }
 
-class StorageEngineGetTableDefinition: public std::unary_function<StorageEngine *,bool>
+class StorageEngineGetTableDefinition
 {
   Session& session;
   const identifier::Table &identifier;
@@ -232,12 +232,12 @@ public:
                                   const identifier::Table &identifier_arg,
                                   message::Table &table_message_arg,
                                   drizzled::error_t &err_arg) :
-    session(session_arg), 
+    session(session_arg),
     identifier(identifier_arg),
-    table_message(table_message_arg), 
+    table_message(table_message_arg),
     err(err_arg) {}
 
-  result_type operator() (argument_type engine)
+  bool operator() (StorageEngine *engine)
   {
     int ret= engine->doGetTableDefinition(session, identifier, table_message);
 
@@ -306,7 +306,7 @@ message::table::shared_ptr StorageEngine::getTableMessage(Session& session,
   return table_message;
 }
 
-class DropTableByIdentifier: public std::unary_function<EngineVector::value_type, bool>
+class DropTableByIdentifier
 {
   Session& session;
   const identifier::Table& identifier;
@@ -322,7 +322,7 @@ public:
     error(error_arg)
   { }
 
-  result_type operator() (argument_type engine)
+  bool operator() (EngineVector::value_type engine)
   {
     if (not engine->doDoesTableExist(session, identifier))
       return false;
@@ -497,7 +497,7 @@ void StorageEngine::getIdentifiers(Session &session, const identifier::Schema &s
   session.open_tables.doGetTableIdentifiers(directory, schema_identifier, set_of_identifiers);
 }
 
-class DropTable: public std::unary_function<identifier::Table&, bool>
+class DropTable
 {
   Session &session;
   StorageEngine *engine;
@@ -509,10 +509,10 @@ public:
     engine(engine_arg)
   { }
 
-  result_type operator() (argument_type identifier)
+  bool operator() (identifier::Table& identifier)
   {
     return engine->doDropTable(session, identifier) == 0;
-  } 
+  }
 };
 
 /*

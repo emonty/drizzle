@@ -21,7 +21,9 @@
 
 #include <string>
 
+#ifndef BOOST_NO_HASH
 #define BOOST_NO_HASH 1
+#endif
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>

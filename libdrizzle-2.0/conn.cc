@@ -391,23 +391,8 @@ const char *drizzle_con_server_version(const drizzle_con_st *con)
 
 uint32_t drizzle_con_server_version_number(const drizzle_con_st *con)
 {
-  if (con == NULL or con->server_version)
-  {
-    return 0;
-  }
-
-  const char *current= con->server_version;
-
-  char *end;
-  uint32_t major= (uint32_t)strtoul(current, &end, 10);
-  current= end + 1;
-
-  uint32_t minor= (uint32_t)strtoul(current, &end, 10);
-  current= end + 1;
-
-  uint32_t version= (uint32_t)strtoul(current, &end, 10);
-
-  return (major * 10000) + (minor * 100) + version;
+  (void) con;
+  return 0;
 }
 
 uint32_t drizzle_con_thread_id(const drizzle_con_st *con)
