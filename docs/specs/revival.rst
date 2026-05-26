@@ -28,24 +28,23 @@ cold. Read this block first; the rest of the spec is the roadmap.
   ``__sync_fetch_and_add`` → ``__atomic_load_n``; C++03 dynamic-
   exception-spec sweep; ``drizzle_result_st`` constructor was missing
   two pointer initialisers — Bionic's stricter heap layout exposed
-  the bug as a ``free(): invalid pointer`` in DTR's auth path), and
+  the bug as a ``free(): invalid pointer`` in DTR's auth path),
   Phase 7 (LTS bump 18.04 → 20.04; C++17 build mode, protobuf 3,
   PCRE2, Boost 1.71, Focal perf numbers, native-AIO perf comparison,
-  and the C++17 mechanical source sweep).
+  and the C++17 mechanical source sweep), and Phase 8 (LTS bump
+  20.04 → 22.04; Boost 1.74; OpenSSL 3 EVP migration for the
+  SHA1/MD5/HMAC consumers; protobuf 3 modern ``ByteSize()`` /
+  cached-size APIs; GCC 11 sweep including the Bison-generated
+  parser's ``YYNOMEM`` overflow fall-through; the stack is split
+  into a Focal-safe prep layer and the Jammy bump itself so every
+  commit stays green on its base; Jammy perf numbers under
+  valgrind 3.18 show stable IR against the Focal AIO run, with a
+  toolchain-driven jump in simulated cache misses and
+  ``estimated_cycles``).
   Each landed phase's commits are tagged in commit messages, *under
   their old numbers* for Phases 0–2 — what this spec now calls Phase
   2 appears in older commits as Phase 1.5. See the Renumber note
   below for the full map.
-* **In progress.** Phase 8 has its first local layers: the base image
-  and bindep selectors are on Ubuntu 22.04, Boost is raised to 1.74,
-  OpenSSL 3 deprecated client-method/init calls are gone, protobuf
-  ``ByteSize()`` / cached-size serialization call sites use the modern
-  APIs, and the GCC 11 / Bison fallout is clean. The tree builds on
-  Jammy; ``podman run drizzle:phase8-amd64-test`` passes ``make unit``
-  and DTR; ``make check`` passes the 7 libdrizzle-1.0 tests and its
-  DTR pass. The message proto files remain proto2 under ``protoc`` 3;
-  a focused unit test now covers required-field presence,
-  recursive ``IsInitialized()``, and normal-vs-partial parse behavior.
 * **In flight, then paused.** Phase 11 (Pandora slim-down to
   ``m4/drizzle.m4``) — what older commit messages call Phase 2. A
   number of build-setup macros have folded into ``m4/drizzle.m4``
@@ -55,10 +54,10 @@ cold. Read this block first; the rest of the spec is the roadmap.
   finishing the bzr/svn/hg strip, the ``PANDORA_`` → ``DRIZZLE_``
   rename) is open but **deliberately deferred** until after the LTS
   ratchet reaches 26.04.
-* **Next.** Split the Phase 8 WIP into LTS-bump layers, re-verify the
-  Focal-safe prep layer on Focal, then record the Jammy perf numbers.
-  The Pandora slim-down (Phase 11) is still held back because
-  the existing Pandora layer still works, and the LTS ratchet brings in
+* **Next.** Phase 9 (LTS bump 22.04 → 24.04). Mostly free per the
+  template — GCC 13 / Boost 1.83 ``-Werror`` casualty sweep. The
+  Pandora slim-down (Phase 11) is still held back because the
+  existing Pandora layer still works, and the LTS ratchet brings in
   modern pkg-config / Boost / OpenSSL / protobuf that make the macro
   conversion cleaner than fighting the 12.04 toolchain. After the
   ratchet reaches 26.04: Phase 11 (Pandora slim-down), Phase 12
