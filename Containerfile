@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG UBUNTU=22.04
+ARG UBUNTU=24.04
 
 FROM quay.io/inaugust/bindep-rs AS bindep_rs
 
