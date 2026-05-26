@@ -923,11 +923,11 @@ bool Session::lockGlobalReadLock()
     old_message= enter_cond(COND_global_read_lock, LOCK_global_read_lock,
                             "Waiting to get readlock");
 
-    waiting_for_read_lock++;
+    waiting_for_read_lock= waiting_for_read_lock + 1;
     boost::mutex::scoped_lock scopedLock(LOCK_global_read_lock, boost::adopt_lock_t());
     while (protect_against_global_read_lock && not getKilled())
       COND_global_read_lock.wait(scopedLock);
-    waiting_for_read_lock--;
+    waiting_for_read_lock= waiting_for_read_lock - 1;
     scopedLock.release();
     if (getKilled())
     {
@@ -935,7 +935,7 @@ bool Session::lockGlobalReadLock()
       return true;
     }
     setGlobalReadLock(Session::GOT_GLOBAL_READ_LOCK);
-    global_read_lock++;
+    global_read_lock= global_read_lock + 1;
     exit_cond(old_message); // this unlocks LOCK_global_read_lock
   }
 
@@ -960,9 +960,10 @@ void Session::unlockGlobalReadLock(void)
 
   {
     boost::mutex::scoped_lock scopedLock(LOCK_global_read_lock);
-    tmp= --global_read_lock;
+    global_read_lock= global_read_lock - 1;
+    tmp= global_read_lock;
     if (isGlobalReadLock() == Session::MADE_GLOBAL_READ_LOCK_BLOCK_COMMIT)
-      --global_read_lock_blocks_commit;
+      global_read_lock_blocks_commit= global_read_lock_blocks_commit - 1;
   }
   /* Send the signal outside the mutex to avoid a context switch */
   if (not tmp)
@@ -1022,7 +1023,7 @@ bool Session::wait_if_global_read_lock(bool abort_on_refresh, bool is_not_commit
   }
 
   if (not abort_on_refresh && not result)
-    protect_against_global_read_lock++;
+    protect_against_global_read_lock= protect_against_global_read_lock + 1;
 
   /*
     The following is only true in case of a global read locks (which is rare)
@@ -1047,7 +1048,8 @@ void Session::startWaitingGlobalReadLock()
     return;
 
   LOCK_global_read_lock.lock();
-  bool tmp= (!--protect_against_global_read_lock && (waiting_for_read_lock || global_read_lock_blocks_commit));
+  protect_against_global_read_lock= protect_against_global_read_lock - 1;
+  bool tmp= (!protect_against_global_read_lock && (waiting_for_read_lock || global_read_lock_blocks_commit));
   LOCK_global_read_lock.unlock();
 
   if (tmp)
@@ -1067,7 +1069,7 @@ bool Session::makeGlobalReadLockBlockCommit()
     return false;
   LOCK_global_read_lock.lock();
   /* increment this BEFORE waiting on cond (otherwise race cond) */
-  global_read_lock_blocks_commit++;
+  global_read_lock_blocks_commit= global_read_lock_blocks_commit + 1;
   old_message= enter_cond(COND_global_read_lock, LOCK_global_read_lock,
                           "Waiting for all running commits to finish");
   while (protect_against_global_read_lock && not getKilled())
@@ -1078,7 +1080,7 @@ bool Session::makeGlobalReadLockBlockCommit()
   }
   if ((error= test(getKilled())))
   {
-    global_read_lock_blocks_commit--; // undo what we did
+    global_read_lock_blocks_commit= global_read_lock_blocks_commit - 1; // undo what we did
   }
   else
   {

@@ -22,7 +22,7 @@
 
 #include <bitset>
 #include <boost/program_options.hpp>
-#include <boost/detail/atomic_count.hpp>
+#include <boost/smart_ptr/detail/atomic_count.hpp>
 #include <drizzled/common_fwd.h>
 #include <drizzled/global_buffer.h>
 #include <drizzled/definitions.h>

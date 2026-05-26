@@ -48,7 +48,7 @@ struct atomic_pthread {
 #   define __DRIZZLE_DECL_ATOMIC_PTHREAD(T)                              \
   template<> struct atomic_pthread<T>                                   \
   : internal::atomic_impl<T,T, internal::pthread_traits<T,T> > {         \
-    atomic_pthread<T>()                                                 \
+    atomic_pthread()                                                    \
       : internal::atomic_impl<T,T, internal::pthread_traits<T,T> >() {}  \
     T operator=( T rhs ) { return store_with_release(rhs); }            \
   };

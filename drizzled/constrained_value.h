@@ -58,15 +58,15 @@ protected:
   virtual constrained_value<T>& set_value(T rhs)= 0;
 
 public:
-  explicit constrained_value<T>(T in_value= 0) :
+  explicit constrained_value(T in_value= 0) :
     m_val(in_value)
   { }
 
-  constrained_value<T>(const constrained_value<T>& rhs) :
+  constrained_value(const constrained_value<T>& rhs) :
     m_val(rhs.m_val)
   { }
 
-  virtual ~constrained_value<T>()
+  virtual ~constrained_value()
   {}
 
   operator T() const
@@ -174,7 +174,7 @@ class constrained_check :
   public constrained_value<T>
 {
 public:
-  constrained_check<T,MAXVAL,MINVAL,ALIGN>(T in_value= 0) :
+  constrained_check(T in_value= 0) :
     constrained_value<T>(in_value)
   { }
 

@@ -41,7 +41,7 @@
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/detail/atomic_count.hpp>
+#include <boost/smart_ptr/detail/atomic_count.hpp>
 
 #include <drizzled/cached_directory.h>
 #include <drizzled/charset.h>
@@ -1992,7 +1992,8 @@ static void drizzle_init_variables()
   dropping_tables= ha_open_options=0;
   getDebug().reset();
   wake_thread=0;
-  abort_loop= select_thread_in_use= false;
+  abort_loop= false;
+  select_thread_in_use= false;
   shutdown_in_progress= 0;
   drizzled_user= drizzled_chroot= 0;
   memset(&current_global_counters, 0, sizeof(current_global_counters));

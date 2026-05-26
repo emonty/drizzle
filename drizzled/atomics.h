@@ -138,8 +138,8 @@ struct atomic {
 #define __DRIZZLE_DECL_ATOMIC(T)                                        \
   template<> struct atomic<T>                                           \
   : internal::atomic_impl<T,T,ATOMIC_TRAITS<T,T> > {                    \
-    atomic<T>() : internal::atomic_impl<T,T,ATOMIC_TRAITS<T,T> >() {}   \
-    atomic<T>& operator=( T rhs ) { store_with_release(rhs); return *this; } \
+    atomic() : internal::atomic_impl<T,T,ATOMIC_TRAITS<T,T> >() {}      \
+    atomic& operator=( T rhs ) { store_with_release(rhs); return *this; } \
   };
 /* *INDENT-ON* */
 
@@ -166,7 +166,7 @@ __DRIZZLE_DECL_ATOMIC(unsigned long long)
 #   define __DRIZZLE_DECL_ATOMIC64(T)                                   \
   template<> struct atomic<T>                                           \
   : internal::atomic_impl<T,T,internal::pthread_traits<T,T> > {         \
-    atomic<T>()                                                         \
+    atomic()                                                            \
       : internal::atomic_impl<T,T,internal::pthread_traits<T,T> >() {}  \
     T operator=( T rhs ) { return store_with_release(rhs); }            \
   };

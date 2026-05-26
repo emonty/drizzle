@@ -342,8 +342,11 @@ rw_lock_s_lock_direct(
 {
 	ut_ad(lock->lock_word == X_LOCK_DECR);
 
-	/* Indicate there is a new reader by decrementing lock_word */
-	lock->lock_word--;
+	/* Indicate there is a new reader by decrementing lock_word.
+	C++20 deprecated -- on volatile lvalues (P1152); spell the same
+	read-modify-write out by hand.  This direct path is single-threaded
+	by contract (see function header). */
+	lock->lock_word = lock->lock_word - 1;
 
 	lock->last_s_file_name = file_name;
 	lock->last_s_line = line;
@@ -533,8 +536,9 @@ rw_lock_s_unlock_direct(
 	rw_lock_remove_debug_info(lock, 0, RW_LOCK_SHARED);
 #endif
 
-	/* Decrease reader count by incrementing lock_word */
-	lock->lock_word++;
+	/* Decrease reader count by incrementing lock_word.  Same volatile
+	++ deprecation as rw_lock_s_lock_direct above. */
+	lock->lock_word = lock->lock_word + 1;
 
 	ut_ad(!lock->waiters);
 	ut_ad(rw_lock_validate(lock));

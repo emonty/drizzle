@@ -3211,10 +3211,11 @@ print_table_data(drizzle_result_st *result)
       // Room for "NULL"
       length=4;
     }
-    if ((length < 5) and 
+    if ((length < 5) and
       (server_type == ServerDetect::SERVER_DRIZZLE_FOUND) and
       (drizzle_column_type(field) == DRIZZLE_COLUMN_TYPE_TINY) and
-      (drizzle_column_type(field) & DRIZZLE_COLUMN_FLAGS_UNSIGNED))
+      (static_cast<int>(drizzle_column_type(field))
+       & static_cast<int>(DRIZZLE_COLUMN_FLAGS_UNSIGNED)))
     {
       // Room for "FALSE"
       length= 5;

@@ -32,12 +32,12 @@ namespace drizzled {
 class CreateField : public memory::SqlAlloc
 {
 public:
-  const char *field_name; /**< Name of the field to be created */
-  const char *change; /**< If done with alter table */
-  const char *after; /**< Put this new Field after this Field */
+  const char *field_name= nullptr; /**< Name of the field to be created */
+  const char *change= nullptr; /**< If done with alter table */
+  const char *after= nullptr; /**< Put this new Field after this Field */
   str_ref comment; /**< A comment for this field */
-  Item *def; /**< Default value for the new field */
-  enum_field_types sql_type; /**< The data type of the new field */
+  Item *def= nullptr; /**< Default value for the new field */
+  enum_field_types sql_type= enum_field_types(); /**< The data type of the new field */
 
   enum_field_types type() const
   {
@@ -48,26 +48,26 @@ public:
    * At various stages in execution this can be length of field in bytes or
    * max number of characters.
    */
-  uint32_t length;
+  uint32_t length= 0;
   /**
    * The value of `length' as set by parser: is the number of characters
    * for most of the types, or of bytes for BLOBs or numeric types.
    */
-  uint32_t char_length;
-  uint32_t decimals;
-  uint32_t flags;
-  uint32_t pack_length;
-  uint32_t key_length;
-  Field::utype unireg_check; /**< See Field::unireg_check */
-  TYPELIB *interval; /**< Which interval to use (ENUM types..) */
+  uint32_t char_length= 0;
+  uint32_t decimals= 0;
+  uint32_t flags= 0;
+  uint32_t pack_length= 0;
+  uint32_t key_length= 0;
+  Field::utype unireg_check= Field::utype(); /**< See Field::unireg_check */
+  TYPELIB *interval= nullptr; /**< Which interval to use (ENUM types..) */
   List<String> interval_list;
-  const charset_info_st *charset; /**< Character set for the column -- @TODO should be deleted */
-  Field *field; // For alter table
+  const charset_info_st *charset= nullptr; /**< Character set for the column -- @TODO should be deleted */
+  Field *field= nullptr; // For alter table
 
-  uint8_t interval_id;	// For rea_create_table
-  uint32_t offset;
+  uint8_t interval_id= 0;	// For rea_create_table
+  uint32_t offset= 0;
 
-  CreateField() :after(0) {}
+  CreateField() = default;
   CreateField(Field *field, Field *orig_field);
   void create_length_to_internal_length(void);
 

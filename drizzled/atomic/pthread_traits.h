@@ -86,7 +86,7 @@ public:
   {
     my_lock.lock();
     value_type ret= *value;
-    (*value)++;
+    *value= ret + 1;
     my_lock.unlock();
     return ret;
   }
@@ -95,7 +95,7 @@ public:
   {
     my_lock.lock();
     value_type ret= *value;
-    (*value)--;
+    *value= ret - 1;
     my_lock.unlock();
     return ret;
   }
