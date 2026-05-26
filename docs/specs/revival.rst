@@ -31,7 +31,7 @@ cold. Read this block first; the rest of the spec is the roadmap.
   the bug as a ``free(): invalid pointer`` in DTR's auth path),
   Phase 7 (LTS bump 18.04 → 20.04; C++17 build mode, protobuf 3,
   PCRE2, Boost 1.71, Focal perf numbers, native-AIO perf comparison,
-  and the C++17 mechanical source sweep), and Phase 8 (LTS bump
+  and the C++17 mechanical source sweep), Phase 8 (LTS bump
   20.04 → 22.04; Boost 1.74; OpenSSL 3 EVP migration for the
   SHA1/MD5/HMAC consumers; protobuf 3 modern ``ByteSize()`` /
   cached-size APIs; GCC 11 sweep including the Bison-generated
@@ -40,7 +40,20 @@ cold. Read this block first; the rest of the spec is the roadmap.
   commit stays green on its base; Jammy perf numbers under
   valgrind 3.18 show stable IR against the Focal AIO run, with a
   toolchain-driven jump in simulated cache misses and
-  ``estimated_cycles``).
+  ``estimated_cycles``), and Phase 9 (LTS bump 22.04 → 24.04;
+  Boost 1.83; GCC 13 / libstdc++ 13 sweep — dropped the deprecated
+  ``std::unary_function`` / ``std::binary_function`` /
+  ``std::iterator`` base classes that go away in C++20, moved
+  ``boost::filesystem::change_extension`` to
+  ``path::replace_extension``, and cleaned up a latent
+  infinite-recursion in ``mi_report_error`` that GCC finally
+  noticed; ported the autoreconf-time pandora-plugin generator and
+  the ``mysql_protocol.prototest`` DTR suite from python2 to
+  python3 because Noble drops python2 entirely; native AIO disabled
+  because podman's default seccomp profile rejects Noble's
+  ``io_pgetevents`` syscall and the Phase 7 numbers showed
+  native AIO was a wash anyway; Noble perf numbers stable against
+  Jammy).
   Each landed phase's commits are tagged in commit messages, *under
   their old numbers* for Phases 0–2 — what this spec now calls Phase
   2 appears in older commits as Phase 1.5. See the Renumber note
@@ -54,11 +67,13 @@ cold. Read this block first; the rest of the spec is the roadmap.
   finishing the bzr/svn/hg strip, the ``PANDORA_`` → ``DRIZZLE_``
   rename) is open but **deliberately deferred** until after the LTS
   ratchet reaches 26.04.
-* **Next.** Phase 9 (LTS bump 22.04 → 24.04). Mostly free per the
-  template — GCC 13 / Boost 1.83 ``-Werror`` casualty sweep. The
-  Pandora slim-down (Phase 11) is still held back because the
-  existing Pandora layer still works, and the LTS ratchet brings in
-  modern pkg-config / Boost / OpenSSL / protobuf that make the macro
+* **Next.** Phase 10 (LTS bump 24.04 → 26.04, final landing). On
+  the 26.04 toolchain we should also be able to jump straight to
+  C++23 — GCC 14's C++23 support is far enough along that doing the
+  C++20 hop on 24.04's GCC 13 first is wasted motion. The Pandora
+  slim-down (Phase 11) is still held back because the existing
+  Pandora layer still works, and the LTS ratchet brings in modern
+  pkg-config / Boost / OpenSSL / protobuf that make the macro
   conversion cleaner than fighting the 12.04 toolchain. After the
   ratchet reaches 26.04: Phase 11 (Pandora slim-down), Phase 12
   (constant-fold), Phase 13 (plugin enable-by-default sweep), Phase 14
